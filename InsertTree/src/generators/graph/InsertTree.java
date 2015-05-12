@@ -21,7 +21,7 @@ import algoanim.animalscript.AnimalScript;
 
 public class InsertTree implements Generator {
     private Language lang;
-    private String graph;
+    private Graph graph;
 
     public InsertTree(){
     	lang = new AnimalScript("InsertTree", "Team31", 800, 600);
