@@ -23,22 +23,22 @@ public class InsertTree implements Generator {
     private Language lang;
     private Graph graph;
 
-    public InsertTree(){
+   /* public InsertTree(){
     	lang = new AnimalScript("InsertTree", "Team31", 800, 600);
     	lang.setStepMode(true);
-    }
+    }*/
     
-    public InsertTree(Language lang){
+    /*public InsertTree(Language lang){
     	this.lang = lang;
     	lang.setStepMode(true);
-    }
+    }*/
     
     public void init(){
         lang = new AnimalScript("InsertTree", "Team31", 800, 600);
         
-        AnimalGraphGenerator gGen = new AnimalGraphGenerator((AnimalScript) lang);
-        System.out.println(lang);
-        this.generate(null, null);
+        //AnimalGraphGenerator gGen = new AnimalGraphGenerator((AnimalScript) lang);
+        //System.out.println(lang);
+        //this.generate(null, null);
         
     }
 
