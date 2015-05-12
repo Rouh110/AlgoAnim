@@ -12,6 +12,7 @@ import java.util.Locale;
 
 import algoanim.primitives.Graph;
 import algoanim.primitives.generators.Language;
+import algoanim.util.Node;
 
 import java.util.Hashtable;
 
@@ -32,9 +33,14 @@ public class PageRank implements Generator {
 
     public String generate(AnimationPropertiesContainer props,Hashtable<String, Object> primitives) {
         graph = (Graph)primitives.get("graph");
-        
+        lang.addGraph(graph);
+        lang.nextStep();
+        PageRankCalculator prc = new PageRankCalculator(graph.getAdjacencyMatrix());
+        System.out.println(prc.toString());
         return lang.toString();
     }
+    
+    
 
     public String getName() {
         return "PageRank";
