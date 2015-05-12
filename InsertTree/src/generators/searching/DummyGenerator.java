@@ -2,6 +2,7 @@ package generators.searching;
 
 import generators.framework.Generator;
 import generators.framework.GeneratorBundle;
+import generators.graph.InsertTree;
 import generators.searching.alphabeta.AlphaBeta;
 import generators.searching.alphabeta.AlphaBetaSearch;
 import generators.searching.binarysearching.GenericIterativeBinaryStringSearching;
@@ -41,6 +42,8 @@ public class DummyGenerator implements GeneratorBundle {
   @Override
   public Vector<Generator> getGenerators() {
     Vector<Generator> generators = new Vector<Generator>(35, 15);
+    
+    generators.add(new InsertTree());
     
     generators.add(new AStarGenerator());
 
