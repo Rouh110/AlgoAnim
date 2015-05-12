@@ -25,7 +25,28 @@ import generators.searching.kmp.KnuthMorrisPratt;
 import generators.searching.kmp.KnuthMorrisPrattSearch;
 import generators.searching.kmp.KnuthMorrisPrattStringSearchWrapper;
 import generators.searching.minmax.MinMaxGenerator;
+import generators.searching.AStarGenerator;
+import generators.searching.Bitap2;
+import generators.searching.Bullyalgorithmus;
 import generators.searching.ElectionOnRings;
+import generators.searching.IDAStar;
+import generators.searching.IterativeTiefensuche;
+import generators.searching.JumpSearchAlgorithm;
+import generators.searching.Kadane;
+import generators.searching.Levenshtein2011;
+import generators.searching.Levenstein;
+import generators.searching.LinearStringSearch;
+import generators.searching.Logclockmutexgenerator;
+import generators.searching.Negascout;
+import generators.searching.PUSGenerator;
+import generators.searching.RabinKarp;
+import generators.searching.RabinKarpAlgorithm;
+import generators.searching.RepetitionMatcher;
+import generators.searching.SelectionSearch;
+import generators.searching.SkipSearchGenerator;
+import generators.searching.StringMatchingFiniteStateMachine;
+import generators.searching.TSPviaGBFGenerator;
+import generators.searching.UCSGenerator;
 import generators.searching.straightselection.GenericIterativeStraightIntSelection;
 import generators.searching.straightselection.GenericIterativeStraightIntSelectionWithCounter;
 import generators.searching.straightselection.GenericIterativeStraightStringSelection;
@@ -43,7 +64,6 @@ public class DummyGenerator implements GeneratorBundle {
   public Vector<Generator> getGenerators() {
     Vector<Generator> generators = new Vector<Generator>(35, 15);
     
-    generators.add(new InsertTree());
     
     generators.add(new AStarGenerator());
 
