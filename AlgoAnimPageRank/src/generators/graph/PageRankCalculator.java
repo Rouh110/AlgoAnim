@@ -1,10 +1,12 @@
 package generators.graph;
 
+
 public class PageRankCalculator {
 
 	int[][] adjacencyMatrix;
 	float[] nodes;
 	int[] outcomingEdges;
+
 	
 	float[][] G;
 	
@@ -53,6 +55,7 @@ public class PageRankCalculator {
 			}
 		}
 		
+
 		///// calculates the matrix G /////
 		
 		G = new float[numberOfNodes][numberOfNodes];
@@ -71,7 +74,10 @@ public class PageRankCalculator {
 				
 			}
 		}
+
 	}
+	
+
 	
 	
 	private String matrToString(int[][] matrix)
