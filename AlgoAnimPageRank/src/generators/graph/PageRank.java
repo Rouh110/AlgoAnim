@@ -36,7 +36,16 @@ public class PageRank implements Generator {
         lang.addGraph(graph);
         lang.nextStep();
         PageRankCalculator prc = new PageRankCalculator(graph.getAdjacencyMatrix());
-        System.out.println(prc.toString());
+        float minDelta = 0.000001f;
+        int i = 0;
+        System.out.println("iteration "+i+":\n"+prc.toString()+"\n");
+        while(prc.calcNextStep() > minDelta)
+        {
+        	++i;
+        	System.out.println("iteration "+i+":\n"+prc.toString()+"\n");
+        	
+        }
+        
         return lang.toString();
     }
     

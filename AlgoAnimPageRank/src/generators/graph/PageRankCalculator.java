@@ -10,16 +10,67 @@ public class PageRankCalculator {
 	
 	float d;
 	
-	PageRankCalculator(int[][] adjacencyMatrix)
+	float delta = -1;
+	
+	public PageRankCalculator(int[][] adjacencyMatrix)
 	{
 		this(adjacencyMatrix, 0.85f);
 	}
 	
-	PageRankCalculator(int[][] adjacencyMatrix, float d)
+	public PageRankCalculator(int[][] adjacencyMatrix, float damping)
 	{
-		this.d = d;
+		this.d = damping;
 		//Initialize all matrix
 		init(adjacencyMatrix);
+	}
+	
+	
+	/**
+	 * Calculates the next values of the page rank algorithm for each node.
+	 * Call getCurrentValues to access the new values after calling this function.
+	 * 
+	 * @return the delta value. This value represents how much the values changed.
+	 */
+	public float calcNextStep()
+	{
+		float[] result = new float[nodes.length];
+		
+		matrMultVec(G, nodes, result); // calculates the next values
+		
+		normalize(result); // normalise to prevent numerical errors to accumulate.
+		
+		delta = calcDelta(nodes, result); // calculates the delta: |X_(i-1) - X_(i)|
+		
+		nodes = result; 
+		return delta;
+	}
+	
+	/**
+	 * @return The delta value. This value represents how much the values changed. 
+	 * If the calcNextStep function isn't called once, the value will be invalid and the function will return -1.
+	 * Otherwise the value will always be positive.
+	 */
+	public float getDelta()
+	{
+		return delta;
+	}
+	
+	/**
+	 * 
+	 * @return The google matrix that will be used to calculate the new values.
+	 */
+	public float[][] getGoogleMatrix()
+	{
+		return G;
+	}
+	
+	/**
+	 * 
+	 * @return The current values for each node.
+	 */
+	public float[] getCurrentValues()
+	{
+		return nodes;
 	}
 	
 	private void init(int[][] adjacencyMatrix)
@@ -74,6 +125,106 @@ public class PageRankCalculator {
 	}
 	
 	
+	///////////////////////math section/////////////////////////////////////
+	
+	/**
+	 * Norms the given vector. After that the sum of all values in the vector will be 1. 
+	 * @param vector
+	 */
+	private void normalize(float[] vector)
+	{
+		float norm = norm(vector);
+		
+		if(norm != 0)
+		{
+			for(int i = 0; i< vector.length; i++)
+			{
+				vector[i] = vector[i]/norm;
+			}
+		}
+	}
+	
+	/**
+	 * Calculates the delta between the given vectors.
+	 * @param vector1
+	 * @param vector2
+	 * @return the calculated delta
+	 */
+	private float calcDelta(float[] vector1, float[] vector2)
+	{
+		if(vector1.length != vector2.length)
+			return -1;
+		float tmpRes = 0;
+		float tmp;
+		for(int i = 0; i < vector1.length; i++)
+		{
+			tmp = vector1[i]-vector2[i];
+			tmpRes += tmp*tmp;
+		}
+		
+		return (float)Math.sqrt(tmpRes);
+	}
+	
+	/**
+	 * Calculates the L1-norm for the given vector
+	 * @param vector
+	 * @return the 1-norm
+	 */
+	private float norm(float[] vector)
+	{
+		float tmpRes = 0.0f;
+		for(int i = 0; i < vector.length; i++)
+		{
+			tmpRes += vector[i];
+		}	
+		return Math.abs(tmpRes);
+	}
+	
+	/**
+	 * Calculates the L2-norm for the given vector
+	 * @param vector
+	 * @return
+	 */
+	private float norm2(float[] vector)
+	{
+		float tmpRes = 0.0f;
+		for(int i = 0; i < vector.length; i++)
+		{
+			tmpRes += vector[i]*vector[i];
+		}	
+		return (float)Math.sqrt(tmpRes);
+	}
+	
+	/**
+	 * Calculates the matrix multiplication with a vector.
+	 * The result will be stored in the result vector.
+	 * The result vector musn't be the same vector as the given vector.
+	 * @param matrix
+	 * @param vector
+	 * @param result
+	 * @return
+	 */
+	private boolean matrMultVec(float[][] matrix, float[] vector, float[] result)
+	{
+		if(matrix.length != vector.length || vector.length != result.length)
+			return false;
+		
+		float tmpRes;
+		for(int i = 0; i< matrix[0].length; i++)
+		{
+			tmpRes = 0;
+			for(int j = 0; j < matrix.length; j++)
+			{
+				tmpRes += matrix[j][i]*vector[j];
+			}
+			
+			result[i] = tmpRes;
+		}
+		
+		return true;
+	}
+	
+	/////////////////////////To String Section///////////////////////////////////
 	private String matrToString(int[][] matrix)
 	{
 		StringBuilder sb = new StringBuilder();
@@ -131,7 +282,8 @@ public class PageRankCalculator {
 		
 		return "adjacencyMatrix:"+matrToString(adjacencyMatrix)+"\n\nG:"+matrToString(G)
 				+ "\n\noutcomingEdges:"+arrToString(outcomingEdges)
-				+ "\n\nnode values:"+ arrToString(nodes);
+				+ "\n\nnode values:"+ arrToString(nodes)
+				+ "\n\ndelta: "+ delta;
 		
 	}
 }
