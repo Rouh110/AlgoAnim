@@ -8,10 +8,14 @@ package generators.graph;
 import generators.framework.Generator;
 import generators.framework.GeneratorType;
 
+import java.awt.Color;
+import java.awt.Font;
 import java.util.Locale;
 
 import algoanim.primitives.Graph;
 import algoanim.primitives.generators.Language;
+import algoanim.properties.*;
+import algoanim.util.Coordinates;
 import algoanim.util.Node;
 
 import java.util.Hashtable;
@@ -24,17 +28,31 @@ public class PageRank implements Generator {
     private Graph graph;
     
     public PageRank(){
-    	System.out.println("Hello World");
+    	//System.out.println("Hello World");
     }
 
     public void init(){
         lang = new AnimalScript("PageRank", "Jan Ulrich Schmitt, Dennis Juckwer", 800, 600);
+        
     }
 
     public String generate(AnimationPropertiesContainer props,Hashtable<String, Object> primitives) {
-        graph = (Graph)primitives.get("graph");
-        lang.addGraph(graph);
-        lang.nextStep();
+    	TextProperties headerProps = new TextProperties();
+    	headerProps.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF,Font.BOLD, 24));
+    	lang.newText(new Coordinates(20,30), "Der PageRank-Algorithmus", "header", null, headerProps);
+    	//lang.nextStep();
+    	graph = (Graph)primitives.get("graph");
+    	
+    	//graph.changeColor(AnimationPropertiesKeys.HIGHLIGHTCOLOR_PROPERTY, Color.red, null, null);
+    	//
+    	//graph.hideNode(0, null, null);
+    	//GraphProperties graphProps = new GraphProperties();
+        //lang.addGraph(graph, null, graphProps);
+    	lang.addGraph(graph);
+        graph.changeColor(AnimationPropertiesKeys.EDGECOLOR_PROPERTY, Color.green, null, null);
+        //graph.hideNode(0, null, null);
+        //System.out.println("Der Knoten 0 hat das Label: " + graph.getNodeLabel(0));
+        //lang.nextStep();
         PageRankCalculator prc = new PageRankCalculator(graph.getAdjacencyMatrix());
         float minDelta = 0.000001f;
         int i = 0;
