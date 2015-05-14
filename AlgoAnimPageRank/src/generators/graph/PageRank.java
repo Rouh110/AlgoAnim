@@ -49,7 +49,9 @@ public class PageRank implements Generator {
     	//GraphProperties graphProps = new GraphProperties();
         //lang.addGraph(graph, null, graphProps);
     	lang.addGraph(graph);
-        graph.changeColor(AnimationPropertiesKeys.EDGECOLOR_PROPERTY, Color.green, null, null);
+    	graph.changeColor(AnimationPropertiesKeys.HIGHLIGHTCOLOR_PROPERTY, Color.GREEN, null, null);
+    	graph.highlightNode(0, null, null);
+        //graph.changeColor(AnimationPropertiesKeys.EDGECOLOR_PROPERTY, Color.green, null, null);
         //graph.hideNode(0, null, null);
         //System.out.println("Der Knoten 0 hat das Label: " + graph.getNodeLabel(0));
         //lang.nextStep();
@@ -64,6 +66,7 @@ public class PageRank implements Generator {
         	
         }
         
+        System.out.println(lang.toString());
         return lang.toString();
     }
     
