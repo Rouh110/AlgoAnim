@@ -40,21 +40,10 @@ public class PageRank implements Generator {
     	TextProperties headerProps = new TextProperties();
     	headerProps.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF,Font.BOLD, 24));
     	lang.newText(new Coordinates(20,30), "Der PageRank-Algorithmus", "header", null, headerProps);
-    	//lang.nextStep();
-    	graph = (Graph)primitives.get("graph");
+    	lang.nextStep();
     	
-    	//graph.changeColor(AnimationPropertiesKeys.HIGHLIGHTCOLOR_PROPERTY, Color.red, null, null);
-    	//
-    	//graph.hideNode(0, null, null);
-    	//GraphProperties graphProps = new GraphProperties();
-        //lang.addGraph(graph, null, graphProps);
-    	lang.addGraph(graph);
-    	graph.changeColor(AnimationPropertiesKeys.HIGHLIGHTCOLOR_PROPERTY, Color.GREEN, null, null);
-    	graph.highlightNode(0, null, null);
-        //graph.changeColor(AnimationPropertiesKeys.EDGECOLOR_PROPERTY, Color.green, null, null);
-        //graph.hideNode(0, null, null);
-        //System.out.println("Der Knoten 0 hat das Label: " + graph.getNodeLabel(0));
-        //lang.nextStep();
+    
+        lang.nextStep();
         PageRankCalculator prc = new PageRankCalculator(graph.getAdjacencyMatrix());
         float minDelta = 0.000001f;
         int i = 0;
