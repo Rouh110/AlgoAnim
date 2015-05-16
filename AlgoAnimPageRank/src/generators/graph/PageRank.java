@@ -13,6 +13,7 @@ import java.awt.Font;
 import java.util.Locale;
 
 import algoanim.primitives.Graph;
+import algoanim.primitives.generators.GraphGenerator;
 import algoanim.primitives.generators.Language;
 import algoanim.properties.*;
 import algoanim.util.Coordinates;
@@ -25,7 +26,7 @@ import algoanim.animalscript.AnimalScript;
 
 public class PageRank implements Generator {
     private Language lang;
-    private Graph graph;
+    private Graph g;
     
     public PageRank(){
     	//System.out.println("Hello World");
@@ -40,10 +41,15 @@ public class PageRank implements Generator {
     	TextProperties headerProps = new TextProperties();
     	headerProps.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF,Font.BOLD, 24));
     	lang.newText(new Coordinates(20,30), "Der PageRank-Algorithmus", "header", null, headerProps);
-    	lang.nextStep();
     	
-    
-        lang.nextStep();
+    	Graph graph = (Graph)primitives.get("graph");
+    	GraphProperties gProps = new GraphProperties("graphprop");
+        gProps.set(AnimationPropertiesKeys.FILL_PROPERTY, Color.WHITE);
+        gProps.set(AnimationPropertiesKeys.HIGHLIGHTCOLOR_PROPERTY, Color.GREEN);
+        gProps.set(AnimationPropertiesKeys.DIRECTED_PROPERTY, true);
+        Graph g = lang.addGraph(graph, null, gProps);
+        //lang.nextStep();
+
         PageRankCalculator prc = new PageRankCalculator(graph.getAdjacencyMatrix());
         float minDelta = 0.000001f;
         int i = 0;
@@ -52,9 +58,30 @@ public class PageRank implements Generator {
         {
         	++i;
         	System.out.println("iteration "+i+":\n"+prc.toString()+"\n");
+        	int[][] adjacencyMatrix = g.getAdjacencyMatrix();
+        	for(int to = 0; to< prc.getCurrentValues().length; to++){
+        		g.highlightNode(to, null, null);
+        		for(int from = 0; from < prc.getCurrentValues().length; from++){
+        			if(adjacencyMatrix[from][to]==1){
+        				g.highlightEdge(from, to, null, null);
+        				//g.unhighlightEdge(from, to, null, null);
+        			}
+        			
+        		}
+        		//lang.nextStep();
+        		for(int from = 0; from < prc.getCurrentValues().length; from++){
+        			if(adjacencyMatrix[from][to]==1){
+        				g.unhighlightEdge(from, to, null, null);
+        			}
+        		}
+        		g.unhighlightNode(to, null, null);
+        		System.out.println("");
+        	}
+        	
         	
         }
         
+
         System.out.println(lang.toString());
         return lang.toString();
     }
