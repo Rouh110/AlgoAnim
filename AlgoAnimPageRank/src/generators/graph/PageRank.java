@@ -34,6 +34,7 @@ public class PageRank implements Generator {
 
     public void init(){
         lang = new AnimalScript("PageRank", "Jan Ulrich Schmitt, Dennis Juckwer", 800, 600);
+        lang.setStepMode(true);
         
     }
 
@@ -41,41 +42,53 @@ public class PageRank implements Generator {
     	TextProperties headerProps = new TextProperties();
     	headerProps.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF,Font.BOLD, 24));
     	lang.newText(new Coordinates(20,30), "Der PageRank-Algorithmus", "header", null, headerProps);
-    	
+    	lang.nextStep();
     	Graph graph = (Graph)primitives.get("graph");
     	GraphProperties gProps = new GraphProperties("graphprop");
         gProps.set(AnimationPropertiesKeys.FILL_PROPERTY, Color.WHITE);
         gProps.set(AnimationPropertiesKeys.HIGHLIGHTCOLOR_PROPERTY, Color.GREEN);
         gProps.set(AnimationPropertiesKeys.DIRECTED_PROPERTY, true);
         Graph g = lang.addGraph(graph, null, gProps);
-        //lang.nextStep();
+        lang.nextStep();
 
         PageRankCalculator prc = new PageRankCalculator(graph.getAdjacencyMatrix());
         float minDelta = 0.000001f;
         int i = 0;
         System.out.println("iteration "+i+":\n"+prc.toString()+"\n");
+        boolean highlightedEdges = false;
         while(prc.calcNextStep() > minDelta)
         {
         	++i;
+        	
         	System.out.println("iteration "+i+":\n"+prc.toString()+"\n");
         	int[][] adjacencyMatrix = g.getAdjacencyMatrix();
         	for(int to = 0; to< prc.getCurrentValues().length; to++){
+        		highlightedEdges = false;
         		g.highlightNode(to, null, null);
+        		lang.nextStep();
         		for(int from = 0; from < prc.getCurrentValues().length; from++){
         			if(adjacencyMatrix[from][to]==1){
         				g.highlightEdge(from, to, null, null);
+        				lang.nextStep();
         				//g.unhighlightEdge(from, to, null, null);
+        				highlightedEdges = true;
         			}
         			
         		}
-        		//lang.nextStep();
-        		for(int from = 0; from < prc.getCurrentValues().length; from++){
-        			if(adjacencyMatrix[from][to]==1){
-        				g.unhighlightEdge(from, to, null, null);
-        			}
+        		
+        		if(highlightedEdges)
+        		{
+        			for(int from = 0; from < prc.getCurrentValues().length; from++){
+            			if(adjacencyMatrix[from][to]==1){
+            				g.unhighlightEdge(from, to, null, null);	
+            			}
+            		}
+            		lang.nextStep();
         		}
+        		
         		g.unhighlightNode(to, null, null);
         		System.out.println("");
+        		//lang.nextStep();
         	}
         	
         	
