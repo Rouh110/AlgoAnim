@@ -55,6 +55,7 @@ public class PageRank implements Generator {
         gProps.set(AnimationPropertiesKeys.FILL_PROPERTY, Color.WHITE);
         gProps.set(AnimationPropertiesKeys.HIGHLIGHTCOLOR_PROPERTY, Color.GREEN);
         gProps.set(AnimationPropertiesKeys.DIRECTED_PROPERTY, true);
+        gProps.set(AnimationPropertiesKeys.DEPTH_PROPERTY,10);
         Graph g = lang.addGraph(graph, null, gProps);
         lang.nextStep();
         
@@ -205,6 +206,24 @@ public class PageRank implements Generator {
     private void setUpAdditionalGraphProperties(Graph g)
     {
     	PageRankGraph p = new PageRankGraph(g,lang);
+    	p.setNodeText(3, "Hallo");
+    	p.setNodeSize(3, 100);
+    	p.setNodeFillColor(3, Color.CYAN);
+    	lang.nextStep();
+    	p.setNodeSize(3, 1);
+    	p.highlightNode(1);
+    	p.setNodeFillColor(1, Color.BLUE);
+    	p.setNodeHighlightColor(1, Color.RED);
+    	lang.nextStep();
+    	p.unhighlightNode(1);
+    	
+    	p.highlightEdge(3,1, null, null);
+    	p.setEdgeHighlightColor(3, 1, Color.BLUE);
+    	p.setNodeSize(1, 20);
+    	lang.nextStep();
+    	p.unhighlightEdge(3, 1, null, null);
+    	p.setEdgeBaseColor(3, 1, Color.GRAY);
+    	
     	
     }
 
