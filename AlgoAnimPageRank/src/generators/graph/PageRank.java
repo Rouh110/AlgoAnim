@@ -114,9 +114,17 @@ public class PageRank implements Generator {
     }
 
     public String getDescription(){
-        return "Der PageRank-Algorithmus ist ein Algorithmus zur Bewertung von Knoten, wie etwa Internetseiten in "
+        return "Der PageRank-Algorithmus ist ein Algorithmus zur Bewertung von Knoten in einem Netzwerk."
+ +" Larry Page und Sergei Brin entwickelten ihn an der Stanford University zur Bewertung von"
+ +" Webseiten im Rahmen ihrer mittlerweile weltweit bekannnten Suchmaschine Google. Das Bewertungsprinzip"
+ +" sieht dabei vor, dass das Gewicht einer Seite umso größer ist, je mehr andere Seiten auf sie verweisen."
+ +" Der Effekt wird dabei von dem Gewicht der auf diese Seite verweisenden Seiten verstärtk."
  +"\n"
- +"einem Netzwerk. ";
+ +"\nEine moegliche Interpretation des PageRanks liefert das sogenannte Random Surfer Modell. Im Rahmen dieses"
+ +" Modells repraesentiert der PageRank eines Knotens bzw. einer Webseite (bei einer Normierung der Summe der PageRanks auf 1) die"
+ +" Wahrscheinlichkeit mit der sich ein sogenannter Zufallssurfer auf einer bestimmten Webseite befindet. Hierbei gilt, dass"
+ + " der Zufallssurfer mit einer Wahrscheinlichkeit von d den Links auf der Webseite folgt, auf der er sich gerade befindet."
+ + " Mit einer Wahrscheinlichkeit von 1-d ruft er manuell in seinem Browser eine der anderen Webseiten auf.";
     }
 
     public String getCodeExample(){
