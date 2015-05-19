@@ -68,7 +68,7 @@ public class PageRank implements Generator {
        
 
         PageRankCalculator prc = new PageRankCalculator(graph.getAdjacencyMatrix());
-        float minDelta = 0.000001f;
+        float minDelta = 0.001f;
         int i = 0;
         System.out.println("iteration "+i+":\n"+prc.toString()+"\n");
         boolean highlightedEdges = false;
