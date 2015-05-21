@@ -45,6 +45,14 @@ public class PageRankGraph{
 		init();
 	}
 	
+	public int getminRadius(){
+		return minRadius;
+	}
+	
+	public int getmaxRadius(){
+		return maxRadius;
+	}
+	
 	protected int getNodeDrawDepth()
 	{
 		return nodeDrawDepth+drawDeph;
