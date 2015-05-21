@@ -181,7 +181,6 @@ public class PageRank implements Generator {
     	color2[1] = endColor.getGreen();
     	color2[2] = endColor.getBlue();
 
-    	
     	for(int i = 0; i < color1.length; i++)
     	{    		
     		color1[i] = color1[i] +(int)((float)(color2[i]-color1[i]) * percent);
