@@ -23,6 +23,7 @@ import algoanim.primitives.generators.Language;
 import algoanim.properties.*;
 import algoanim.util.Coordinates;
 import algoanim.util.Node;
+import algoanim.util.Timing;
 
 import java.util.Hashtable;
 
@@ -54,7 +55,9 @@ public class PageRank implements Generator {
     	PageRankGraph p = setupGraph();
         PageRankCalculator prc = new PageRankCalculator(g.getAdjacencyMatrix());
         SourceCode src = setSourceCode();
-        StringMatrix smat = this.setupMatrix();
+        StringMatrix smat = setupMatrix();
+        Text cText = setCounter();
+        
         
         
         lang.nextStep();
@@ -75,6 +78,8 @@ public class PageRank implements Generator {
         	for(int count = 0; count < g.getSize(); count++){
         		smat.put(1, count, new DecimalFormat("#.#####").format(prc.getCurrentValues()[count]), null, null);
         	}
+        	String newCountText = "Die PageRank-Werte nach Iteration " + i + ":";
+        	cText.setText(newCountText, null, null);
         	lang.nextStep();
 
         	/*
@@ -253,6 +258,14 @@ public class PageRank implements Generator {
     	lang.newText(new Coordinates(20,30), "Der PageRank-Algorithmus", "header", null, headerProps);
     }
     
+    private Text setCounter(){
+
+    	TextProperties counterProps = new TextProperties();
+    	counterProps.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF, Font.PLAIN, 16));
+    	return lang.newText(new Coordinates(700, 260), "Die PageRank-Werte nach der Initialisierung:", "Counter", null, counterProps);
+    	
+    }
+    
     private SourceCode setSourceCode(){
     	SourceCodeProperties sProb = new  SourceCodeProperties();
         sProb.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF,
@@ -260,7 +273,7 @@ public class PageRank implements Generator {
         sProb.set(AnimationPropertiesKeys.COLOR_PROPERTY, Color.BLUE);
         sProb.set(AnimationPropertiesKeys.HIGHLIGHTCOLOR_PROPERTY, Color.RED);
         
-        SourceCode src = lang.newSourceCode(new Coordinates(700, 120), "SourceCode", null, sProb);
+        SourceCode src = lang.newSourceCode(new Coordinates(700, 80), "SourceCode", null, sProb);
         src.addCodeLine("1. PageRank (Graph G, dampingfactor d)", "Code0", 0, null);
         src.addCodeLine("2. while PageRank Values change signifficantly", "Code1", 0, null);
         src.addCodeLine("3.     for all nodes in G do", "Code2", 0, null);
