@@ -24,7 +24,7 @@ import algoanim.properties.*;
 import algoanim.util.Coordinates;
 import algoanim.util.Node;
 import algoanim.util.Timing;
-///*
+/*
 import generators.framework.properties.AnimationPropertiesContainer;
 import algoanim.animalscript.AnimalScript;
 import algoanim.properties.PolylineProperties;
@@ -33,25 +33,39 @@ import algoanim.properties.TextProperties;
 import algoanim.properties.RectProperties;
 import algoanim.properties.CircleProperties;
 import algoanim.properties.MatrixProperties;
-//*/
+*/
 import java.util.Hashtable;
 
 import generators.framework.properties.AnimationPropertiesContainer;
 import algoanim.animalscript.AnimalCircleGenerator;
 import algoanim.animalscript.AnimalScript;
-
+///*
+import java.util.Locale;
+import java.awt.Color;
+import algoanim.properties.SourceCodeProperties;
+//*/
 public class PageRank implements Generator {
     private Language lang;
     private Graph g;
+    /*
     private PolylineProperties edgeProperties;
     private SourceCodeProperties sourceCodeProperties;
     private TextProperties headerTextProperties;
     private RectProperties headerRectangleProperties;
     private CircleProperties nodeColorProperties;
     private MatrixProperties resultAnimationProperties;
-    
+    */
     Circle graphCircles[];
     Text graphText[];
+    
+    private Color color_for_lowest_PRValue;
+    private SourceCodeProperties sourceCode;
+    private Color nodehighlightcolor;
+    private Color color_of_headertext;
+    private Color color_for_highest_PRValue;
+    private Color color_of_edges;
+    private Color color_of_nodetext;
+    private Color boardercolor_of_nodes;
     
     public PageRank(){
     	//System.out.println("Hello World");
@@ -65,13 +79,22 @@ public class PageRank implements Generator {
 
     public String generate(AnimationPropertiesContainer props,Hashtable<String, Object> primitives) {
     	
-        
+        /*
     	edgeProperties = (PolylineProperties)props.getPropertiesByName("edgeProperties");
         sourceCodeProperties = (SourceCodeProperties)props.getPropertiesByName("sourceCodeProperties");
         headerTextProperties = (TextProperties)props.getPropertiesByName("headerTextProperties");
         headerRectangleProperties = (RectProperties)props.getPropertiesByName("headerRectangleProperties");
         nodeColorProperties = (CircleProperties)props.getPropertiesByName("nodeColorProperties");
         resultAnimationProperties = (MatrixProperties)props.getPropertiesByName("resultAnimationProperties");
+    	*/
+        color_for_lowest_PRValue = (Color)primitives.get("color_for_lowest_PRValue");
+        sourceCode = (SourceCodeProperties)props.getPropertiesByName("sourceCode");
+        nodehighlightcolor = (Color)primitives.get("nodehighlightcolor");
+        color_of_headertext = (Color)primitives.get("color_of_headertext");
+        color_for_highest_PRValue = (Color)primitives.get("color_for_highest_PRValue");
+        color_of_edges = (Color)primitives.get("color_of_edges");
+        color_of_nodetext = (Color)primitives.get("color_of_nodetext");
+        boardercolor_of_nodes = (Color)primitives.get("boardercolor_of_nodes");
     	setHeader();
     	g = (Graph)primitives.get("graph");
     	PageRankGraph p = setupGraph();
@@ -277,7 +300,7 @@ public class PageRank implements Generator {
     private void setHeader(){
     	TextProperties headerProps = new TextProperties();
     	headerProps.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF,Font.BOLD, 24));
-    	//this.headerTextProperties.set(AnimationPropertiesKeys.FONT_PROPERTY, new );
+    	headerProps.set(AnimationPropertiesKeys.COLOR_PROPERTY, color_of_headertext);
     	lang.newText(new Coordinates(20,30), "Der PageRank-Algorithmus", "header", null, headerProps);
     }
     
