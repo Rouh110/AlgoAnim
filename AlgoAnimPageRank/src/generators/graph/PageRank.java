@@ -24,7 +24,16 @@ import algoanim.properties.*;
 import algoanim.util.Coordinates;
 import algoanim.util.Node;
 import algoanim.util.Timing;
-
+///*
+import generators.framework.properties.AnimationPropertiesContainer;
+import algoanim.animalscript.AnimalScript;
+import algoanim.properties.PolylineProperties;
+import algoanim.properties.SourceCodeProperties;
+import algoanim.properties.TextProperties;
+import algoanim.properties.RectProperties;
+import algoanim.properties.CircleProperties;
+import algoanim.properties.MatrixProperties;
+//*/
 import java.util.Hashtable;
 
 import generators.framework.properties.AnimationPropertiesContainer;
@@ -34,6 +43,12 @@ import algoanim.animalscript.AnimalScript;
 public class PageRank implements Generator {
     private Language lang;
     private Graph g;
+    private PolylineProperties edgeProperties;
+    private SourceCodeProperties sourceCodeProperties;
+    private TextProperties headerTextProperties;
+    private RectProperties headerRectangleProperties;
+    private CircleProperties nodeColorProperties;
+    private MatrixProperties resultAnimationProperties;
     
     Circle graphCircles[];
     Text graphText[];
@@ -50,6 +65,13 @@ public class PageRank implements Generator {
 
     public String generate(AnimationPropertiesContainer props,Hashtable<String, Object> primitives) {
     	
+        
+    	edgeProperties = (PolylineProperties)props.getPropertiesByName("edgeProperties");
+        sourceCodeProperties = (SourceCodeProperties)props.getPropertiesByName("sourceCodeProperties");
+        headerTextProperties = (TextProperties)props.getPropertiesByName("headerTextProperties");
+        headerRectangleProperties = (RectProperties)props.getPropertiesByName("headerRectangleProperties");
+        nodeColorProperties = (CircleProperties)props.getPropertiesByName("nodeColorProperties");
+        resultAnimationProperties = (MatrixProperties)props.getPropertiesByName("resultAnimationProperties");
     	setHeader();
     	g = (Graph)primitives.get("graph");
     	PageRankGraph p = setupGraph();
@@ -255,6 +277,7 @@ public class PageRank implements Generator {
     private void setHeader(){
     	TextProperties headerProps = new TextProperties();
     	headerProps.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF,Font.BOLD, 24));
+    	//this.headerTextProperties.set(AnimationPropertiesKeys.FONT_PROPERTY, new );
     	lang.newText(new Coordinates(20,30), "Der PageRank-Algorithmus", "header", null, headerProps);
     }
     
