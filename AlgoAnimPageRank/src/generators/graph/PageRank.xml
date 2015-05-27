@@ -128,5 +128,21 @@ edge D B weight 1
 				<value><Font>SansSerif</Font></value>
 			</AnimationPropertyItem>
 		</AnimationProperties>
+				<Primitive type="Color">
+			<name>edgehighlightcolor</name>
+			<value><Color>(0, 255, 0)</Color></value>
+		</Primitive>
+		<Primitive type="Color">
+			<name>color_of_dangling_nodes</name>
+			<value><Color>(0, 255, 255)</Color></value>
+		</Primitive>
+		<Primitive type="Color">
+			<name>matrixhighlightcolor</name>
+			<value><Color>(255, 0, 0)</Color></value>
+		</Primitive>
+		<Primitive type="Color">
+			<name>matrixfillcolor</name>
+			<value><Color>(255, 255, 255)</Color></value>
+		</Primitive>
 	</Folder>
 </PropertiesTreeModel>
