@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Font;
 
 import algoanim.animalscript.AnimalCircleGenerator;
+import algoanim.animalscript.AnimalScript;
 import algoanim.primitives.Circle;
 import algoanim.primitives.Graph;
 import algoanim.primitives.generators.GraphGenerator;
@@ -15,6 +16,7 @@ import algoanim.properties.PolylineProperties;
 import algoanim.properties.TextProperties;
 import algoanim.util.Coordinates;
 import algoanim.util.DisplayOptions;
+import algoanim.util.MsTiming;
 import algoanim.util.Node;
 import algoanim.util.Timing;
 import algoanim.primitives.*;
@@ -76,9 +78,12 @@ public class PageRankGraph{
 			
 			CircleProperties cp = getCircleProperties(null);
 			nodes[i].circle = lang.newCircle(graph.getNode(i),minRadius , graph.getNodeLabel(i), null, cp);
-			
+			nodes[i].radius = minRadius;
+			//nodes[i].circle.moveTo("C", "translate", nodes[i].circle.getCenter(), null, null);
 			TextProperties tp = getTextProperties();
-			nodes[i].text = lang.newText(nodes[i].circle.getCenter(), graph.getNodeLabel(i), graph.getNodeLabel(i)+" text", null, tp);		
+			nodes[i].text = lang.newText(new Coordinates(((Coordinates)nodes[i].circle.getCenter()).getX(),((Coordinates)nodes[i].circle.getCenter()).getY()), graph.getNodeLabel(i), graph.getNodeLabel(i)+" text", null, tp);	
+			nodes[i].text.moveTo("C", "translate", nodes[i].circle.getCenter(), null, null);
+			nodes[i].text.moveBy("translate", -4, -8, null, null);
 		}
 		
 		
@@ -89,7 +94,12 @@ public class PageRankGraph{
 				if(adjacencyMatrix[from][to] != 0)
 				{
 					PageRankEdge edge = new PageRankEdge();				
-					edge.line = createLine(nodes[from], nodes[to]);
+					
+					Coordinates lineNodes[] = getEdgeCoordinates(nodes[from], nodes[to]);
+					edge.line = createLine(lineNodes);			
+					edge.from = lineNodes[0];
+					edge.to = lineNodes[1];
+					
 					edgeMatrix[from][to] = edge;
 				}
 			}
@@ -97,10 +107,8 @@ public class PageRankGraph{
 	    
 	}
 
-	protected Polyline createLine(PageRankNode from, PageRankNode to)
+	protected Polyline createLine(Node lineNodes[])
 	{
-		
-		Node lineNodes[] = getEdgeCoordinates(from, to);
 		
 		PolylineProperties pp = getPolyLineProperties(null);
 		return lang.newPolyline(lineNodes, "edge", null, pp);
@@ -135,10 +143,13 @@ public class PageRankGraph{
 			return;
 		
 		prn.isHighlighted = true;
-		CircleProperties cp = getCircleProperties(prn);
 		
-		prn.circle.hide();
-		prn.circle = lang.newCircle(prn.circle.getCenter(),prn.circle.getRadius() , prn.circle.getName(), null, cp);
+		
+		prn.circle.changeColor(AnimalScript.COLORCHANGE_FILLCOLOR, prn.highlightColor, null, null);
+		
+		//CircleProperties cp = getCircleProperties(prn);
+		//prn.circle.hide();
+		//prn.circle = lang.newCircle(prn.circle.getCenter(),prn.circle.getRadius() , prn.circle.getName(), null, cp);
 		
 	}
 	
@@ -150,10 +161,11 @@ public class PageRankGraph{
 			return;
 	
 		prn.isHighlighted = false;
-		CircleProperties cp = getCircleProperties(prn);
 		
-		prn.circle.hide();
-		prn.circle = lang.newCircle(prn.circle.getCenter(),prn.circle.getRadius() , prn.circle.getName(), null, cp);
+		prn.circle.changeColor(AnimalScript.COLORCHANGE_FILLCOLOR, prn.fillColor, null, null);
+//		CircleProperties cp = getCircleProperties(prn);
+//		prn.circle.hide();
+//		prn.circle = lang.newCircle(prn.circle.getCenter(),prn.circle.getRadius() , prn.circle.getName(), null, cp);
 		
 	}
 	
@@ -292,6 +304,7 @@ public class PageRankGraph{
 	
 	public void setNodeSize(int nodeNr, int newRadius)
 	{
+		Timing duration = new MsTiming(500);
 		PageRankNode prn = nodes[nodeNr];
 		
 		if(newRadius < minRadius)
@@ -302,39 +315,48 @@ public class PageRankGraph{
 			newRadius = maxRadius;
 		}
 		
-		CircleProperties cp = getCircleProperties(prn);
-		
-		prn.circle.hide();
-		prn.circle = lang.newCircle(prn.circle.getCenter(),newRadius , prn.circle.getName(), null, cp);
-		updateEdgesForNode(nodeNr);
+		prn.circle.moveBy("translateRadius", newRadius-prn.radius, newRadius-prn.radius, null,duration);
+		prn.radius = newRadius;
+//		CircleProperties cp = getCircleProperties(prn);
+//		prn.circle.hide();
+//		prn.circle = lang.newCircle(prn.circle.getCenter(),newRadius , prn.circle.getName(), null, cp);
+//		
+		updateEdgesForNode(nodeNr,duration);
 	
 	}
 	
 	
-	protected void updateEdgesForNode(int nodeNr)
+	protected void updateEdgesForNode(int nodeNr, Timing duration)
 	{
 		for(int to = 0; to < graph.getSize(); to++)
 		{
 			if(adjacencyMatrix[nodeNr][to] != 0)
 			{
-				updateEdge(edgeMatrix[nodeNr][to], nodes[nodeNr], nodes[to]);
+				updateEdge(edgeMatrix[nodeNr][to], nodes[nodeNr], nodes[to],duration);
 			}
 			
 			if(adjacencyMatrix[to][nodeNr] != 0)
 			{
-				updateEdge(edgeMatrix[to][nodeNr], nodes[to], nodes[nodeNr]);
+				updateEdge(edgeMatrix[to][nodeNr], nodes[to], nodes[nodeNr],duration);
 			}
 								
 		}
 	}
 	
-	protected void updateEdge(PageRankEdge edge, PageRankNode from, PageRankNode to)
+	protected void updateEdge(PageRankEdge edge, PageRankNode from, PageRankNode to, Timing duration)
 	{
-		Node lineNodes[] = getEdgeCoordinates(from, to);
-		PolylineProperties pp = getPolyLineProperties(edge);
+		Coordinates lineNodes[] = getEdgeCoordinates(from, to);
+//		edge.line.moveTo("C","translateNodes 1",lineNodes[0] ,null, null);
+//		edge.line.moveTo("C","translateNodes 2",lineNodes[1] ,null, null);
+		edge.line.moveBy("translateNodes 1", lineNodes[0].getX()-edge.from.getX(),lineNodes[0].getY()-edge.from.getY(), null, duration);
+		edge.line.moveBy("translateNodes 2", lineNodes[1].getX()-edge.to.getX(),lineNodes[1].getY()-edge.to.getY(), null, duration);
 		
-		edge.line.hide();
-		edge.line = lang.newPolyline(lineNodes, "edge", null, pp); 
+//		PolylineProperties pp = getPolyLineProperties(edge);
+//		
+//		edge.line.hide();
+//		edge.line = lang.newPolyline(lineNodes, "edge", null, pp); 
+		edge.from = lineNodes[0];
+		edge.to = lineNodes[1];
 	}
 	
 	protected Coordinates[] getEdgeCoordinates(PageRankNode from, PageRankNode to)
@@ -347,16 +369,16 @@ public class PageRankGraph{
 		
 		double length =  Math.sqrt(vecx*vecx+vecy*vecy);
 		
-		if(length <= from.circle.getRadius() + to.circle.getRadius())
+		if(length <= from.radius + to.radius)
 		{
 			//TODO: do something other when nodes are overlapping
 		}
 		
-		int fromX = c1.getX() + (int)((float)vecx/(float)length * (float)from.circle.getRadius());
-		int fromY = c1.getY() +(int)((float)vecy/(float)length * (float)from.circle.getRadius());
+		int fromX = c1.getX() + (int)((float)vecx/(float)length * (float)from.radius);
+		int fromY = c1.getY() +(int)((float)vecy/(float)length * (float)from.radius);
 		
-		int toX = c1.getX() + (int)((float)vecx/(float)length * (float)(length - to.circle.getRadius()));
-		int toY = c1.getY() +(int)((float)vecy/(float)length * (float)(length - to.circle.getRadius()));
+		int toX = c1.getX() + (int)((float)vecx/(float)length * (float)(length - to.radius));
+		int toY = c1.getY() +(int)((float)vecy/(float)length * (float)(length - to.radius));
 		
 		Coordinates result[] = {new Coordinates(fromX, fromY),new Coordinates(toX, toY)};
 		
@@ -422,6 +444,7 @@ public class PageRankGraph{
 	{
 		public Text text = null;
 		public Circle circle = null;
+		public int radius = minRadius;
 		public Color highlightColor = Color.GREEN;
 		public Color fillColor = Color.WHITE;
 		public boolean isHighlighted = false;
@@ -433,6 +456,7 @@ public class PageRankGraph{
 		public Color highlightColor = Color.GREEN;
 		public Color baseColor = Color.BLACK;
 		public boolean isHighlighted = false;
-		
+		public Coordinates from;
+		public Coordinates to;
 	}
 }
