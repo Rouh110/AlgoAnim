@@ -112,6 +112,21 @@ public class PageRankGraph{
 		
 	}
 	
+	public void setTextColor(int nodeNr, Color textColor)
+	{
+		if(textColor != null)
+		{
+			nodes[nodeNr].text.changeColor("color", textColor, null, null);
+		}
+	}
+	
+	public void setAllTextColor(Color textColor)
+	{
+		for(int i = 0; i < nodes.length; i++)
+		{
+			setTextColor(i, textColor);
+		}
+	}
 	public void highlightNode(int nodeNr)
 	{
 		PageRankNode prn = nodes[nodeNr];
@@ -191,6 +206,18 @@ public class PageRankGraph{
 		}
 	}
 	
+	public void setAllEdgesBaseColor(Color edgeBaseColor)
+	{
+		for(int from = 0; from < nodes.length; from++)
+		{
+			for(int to = 0; to < nodes.length; to ++)
+			{
+				setEdgeBaseColor(from,to,edgeBaseColor);
+			}
+		}
+			
+	}
+	
 	public void setEdgeHighlightColor(int from, int to, Color newColor)
 	{
 		if(newColor == null)
@@ -209,6 +236,18 @@ public class PageRankGraph{
 			highlightEdge(from, to, null,null);
 		}
 		
+	}
+	
+	public void setAllEdgesHighlightColor(Color edgeHighlightColor)
+	{
+		for(int from = 0; from < nodes.length; from++)
+		{
+			for(int to = 0; to < nodes.length; to ++)
+			{
+				setEdgeHighlightColor(from,to,edgeHighlightColor);
+			}
+		}
+			
 	}
 	
 	public void setNodeFillColor(int nodeNr, Color newColor)
@@ -240,6 +279,14 @@ public class PageRankGraph{
 		{
 			node.isHighlighted = false;
 			highlightNode(nodeNr);
+		}
+	}
+	
+	public void setAllNodeHighlightColor(Color highlightColor)
+	{
+		for(int i = 0; i < nodes.length; i++)
+		{
+			setNodeHighlightColor(i, highlightColor);
 		}
 	}
 	
