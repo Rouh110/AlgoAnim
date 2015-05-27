@@ -336,7 +336,7 @@ public class PageRank implements Generator {
     	//Graph graph = (Graph)primitives.get("graph");
     	GraphProperties gProps = new GraphProperties("graphprop");
         gProps.set(AnimationPropertiesKeys.FILL_PROPERTY, Color.WHITE);
-        gProps.set(AnimationPropertiesKeys.HIGHLIGHTCOLOR_PROPERTY, Color.GREEN);
+        gProps.set(AnimationPropertiesKeys.HIGHLIGHTCOLOR_PROPERTY, nodehighlightcolor);
         gProps.set(AnimationPropertiesKeys.DIRECTED_PROPERTY, true);
         gProps.set(AnimationPropertiesKeys.DEPTH_PROPERTY,0);
         g = lang.addGraph(g, null, gProps);
