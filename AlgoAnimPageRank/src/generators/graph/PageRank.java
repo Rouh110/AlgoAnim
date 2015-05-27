@@ -87,6 +87,9 @@ public class PageRank implements Generator {
         nodeColorProperties = (CircleProperties)props.getPropertiesByName("nodeColorProperties");
         resultAnimationProperties = (MatrixProperties)props.getPropertiesByName("resultAnimationProperties");
     	*/
+    	
+    	//TODO: Edgehighlightcolor, Danglingnodecolor
+    	//TODO: MatrixHighlightColor, MatrixFillColor
         color_for_lowest_PRValue = (Color)primitives.get("color_for_lowest_PRValue");
         sourceCode = (SourceCodeProperties)props.getPropertiesByName("sourceCode");
         nodehighlightcolor = (Color)primitives.get("nodehighlightcolor");
@@ -97,13 +100,11 @@ public class PageRank implements Generator {
         boardercolor_of_nodes = (Color)primitives.get("boardercolor_of_nodes");
     	setHeader();
     	g = (Graph)primitives.get("graph");
-    	PageRankGraph p = setupGraph();
+    	PageRankGraph p = setupGraph(nodehighlightcolor, color_of_edges,color_of_nodetext);
         PageRankCalculator prc = new PageRankCalculator(g.getAdjacencyMatrix());
-        SourceCode src = setSourceCode();
+        SourceCode src = setSourceCode(sourceCode);
         StringMatrix smat = setupMatrix();
         Text cText = setCounter();
-        
-        
         
         lang.nextStep();
         src.unhighlight(0);
@@ -248,7 +249,6 @@ public class PageRank implements Generator {
     	color2[1] = endColor.getGreen();
     	color2[2] = endColor.getBlue();
 
-    	
     	for(int i = 0; i < color1.length; i++)
     	{    		
     		color1[i] = color1[i] +(int)((float)(color2[i]-color1[i]) * percent);
@@ -312,12 +312,12 @@ public class PageRank implements Generator {
     	
     }
     
-    private SourceCode setSourceCode(){
-    	SourceCodeProperties sProb = new  SourceCodeProperties();
-        sProb.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF,
-                Font.PLAIN, 12));
-        sProb.set(AnimationPropertiesKeys.COLOR_PROPERTY, Color.BLUE);
-        sProb.set(AnimationPropertiesKeys.HIGHLIGHTCOLOR_PROPERTY, Color.RED);
+    private SourceCode setSourceCode(SourceCodeProperties sProb){
+//    	SourceCodeProperties sProb = new  SourceCodeProperties();
+//        sProb.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF,
+//                Font.PLAIN, 12));
+//        sProb.set(AnimationPropertiesKeys.COLOR_PROPERTY, Color.BLUE);
+//        sProb.set(AnimationPropertiesKeys.HIGHLIGHTCOLOR_PROPERTY, Color.RED);
         
         SourceCode src = lang.newSourceCode(new Coordinates(700, 80), "SourceCode", null, sProb);
         src.addCodeLine("1. PageRank (Graph G, dampingfactor d)", "Code0", 0, null);
@@ -332,7 +332,7 @@ public class PageRank implements Generator {
         return src;
     }
     
-    private PageRankGraph setupGraph(){
+    private PageRankGraph setupGraph(Color nodehighlightcolor,Color color_of_edges,Color color_of_nodetext){
     	//Graph graph = (Graph)primitives.get("graph");
     	GraphProperties gProps = new GraphProperties("graphprop");
         gProps.set(AnimationPropertiesKeys.FILL_PROPERTY, Color.WHITE);
@@ -342,6 +342,9 @@ public class PageRank implements Generator {
         g = lang.addGraph(g, null, gProps);
         g.hide();
         PageRankGraph p = new PageRankGraph(g,lang);
+        p.setAllNodeHighlightColor(nodehighlightcolor);
+        p.setAllEdgesBaseColor(color_of_edges);
+        p.setAllTextColor(color_of_nodetext);
         return  p;
     }
     
@@ -420,7 +423,7 @@ public class PageRank implements Generator {
     	
     	for(int nodes = 0; nodes < prc.getCurrentValues().length; nodes++){
     		p.setNodeSize(nodes, this.calcNodeSize(prc.getCurrentValues()[nodes], p.getmaxRadius(), p.getminRadius(), g));
-    		p.setNodeFillColor(nodes, colorLin(Color.WHITE, Color.RED, (float)0.15/g.getSize(), (float)1, prc.getCurrentValues()[nodes]));
+    		p.setNodeFillColor(nodes, colorLin(color_for_lowest_PRValue, color_for_highest_PRValue, (float)0.15/g.getSize(), (float)1, prc.getCurrentValues()[nodes]));
     	}
     	//lang.nextStep();
   
