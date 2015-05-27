@@ -65,7 +65,11 @@ public class PageRank implements Generator {
     private Color color_for_highest_PRValue;
     private Color color_of_edges;
     private Color color_of_nodetext;
-    private Color boardercolor_of_nodes;
+    //private Color boardercolor_of_nodes;
+    private Color matrixfillcolor;
+    private Color matrixhighlightcolor;
+    private Color edgehighlightcolor;
+    private Color color_of_dangling_nodes;
     
     public PageRank(){
     	//System.out.println("Hello World");
@@ -88,7 +92,6 @@ public class PageRank implements Generator {
         resultAnimationProperties = (MatrixProperties)props.getPropertiesByName("resultAnimationProperties");
     	*/
     	
-    	//TODO: Edgehighlightcolor, Danglingnodecolor
     	//TODO: MatrixHighlightColor, MatrixFillColor
         color_for_lowest_PRValue = (Color)primitives.get("color_for_lowest_PRValue");
         sourceCode = (SourceCodeProperties)props.getPropertiesByName("sourceCode");
@@ -97,8 +100,13 @@ public class PageRank implements Generator {
         color_for_highest_PRValue = (Color)primitives.get("color_for_highest_PRValue");
         color_of_edges = (Color)primitives.get("color_of_edges");
         color_of_nodetext = (Color)primitives.get("color_of_nodetext");
-        boardercolor_of_nodes = (Color)primitives.get("boardercolor_of_nodes");
+        //boardercolor_of_nodes = (Color)primitives.get("boardercolor_of_nodes");
+        matrixfillcolor = (Color)primitives.get("matrixfillcolor");
+        matrixhighlightcolor = (Color)primitives.get("matrixhighlightcolor");
+        edgehighlightcolor = (Color)primitives.get("edgehighlightcolor");
+        color_of_dangling_nodes = (Color)primitives.get("color_of_dangling_nodes");
     	setHeader();
+    	setInformationText();
     	g = (Graph)primitives.get("graph");
     	PageRankGraph p = setupGraph(nodehighlightcolor, color_of_edges,color_of_nodetext);
         PageRankCalculator prc = new PageRankCalculator(g.getAdjacencyMatrix());
@@ -300,8 +308,34 @@ public class PageRank implements Generator {
     private void setHeader(){
     	TextProperties headerProps = new TextProperties();
     	headerProps.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF,Font.BOLD, 24));
-    	headerProps.set(AnimationPropertiesKeys.COLOR_PROPERTY, color_of_headertext);
+    	//headerProps.set(AnimationPropertiesKeys.COLOR_PROPERTY, color_of_headertext);
+    	headerProps.set(AnimationPropertiesKeys.COLOR_PROPERTY, edgehighlightcolor);
     	lang.newText(new Coordinates(20,30), "Der PageRank-Algorithmus", "header", null, headerProps);
+    }
+    
+    private void setInformationText(){
+    	/*TextProperties infoProps = new TextProperties();
+    	infoProps.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF, Font.BOLD, 20));
+    	Text infoText = lang.newText(new Coordinates(20,100),getDescription() , "infoText", null, infoProps);
+    	lang.nextStep();
+    	infoText.hide();
+    	*/
+    	SourceCodeProperties infoProps = new SourceCodeProperties();
+    	infoProps.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF, Font.BOLD, 20));
+    	SourceCode infoText = lang.newSourceCode(new Coordinates(20,100), "InfoText", null, infoProps);
+    	infoText.addCodeLine("Der PageRank-Algorithmus ist ein Algorithmus zur Bewertung von Knoten in einem Netzwerk.", "Line0", 0, null);
+    	infoText.addCodeLine("Larry Page und Sergei Brin entwickelten ihn an der Stanford University zur Bewertung von", "Line1", 0, null);
+    	infoText.addCodeLine("Webseiten im Rahmen ihrer mittlerweile weltweit bekannnten Suchmaschine Google. Das Bewertungsprinzip", "Line2", 0, null);
+    	infoText.addCodeLine("sieht dabei vor, dass das Gewicht einer Seite umso groesser ist, je mehr andere Seiten auf sie verweisen.", "Line3", 0, null);
+    	infoText.addCodeLine("Der Effekt wird dabei von dem Gewicht der auf diese Seite verweisenden Seiten verstaertk.", "Line4", 0, null);
+    	infoText.addCodeLine("", "Line5", 0, null);
+    	infoText.addCodeLine("Eine moegliche Interpretation des PageRanks liefert das sogenannte Random Surfer Modell. Im Rahmen dieses", "Line6", 0, null);
+    	infoText.addCodeLine("Modells repraesentiert der PageRank eines Knotens bzw. einer Webseite (bei einer Normierung der Summe der PageRanks auf 1) die", "Line7", 0, null);
+    	infoText.addCodeLine("Wahrscheinlichkeit mit der sich ein sogenannter Zufallssurfer auf einer bestimmten Webseite befindet. Hierbei gilt, dass", "Line8", 0, null);
+    	infoText.addCodeLine("der Zufallssurfer mit einer Wahrscheinlichkeit von d den Links auf der Webseite folgt, auf der er sich gerade befindet.", "Line9", 0, null);
+    	infoText.addCodeLine("Mit einer Wahrscheinlichkeit von 1-d ruft er manuell in seinem Browser eine der anderen Webseiten auf.", "Line10", 0, null);
+    	lang.nextStep();
+    	infoText.hide();
     }
     
     private Text setCounter(){
@@ -336,7 +370,7 @@ public class PageRank implements Generator {
     	//Graph graph = (Graph)primitives.get("graph");
     	GraphProperties gProps = new GraphProperties("graphprop");
         gProps.set(AnimationPropertiesKeys.FILL_PROPERTY, Color.WHITE);
-        gProps.set(AnimationPropertiesKeys.HIGHLIGHTCOLOR_PROPERTY, Color.GREEN);
+        gProps.set(AnimationPropertiesKeys.HIGHLIGHTCOLOR_PROPERTY, nodehighlightcolor);
         gProps.set(AnimationPropertiesKeys.DIRECTED_PROPERTY, true);
         gProps.set(AnimationPropertiesKeys.DEPTH_PROPERTY,0);
         g = lang.addGraph(g, null, gProps);
@@ -345,6 +379,7 @@ public class PageRank implements Generator {
         p.setAllNodeHighlightColor(nodehighlightcolor);
         p.setAllEdgesBaseColor(color_of_edges);
         p.setAllTextColor(color_of_nodetext);
+        p.setAllEdgesHighlightColor(edgehighlightcolor);
         return  p;
     }
     
@@ -413,9 +448,28 @@ public class PageRank implements Generator {
     		src.highlight(6);
     		lang.nextStep();
     		src.unhighlight(6);
+    		for(int i = 0; i < g.getSize(); i++){
+    			if(prc.outcomingEdges[i]==0){
+    				src.highlight(7);
+    				if(p.nodes[i].isHighlighted){
+    					p.setNodeHighlightColor(i, color_of_dangling_nodes);
+    					lang.nextStep();
+    					p.setNodeHighlightColor(i, nodehighlightcolor);
+    					src.unhighlight(7);
+    				}else{
+    					Color tempColor = p.nodes[i].fillColor;
+    					p.setNodeFillColor(i, color_of_dangling_nodes);
+    					lang.nextStep();
+    					p.setNodeFillColor(i, tempColor);
+    					src.unhighlight(7);
+    				}
+    			}
+    		}
+    		/*
     		src.highlight(7);
     		lang.nextStep();
     		src.unhighlight(7);
+    		*/
     		p.unhighlightNode(to);
     		//lang.nextStep();
     		
