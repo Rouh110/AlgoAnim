@@ -88,20 +88,20 @@ public class PageRankCalculator {
 		nodes = new float[numberOfNodes];
 		outcomingEdges = new int[numberOfNodes];
 		
-		for(int i = 0; i < numberOfNodes; ++i)
+		for(int to = 0; to < numberOfNodes; ++to)
 		{
-			nodes[i] = 1.0f/(float)numberOfNodes; // sets the beginning values of the nodes.
-			for(int j = 0; j < numberOfNodes; ++j)
+			nodes[to] = 1.0f/(float)numberOfNodes; // sets the beginning values of the nodes.
+			for(int from = 0; from < numberOfNodes; ++from)
 			{
-				if(adjacencyMatrix[i][j] != 0)
+				if(adjacencyMatrix[from][to] != 0)
 				{
-					this.adjacencyMatrix[i][j] = 1; // sets the adjacencyMatrix to 1 if the given matrix has a value other then 0 at the same position.
+					this.adjacencyMatrix[from][to] = 1; // sets the adjacencyMatrix to 1 if the given matrix has a value other then 0 at the same position.
 					//
-					outcomingEdges[i] += this.adjacencyMatrix[i][j]; // count the number of outcoming edges.
+					outcomingEdges[from] += this.adjacencyMatrix[from][to]; // count the number of outcoming edges.
 					
 				}else
 				{
-					this.adjacencyMatrix[i][j] = 0; // sets the adjacencyMatrix to 0 if the given matrix has a 0 too.
+					this.adjacencyMatrix[from][to] = 0; // sets the adjacencyMatrix to 0 if the given matrix has a 0 too.
 				}
 			}
 		}
