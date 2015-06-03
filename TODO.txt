@@ -1,0 +1,8 @@
+Page rank
+Berechnungsanzeigen komplette berechnung.
+Delta abstand zur letzten iteration anzeigen.
+Markierungen
+Dangling nodes markieren (eventuell mit verbindungen)
+Weiter informationen (zum Schluss)
+
+Abfragen

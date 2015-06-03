@@ -24,7 +24,10 @@ import algoanim.primitives.generators.Language;
 import algoanim.properties.*;
 import algoanim.util.Coordinates;
 import algoanim.util.Node;
+import algoanim.util.Offset;
 import algoanim.util.Timing;
+
+
 
 /*
 import generators.framework.properties.AnimationPropertiesContainer;
@@ -41,6 +44,8 @@ import java.util.Hashtable;
 import generators.framework.properties.AnimationPropertiesContainer;
 import algoanim.animalscript.AnimalCircleGenerator;
 import algoanim.animalscript.AnimalScript;
+import algoanim.animalscript.AnimalStringMatrixGenerator;
+
 
 ///*
 import java.util.Locale;
@@ -64,7 +69,7 @@ public class PageRank implements Generator {
     
     private int adjacencymatrix[][];
     private int numberOfOutgoingEdges[];
-    private ArrayList results = new ArrayList();
+    private ArrayList<float[]> results;
     private float initValue;
     private float difference=100.0f;
     private int iterations = 1;
@@ -94,6 +99,10 @@ public class PageRank implements Generator {
     }
     
     private void initalValues(int [][] adjacencymatrix){
+    	    	
+        results = new ArrayList<float[]>();
+        iterations = 1;
+    	difference = 100;
     	this.adjacencymatrix = new int [adjacencymatrix.length][adjacencymatrix.length];
     	numberOfOutgoingEdges = new int[adjacencymatrix.length];
     	initValue = 1.0f / (float)g.getSize();
@@ -155,13 +164,12 @@ public class PageRank implements Generator {
         StringMatrix actMat = setupMatrix(700, 400, 0.0f);
         Text lastText = setCounter(700, 210, "Die PageRank-Werte nach der Initialisierung:");
         Text currentText = setCounter(700, 360, "Die PageRank-Werte von Iteration 1:");
-        Text actualValueText = setCounter(930, 280, "");
+        Text actualValueText = setCounter(700, 490, "");
         actualValueText.changeColor(AnimationPropertiesKeys.COLOR_PROPERTY, Color.BLUE, null, null);
         
         lang.nextStep();
         src.unhighlight(0);
         
-
         //float minDelta = 0.001f;
         //int i = 0;
         //System.out.println("iteration "+i+":\n"+prc.toString()+"\n");
@@ -199,13 +207,15 @@ public class PageRank implements Generator {
 						p.setNodeSize(to, this.calcNodeSize(currentResults[to], p.getmaxRadius(), p.getminRadius(), g));
 						float [] lastValues = (float []) results.get(iterations - 2);
 						//float tempVal = lastValues[from];
-						smat.highlightCell(1, from, null, null);
+//						smat.highlightCell(1, from, null, null);
+						smat.highlightElem(1, from, null, null);
 						actualValueText.setText("PR of p in the last step: " + new DecimalFormat("#.#####").format(lastValues[from]), null, null);
 						actMat.put(1, to, new DecimalFormat("#.#####").format(currentResults[to]), null, null);
 						//p.setNodeFillColor(to, colorLin(color_for_lowest_PRValue, color_for_highest_PRValue, (float)0.15/g.getSize(), (float)1, currentResults[to]));
 						lang.nextStep();
 						actualValueText.setText("", null, null);
-						smat.unhighlightCell(1, from, null, null);
+//						smat.unhighlightCell(1, from, null, null);
+						smat.unhighlightElem(1, from, null, null);
 						src.unhighlight(5);
 						p.unhighlightEdge(from, to, null, null);
 						//lang.nextStep();
@@ -218,6 +228,7 @@ public class PageRank implements Generator {
 				for(int dangCount = 0; dangCount < adjacencymatrix.length; dangCount++){
 					if(isDanglingNode(dangCount)){
 						src.highlight(7);
+						smat.highlightElem(0, dangCount, null, null);
 						p.highlightNode(dangCount);
 						currentResults[to] = (float) (currentResults[to] + 0.85f * (predecValues[dangCount]/adjacencymatrix.length));
 						p.setNodeSize(to, this.calcNodeSize(currentResults[to], p.getmaxRadius(), p.getminRadius(), g));
@@ -228,11 +239,13 @@ public class PageRank implements Generator {
 						actualValueText.setText("", null, null);
 						src.unhighlight(7);
 						p.unhighlightNode(dangCount);
-
+						smat.unhighlightElem(0, dangCount, null, null);
 					}
 				}
+				
 				p.unhighlightNode(to);
-				smat.unhighlightCell(0, to, null, null);
+				actMat.unhighlightCell(0, to, null, null);
+				//smat.unhighlightCell(0, to, null, null);
 			}
 			
 			for(int i = 0; i< adjacencymatrix.length; i++){
@@ -516,6 +529,10 @@ public class PageRank implements Generator {
     }
     
     private StringMatrix setupMatrix(int x, int y, float initValue){
+    	
+    	AnimalStringMatrixGenerator matrixGenerator = new AnimalStringMatrixGenerator(
+				(AnimalScript) lang);
+    	
         //String[][] strValues = {{"Hallo", "und",},{"Ciao","!"}};
     	String[][] strValues = new String[2][g.getSize()];
     	//String[][] strValues = new String[2][2];
@@ -525,10 +542,17 @@ public class PageRank implements Generator {
     		strValues[0][i] = g.getNodeLabel(i);
     		strValues[1][i] = "" + initValue;
     	}
+    	
         MatrixProperties matProp = new MatrixProperties();
-        matProp.set(AnimationPropertiesKeys.GRID_STYLE_PROPERTY, "matrix");
-        matProp.set(AnimationPropertiesKeys.FILLED_PROPERTY, false);
-        StringMatrix smat = lang.newStringMatrix(new Coordinates(x, y), strValues, "Matrix", null, matProp);
+        matProp.set(AnimationPropertiesKeys.GRID_STYLE_PROPERTY, "table");
+        //matProp.set(AnimationPropertiesKeys.FILLED_PROPERTY, false);
+        matProp.set(AnimationPropertiesKeys.CELL_HEIGHT_PROPERTY, 30);
+        matProp.set(AnimationPropertiesKeys.CELL_WIDTH_PROPERTY, 80);
+        StringMatrix smat = new StringMatrix(matrixGenerator,
+				new Coordinates(x, y), strValues, "Matrix", null,
+				matProp);
+        
+        //StringMatrix smat = lang.newStringMatrix(new Coordinates(x, y), strValues, "Matrix", null, matProp);
     	return smat;
     }
     
