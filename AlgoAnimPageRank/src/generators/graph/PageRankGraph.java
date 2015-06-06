@@ -2,6 +2,8 @@ package generators.graph;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.util.LinkedList;
+import java.util.List;
 
 import algoanim.animalscript.AnimalCircleGenerator;
 import algoanim.animalscript.AnimalScript;
@@ -70,6 +72,7 @@ public class PageRankGraph{
 	
 	private void init()
 	{
+		// setup nodes
 		nodes = new PageRankNode[graph.getSize()];
 		for(int i = 0; i < graph.getSize(); i++)
 		{
@@ -86,7 +89,7 @@ public class PageRankGraph{
 			nodes[i].text.moveBy("translate", -4, -8, null, null);
 		}
 		
-		
+		// set up normal edges
 		for(int to = 0; to < graph.getSize(); to++)
 		{
 			for(int from = 0; from < graph.getSize(); from++)
@@ -105,6 +108,27 @@ public class PageRankGraph{
 			}
 		}
 	    
+		// set up dangling Edges
+		
+		List<Integer> danglingNodes = getAllDanglingNodeNrs();
+		
+		for(Integer dNodeNr : danglingNodes)
+		{
+			for(int to = 0; to < nodes.length; to++)
+			{
+				PageRankEdge dEdge = new PageRankEdge();
+				
+				dEdge.isDanglingEdge = true;
+				Coordinates lineNodes[] = getEdgeCoordinates(nodes[dNodeNr], nodes[to]);
+				dEdge.line = createLine(lineNodes);			
+				dEdge.from = lineNodes[0];
+				dEdge.to = lineNodes[1];
+				edgeMatrix[dNodeNr][to] = dEdge;
+				
+				hideEdge(dNodeNr, to);
+			}
+		}
+		
 	}
 
 	protected Polyline createLine(Node lineNodes[])
@@ -220,17 +244,43 @@ public class PageRankGraph{
 	
 	public void setAllEdgesBaseColor(Color edgeBaseColor)
 	{
+		setAllEdgesBaseColor(edgeBaseColor, false);
+			
+	}
+	
+	public void setAllEdgesBaseColor(Color edgeBaseColor, boolean setDanglingEdgesColor)
+	{
 		for(int from = 0; from < nodes.length; from++)
 		{
 			for(int to = 0; to < nodes.length; to ++)
 			{
-				setEdgeBaseColor(from,to,edgeBaseColor);
+				if(setDanglingEdgesColor || adjacencyMatrix[from][to] != 0)
+				{
+					setEdgeBaseColor(from,to,edgeBaseColor);
+				}
+				
 			}
 		}
 			
 	}
 	
-	public void setEdgeHighlightColor(int from, int to, Color newColor)
+	public void setAllDangingEdgeBaseColor(Color edgeBaseColor)
+	{
+		PageRankEdge edge = null;
+		for(int from = 0; from < nodes.length; from++)
+		{
+			for(int to = 0; to < nodes.length; to ++)
+			{
+				edge = edgeMatrix[from][to];
+				if(edge != null && edge.isDanglingEdge)
+				{
+					setEdgeBaseColor(from,to,edgeBaseColor);
+				}
+			}
+		}
+	}
+	
+	public void setEdgeHighlightColor(int from, int to, Color newColor )
 	{
 		if(newColor == null)
 			return;
@@ -250,16 +300,97 @@ public class PageRankGraph{
 		
 	}
 	
+	
+	
 	public void setAllEdgesHighlightColor(Color edgeHighlightColor)
+	{
+		setAllEdgesHighlightColor(edgeHighlightColor, false);
+			
+	}
+	
+	public void setAllEdgesHighlightColor(Color edgeHighlightColor,boolean setDanglingEdgesHColor )
 	{
 		for(int from = 0; from < nodes.length; from++)
 		{
 			for(int to = 0; to < nodes.length; to ++)
 			{
-				setEdgeHighlightColor(from,to,edgeHighlightColor);
+				if(setDanglingEdgesHColor || adjacencyMatrix[from][to] != 0)
+				{
+					setEdgeHighlightColor(from,to,edgeHighlightColor);
+				}
 			}
 		}
 			
+	}
+	
+	public void setAllDanglingEdgesHighlightColor(Color edgeHighlightColor)
+	{
+		PageRankEdge edge = null;
+		for(int from = 0; from < nodes.length; from++)
+		{
+			for(int to = 0; to < nodes.length; to ++)
+			{
+				edge = edgeMatrix[from][to];
+				if(edge != null && edge.isDanglingEdge)
+				{
+					setEdgeHighlightColor(from,to,edgeHighlightColor);
+				}
+			}
+		}
+
+	}
+	
+	public void showEdge(int from, int to)
+	{
+		PageRankEdge edge = edgeMatrix[from][to];
+		
+		if(edge != null)
+		{
+			edge.line.show();
+		}
+		
+	}
+	
+	public void hideEdge(int from, int to)
+	{
+		PageRankEdge edge = edgeMatrix[from][to];
+		
+		if(edge != null)
+		{
+			edge.line.hide();
+		}
+	}
+	
+	public void showAllDanglingEdges()
+	{
+		PageRankEdge edge = null;
+		for(int from = 0; from < nodes.length; from++)
+		{
+			for(int to = 0; to < nodes.length; to ++)
+			{
+				edge = edgeMatrix[from][to];
+				if(edge != null && edge.isDanglingEdge)
+				{
+					showEdge(from, to);
+				}
+			}
+		}
+	}
+	
+	public void hideAllDanglingEdges()
+	{
+		PageRankEdge edge = null;
+		for(int from = 0; from < nodes.length; from++)
+		{
+			for(int to = 0; to < nodes.length; to ++)
+			{
+				edge = edgeMatrix[from][to];
+				if(edge != null && edge.isDanglingEdge)
+				{
+					hideEdge(from, to);
+				}
+			}
+		}
 	}
 	
 	public void setNodeFillColor(int nodeNr, Color newColor)
@@ -325,17 +456,44 @@ public class PageRankGraph{
 	
 	}
 	
+	public boolean isDanglingNode(int nodeNr)
+	{
+		for(int to = 0; to < nodes.length; ++to)
+		{
+			if(adjacencyMatrix[nodeNr][to] != 0)
+			{
+				return false;
+			}
+		}
+		
+		return true;
+	}
+	
+	public List<Integer> getAllDanglingNodeNrs()
+	{
+		LinkedList<Integer> list = new LinkedList<Integer>();
+		
+		for(int i = 0; i < nodes.length; ++i)
+		{
+			if(isDanglingNode(i))
+			{
+				list.add(i);
+			}
+		}
+		
+		return list;
+	}
 	
 	protected void updateEdgesForNode(int nodeNr, Timing duration)
 	{
 		for(int to = 0; to < graph.getSize(); to++)
 		{
-			if(adjacencyMatrix[nodeNr][to] != 0)
+			if(edgeMatrix[nodeNr][to] != null)
 			{
 				updateEdge(edgeMatrix[nodeNr][to], nodes[nodeNr], nodes[to],duration);
 			}
 			
-			if(adjacencyMatrix[to][nodeNr] != 0)
+			if(edgeMatrix[to][nodeNr] != null)
 			{
 				updateEdge(edgeMatrix[to][nodeNr], nodes[to], nodes[nodeNr],duration);
 			}
@@ -458,5 +616,6 @@ public class PageRankGraph{
 		public boolean isHighlighted = false;
 		public Coordinates from;
 		public Coordinates to;
+		public boolean isDanglingEdge = false;
 	}
 }

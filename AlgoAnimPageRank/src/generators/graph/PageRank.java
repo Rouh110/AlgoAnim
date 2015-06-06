@@ -158,6 +158,7 @@ public class PageRank implements Generator {
     	g = (Graph)primitives.get("graph");
     	initalValues(g.getAdjacencyMatrix());
     	PageRankGraph p = setupGraph(nodehighlightcolor, color_of_edges,color_of_nodetext);
+    	p.setAllDangingEdgeBaseColor(color_of_dangling_nodes);
         //PageRankCalculator prc = new PageRankCalculator(g.getAdjacencyMatrix());
         SourceCode src = setSourceCode(sourceCode);
         StringMatrix smat = setupMatrix(700,250, initValue);
@@ -241,6 +242,9 @@ public class PageRank implements Generator {
 				src.highlight(6);
 				lang.nextStep();
 				src.unhighlight(6);
+				
+	/*			
+<<<<<<< HEAD
 				for(int dangCount = 0; dangCount < adjacencymatrix.length; dangCount++){
 					if(isDanglingNode(dangCount)){
 						fV = "PR( " + g.getNodeLabel(to)+ ") = PR(" + g.getNodeLabel(to) + ") + d * 1/|G| ";
@@ -263,6 +267,34 @@ public class PageRank implements Generator {
 						p.unhighlightNode(dangCount);
 						smat.unhighlightElem(0, dangCount, null, null);
 					}
+=======
+*/
+				
+				for(Integer dangNode : p.getAllDanglingNodeNrs())
+				{
+					src.highlight(7);
+					smat.highlightElem(0, dangNode, null, null);
+					fV = "PR( " + g.getNodeLabel(to)+ ") = PR(" + g.getNodeLabel(to) + ") + d * 1/|G| ";
+					formulaV.setText(fV, null, null);
+					float tempResult = currentResults[to];
+					currentResults[to] = (float) (currentResults[to] + 0.85f * (predecValues[dangNode]/adjacencymatrix.length));
+					fC = "PR(" + g.getNodeLabel(to) + ") = " + new DecimalFormat("#.#####").format(tempResult) + " +  0.85 * 1/" + g.getSize() + " = " + new DecimalFormat("#.#####").format(currentResults[to]);
+					formulaC.setText(fC, null, null);
+					p.setNodeHighlightColor(dangNode, color_of_dangling_nodes);
+					p.highlightNode(dangNode);
+					p.showEdge(dangNode, to);
+					p.hideEdge(to, dangNode);
+					currentResults[to] = (float) (currentResults[to] + 0.85f * (predecValues[dangNode]/adjacencymatrix.length));
+					p.setNodeSize(to, this.calcNodeSize(currentResults[to], p.getmaxRadius(), p.getminRadius(), g));
+					actMat.put(1, to, new DecimalFormat("#.#####").format(currentResults[to]), null, null);
+					p.setNodeFillColor(to, colorLin(color_for_lowest_PRValue, color_for_highest_PRValue, (float)0.15/g.getSize(), (float)1, currentResults[to]));
+					lang.nextStep();
+					src.unhighlight(7);
+					p.unhighlightNode(dangNode);
+					p.setNodeHighlightColor(dangNode, nodehighlightcolor);
+					p.showEdge(to, dangNode);
+					p.hideEdge(dangNode, to);
+					smat.unhighlightElem(0, dangNode, null, null);
 				}
 				
 				p.unhighlightNode(to);
