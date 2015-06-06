@@ -242,34 +242,7 @@ public class PageRank implements Generator {
 				src.highlight(6);
 				lang.nextStep();
 				src.unhighlight(6);
-				
-	/*			
-<<<<<<< HEAD
-				for(int dangCount = 0; dangCount < adjacencymatrix.length; dangCount++){
-					if(isDanglingNode(dangCount)){
-						fV = "PR( " + g.getNodeLabel(to)+ ") = PR(" + g.getNodeLabel(to) + ") + d * 1/|G| ";
-						formulaV.setText(fV, null, null);
-						float tempResult = currentResults[to];
-						currentResults[to] = (float) (currentResults[to] + 0.85f * (predecValues[dangCount]/adjacencymatrix.length));
-						fC = "PR(" + g.getNodeLabel(to) + ") = " + new DecimalFormat("#.#####").format(tempResult) + " +  0.85 * 1/" + g.getSize() + " = " + new DecimalFormat("#.#####").format(currentResults[to]);
-						formulaC.setText(fC, null, null);
-						src.highlight(7);
-						smat.highlightElem(0, dangCount, null, null);
-						p.highlightNode(dangCount);
-						
-						p.setNodeSize(to, this.calcNodeSize(currentResults[to], p.getmaxRadius(), p.getminRadius(), g));
-						//actualValueText.setText("1/|G| : " + new DecimalFormat("#.#####").format((1.0f/adjacencymatrix.length)), null, null);
-						actMat.put(1, to, new DecimalFormat("#.#####").format(currentResults[to]), null, null);
-						p.setNodeFillColor(to, colorLin(color_for_lowest_PRValue, color_for_highest_PRValue, (float)0.15/g.getSize(), (float)1, currentResults[to]));
-						lang.nextStep();
-						//actualValueText.setText("", null, null);
-						src.unhighlight(7);
-						p.unhighlightNode(dangCount);
-						smat.unhighlightElem(0, dangCount, null, null);
-					}
-=======
-*/
-				
+	
 				for(Integer dangNode : p.getAllDanglingNodeNrs())
 				{
 					src.highlight(7);
@@ -284,7 +257,6 @@ public class PageRank implements Generator {
 					p.highlightNode(dangNode);
 					p.showEdge(dangNode, to);
 					p.hideEdge(to, dangNode);
-					currentResults[to] = (float) (currentResults[to] + 0.85f * (predecValues[dangNode]/adjacencymatrix.length));
 					p.setNodeSize(to, this.calcNodeSize(currentResults[to], p.getmaxRadius(), p.getminRadius(), g));
 					actMat.put(1, to, new DecimalFormat("#.#####").format(currentResults[to]), null, null);
 					p.setNodeFillColor(to, colorLin(color_for_lowest_PRValue, color_for_highest_PRValue, (float)0.15/g.getSize(), (float)1, currentResults[to]));
@@ -317,70 +289,7 @@ public class PageRank implements Generator {
         System.out.println(lang.toString());
 		return lang.toString();
     }
-        /*
-        while(prc.calcNextStep() > minDelta)
-        {
-        	
-        	++i;
-        	
-        	System.out.println("iteration "+i+":\n"+prc.toString()+"\n");
-        	this.visualizeIteration(prc, p, src, smat);
-        	//smat.put(0, 0, "Test", null, null);
-        	for(int count = 0; count < g.getSize(); count++){
-        		smat.put(1, count, new DecimalFormat("#.#####").format(prc.getCurrentValues()[count]), null, null);
-        	}
-        	String newCountText = "Die PageRank-Werte nach Iteration " + i + ":";
-        	cText.setText(newCountText, null, null);
-        	lang.nextStep();
-
-        	/*
-        	for(int to = 0; to< prc.getCurrentValues().length; to++){
-        		highlightedEdges = false;
-        		g.highlightNode(to, null, null);
-        		lang.nextStep();
-        		for(int from = 0; from < prc.getCurrentValues().length; from++){
-        			if(adjacencyMatrix[from][to]==1){
-        				g.highlightEdge(from, to, null, null);
-        				lang.nextStep();
-        				//g.unhighlightEdge(from, to, null, null);
-        				highlightedEdges = true;
-        			}
-        			
-        		}
-        		g.unhighlightNode(to, null, null);
-        		//lang.nextStep();
-        		
-        		if(highlightedEdges)
-        		{
-        			for(int from = 0; from < prc.getCurrentValues().length; from++){
-            			if(adjacencyMatrix[from][to]==1){
-            				g.unhighlightEdge(from, to, null, null);	
-            			}
-            		}
-            		lang.nextStep();
-        		}
-        		g.unhighlightNode(to, null, null);
-        		
-        		
-        		//g.getProperties().set(AnimationPropertiesKeys.FILL_PROPERTY, colorLin(Color.YELLOW,Color.RED,prc.getCurrentValues()[to]));
-
-        		g.getProperties().set(AnimationPropertiesKeys.FILL_PROPERTY,new Color(0.0f,0.0f,0.0f,0.5f));
-        		lang.addGraph(g, null, gProps);
-        		g.unhighlightNode(to, null, null);
-        		System.out.println("");
-        		//lang.nextStep();
-        		
-        	}
-        	
-        	
-        }
         
-
-        System.out.println(lang.toString());
-        return lang.toString();
-    }
-    */
-
     
     private int calcNodeSize(float prValue, int max, int min, Graph g){
     	float minPRValue = (float)0.15/(float)(g.getAdjacencyMatrix().length);

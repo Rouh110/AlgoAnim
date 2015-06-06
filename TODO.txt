@@ -3,4 +3,5 @@ Page rank
 --	zum Schluss: Durchlaufende Iterationen, Endergebniss, Zusatzinfortmationen (z.B.: google 	Matrix)
 --	am Anfang: Anzeigen und Eklärung der Formel. Weitere Informationen zu den werten (damping factor, dangling nodes etc).
 - Anzeigen ab welchem wert abgebrochen wird.
+- Anzeigen des delta werts in der ersten Iteration soll ungülitg sein.
 - Quiz-Abfragen
