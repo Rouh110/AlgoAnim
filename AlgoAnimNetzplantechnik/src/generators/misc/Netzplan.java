@@ -8,6 +8,8 @@ package generators.misc;
 import generators.framework.Generator;
 import generators.framework.GeneratorType;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 import algoanim.primitives.Graph;
@@ -29,7 +31,32 @@ public class Netzplan implements Generator {
 
     public String generate(AnimationPropertiesContainer props,Hashtable<String, Object> primitives) {
         graph = (Graph)primitives.get("graph");
-        lang.addGraph(graph);
+        //lang.addGraph(graph);
+        NetzplanGraph n = new NetzplanGraph();
+        List<Integer> nodesToProcess = n.getEndNodes();
+        for(Integer currentNode: nodesToProcess){
+        	
+        }
+        /*
+        List<Integer> nodesToProcess = n.getStartNodes();
+        for(Integer currentNode: nodesToProcess){
+        	n.setEarliestEndTime(currentNode, Integer.MAX_VALUE);
+        	n.setEarliestStartTime(currentNode, Integer.MAX_VALUE);
+        	List<Integer> currentPredecessors = n.getPredecessor(currentNode);
+        	if(currentPredecessors.isEmpty()){
+        		n.setEarliestStartTime(currentNode, 0);
+        		n.setLatestEndTime(currentNode, n.getProcessTime(currentNode));
+        	}else{
+        		for(Integer actualPredecessor: currentPredecessors){
+        			if(n.getEarliestEndTime(actualPredecessor) < n.getEarliestStartTime(currentNode)){
+        				n.setEarliestStartTime(currentNode, n.getEarliestEndTime(actualPredecessor));
+        				n.setEarliestEndTime(currentNode, n.getEarliestStartTime(currentNode) + n.getProcessTime(currentNode));
+        			}
+        		}
+        	}
+        	
+        	
+        }*/
         
         
         
