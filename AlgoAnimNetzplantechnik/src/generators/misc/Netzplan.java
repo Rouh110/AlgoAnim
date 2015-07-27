@@ -89,7 +89,7 @@ public class Netzplan implements Generator {
     
 
 	private void calculateFirstDirection(Integer node){
-    	List<Integer> predecessors = n.getPredecessor(node);
+    	List<Integer> predecessors = n.getPredecessors(node);
     	if(n.isStartNode(node)){
     		n.setEarliestStartTime(node, 0);
     		n.setEarliestEndTime(node, n.getProcessTime(node));
@@ -117,12 +117,12 @@ public class Netzplan implements Generator {
     	}
     	
     	for(Integer currentSuccessor: successors){
-    		if(n.hasValidEntry(currentSuccessor, NetzplanGraph.CellID.LatesteEndTime) == false){
+    		if(n.hasValidEntry(currentSuccessor, NetzplanGraph.CellID.LatestEndTime) == false){
     			calculateSecondDirection(currentSuccessor);
     		}
     	}
     	for(Integer currentSuccessor: successors){
-    		if(n.hasValidEntry(node, NetzplanGraph.CellID.LatesteEndTime)==false ||n.getLatestStartTime(currentSuccessor)< n.getLatestEndTime(node)){
+    		if(n.hasValidEntry(node, NetzplanGraph.CellID.LatestEndTime)==false ||n.getLatestStartTime(currentSuccessor)< n.getLatestEndTime(node)){
     			n.setLatestStartTime(node, n.getLatestStartTime(currentSuccessor)- n.getProcessTime(node));
     			n.setLatestStartTime(node, n.getLatestStartTime(node)+ n.getProcessTime(node));
     		}

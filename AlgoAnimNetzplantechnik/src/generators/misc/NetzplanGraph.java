@@ -11,7 +11,7 @@ import algoanim.util.Coordinates;
 
 public class NetzplanGraph {
 	
-	public enum CellID{EarliestStartTime, LatestStartTime, EarliestEndTime, LatesteEndTime, ProcessTime, Name};
+	public enum CellID{EarliestStartTime, LatestStartTime, EarliestEndTime, LatestEndTime, ProcessTime, Name};
 	
 	HashMap<Integer, NetzplanNode> nodes = new HashMap<Integer, NetzplanNode>();
 	
@@ -104,7 +104,7 @@ public class NetzplanGraph {
 	
 	public void setLatestEndTime(int id, int time)
 	{
-		this.setEntry(id, CellID.LatesteEndTime, String.valueOf(time));
+		this.setEntry(id, CellID.LatestEndTime, String.valueOf(time));
 	}
 	
 	public int getLatestEndTime(int id)
@@ -112,7 +112,7 @@ public class NetzplanGraph {
 		int result = -1;
 		try
 		{
-			result = Integer.valueOf(this.getEntry(id, CellID.LatesteEndTime));
+			result = Integer.valueOf(this.getEntry(id, CellID.LatestEndTime));
 		}catch(NumberFormatException e)
 		{
 			result = -1;
@@ -139,7 +139,7 @@ public class NetzplanGraph {
 		return new LinkedList<Integer>();
 	}
 	
-	public List<Integer> getPredecessor(int id)
+	public List<Integer> getPredecessors(int id)
 	{
 		if(hasNode(id))
 		{
@@ -216,7 +216,7 @@ public class NetzplanGraph {
 			case EarliestEndTime:
 				node.values.highlightCell(eetRow, eetColumn, null, null);
 				break;
-			case LatesteEndTime:
+			case LatestEndTime:
 				node.values.highlightCell(letRow, letColumn, null, null);
 				break;
 			case ProcessTime:
@@ -246,7 +246,7 @@ public class NetzplanGraph {
 			case EarliestEndTime:
 				node.values.unhighlightCell(eetRow, eetColumn, null, null);
 				break;
-			case LatesteEndTime:
+			case LatestEndTime:
 				node.values.unhighlightCell(letRow, letColumn, null, null);
 				break;
 			case ProcessTime:
@@ -329,7 +329,7 @@ public class NetzplanGraph {
 				return node.values.getElement(lstRow, lstColumn);
 			case EarliestEndTime:
 				return node.values.getElement(eetRow, eetColumn);
-			case LatesteEndTime:
+			case LatestEndTime:
 				return node.values.getElement(letRow, letColumn);
 			case ProcessTime:
 				return node.values.getElement(ptRow, ptColumn);
@@ -359,7 +359,7 @@ public class NetzplanGraph {
 			case EarliestEndTime:
 				node.values.put(eetRow, eetColumn, entry, null, null);
 				return true;
-			case LatesteEndTime:
+			case LatestEndTime:
 				node.values.put(letRow, letColumn, entry, null, null);
 				return true;
 			case ProcessTime:
