@@ -1,11 +1,16 @@
 package generators.misc;
 
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+
+import algoanim.primitives.StringMatrix;
 
 public class NetzplanGraph {
 	
 	public enum CellID{EarliestStartTime, LatestStartTime, EarliestEndTime, LatesteEndTime, ProcessTime, Name};
+	
+	HashMap<Integer, NetzplanNode> nodes = new HashMap<Integer, NetzplanNode>();
 	
 	public void setProcessTime(int id, int time)
 	{
@@ -128,6 +133,51 @@ public class NetzplanGraph {
 	public void unHighlightEdge(int from, int to)
 	{
 		//TODO: implement
+	}
+	
+	public boolean hasValidEntry(int id, CellID cell)
+	{
+		return false;
+		//TODO: implement
+	}
+	
+	private NetzplanEdge getNetzplanEdge(int from, int to)
+	{
+		NetzplanNode node = getNetzplanNode(from);
+		
+		if(node != null)
+		{
+			if(node.edges.containsKey(to))
+			{
+				return node.edges.get(to);
+			}
+		}
+		
+		return null;
+	}
+	
+	private NetzplanNode getNetzplanNode(int id)
+	{
+		if(nodes.containsKey(id))
+		{
+			return nodes.get(id);
+		}else
+		{
+			return null;
+		}
+	}
+	
+	protected class NetzplanNode
+	{
+		List<Integer> predecessors = new LinkedList<Integer>();
+		List<Integer> sucsessors = new LinkedList<Integer>();	
+		HashMap<Integer, NetzplanEdge> edges = new HashMap<Integer, NetzplanEdge>();
+		StringMatrix values = null;
+	}
+	
+	protected class NetzplanEdge
+	{
+		
 	}
 
 }
