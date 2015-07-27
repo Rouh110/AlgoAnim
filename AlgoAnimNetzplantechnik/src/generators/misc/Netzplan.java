@@ -23,6 +23,7 @@ import algoanim.animalscript.AnimalScript;
 public class Netzplan implements Generator {
     private Language lang;
     private Graph graph;
+    NetzplanGraph n;
 
     public void init(){
         lang = new AnimalScript("Netzplantechnik", "Jan Ulrich Schmitt & Dennis Juckwer", 800, 600);
@@ -32,10 +33,31 @@ public class Netzplan implements Generator {
     public String generate(AnimationPropertiesContainer props,Hashtable<String, Object> primitives) {
         graph = (Graph)primitives.get("graph");
         //lang.addGraph(graph);
-        NetzplanGraph n = new NetzplanGraph();
+        n = new NetzplanGraph();
         List<Integer> nodesToProcess = n.getEndNodes();
         for(Integer currentNode: nodesToProcess){
+        	/*
+        	n.setEarliestStartTime(currentNode, Integer.MAX_VALUE);
+        	n.setEarliestEndTime(currentNode, Integer.MAX_VALUE);
+        	List<Integer> predecessors = n.getPredecessor(currentNode);
+        	for(Integer currentPredecessor: predecessors){
+        		if(n.hasValidEntry(currentPredecessor, NetzplanGraph.CellID.EarliestEndTime)==false){
+        			calculateValue(currentPredecessor);
+        		}
+        	}
+        	for(Integer currentPredecessor: predecessors){
+        		if(n.getEarliestStartTime(currentPredecessor) < n.getEarliestStartTime(currentNode)){
+        			n.setEarliestStartTime(currentNode, n.getEarliestEndTime(currentPredecessor));
+        			n.setEarliestEndTime(currentNode, n.getEarliestStartTime(currentNode) + n.getProcessTime(currentNode));
+        		}
+        	}*/
+        	this.calculateFirstDirection(currentNode);
         	
+        }
+        
+        nodesToProcess = n.getStartNodes();
+        for(Integer currentNode: nodesToProcess){
+        	this.calculateSecondDirection(currentNode);
         }
         /*
         List<Integer> nodesToProcess = n.getStartNodes();
@@ -63,6 +85,52 @@ public class Netzplan implements Generator {
         
         return lang.toString();
     }
+    
+    
+
+	private void calculateFirstDirection(Integer node){
+    	List<Integer> predecessors = n.getPredecessor(node);
+    	if(n.isStartNode(node)){
+    		n.setEarliestStartTime(node, 0);
+    		n.setEarliestEndTime(node, n.getProcessTime(node));
+    	}
+    	
+    	for(Integer currentPredecessor: predecessors){
+    		if(n.hasValidEntry(currentPredecessor, NetzplanGraph.CellID.EarliestEndTime) == false){
+    			calculateFirstDirection(currentPredecessor);
+    		}
+    	}
+    	for(Integer currentPredecessor: predecessors){
+    		if(n.hasValidEntry(node, NetzplanGraph.CellID.EarliestEndTime)==false ||n.getEarliestEndTime(currentPredecessor)< n.getEarliestStartTime(node)){
+    			n.setEarliestStartTime(node, n.getEarliestEndTime(currentPredecessor));
+    			n.setEarliestEndTime(node, n.getEarliestStartTime(node) + n.getProcessTime(node));
+    		}
+    	}
+    	
+    }
+	
+	private void calculateSecondDirection(Integer node) {
+		List<Integer> successors = n.getSuccessors(node);
+    	if(n.isEndNode(node)){
+    		n.setLatestStartTime(node, n.getEarliestStartTime(node));
+    		n.setLatestEndTime(node, n.getEarliestEndTime(node));
+    	}
+    	
+    	for(Integer currentSuccessor: successors){
+    		if(n.hasValidEntry(currentSuccessor, NetzplanGraph.CellID.LatesteEndTime) == false){
+    			calculateSecondDirection(currentSuccessor);
+    		}
+    	}
+    	for(Integer currentSuccessor: successors){
+    		if(n.hasValidEntry(node, NetzplanGraph.CellID.LatesteEndTime)==false ||n.getLatestStartTime(currentSuccessor)< n.getLatestEndTime(node)){
+    			n.setLatestStartTime(node, n.getLatestStartTime(currentSuccessor)- n.getProcessTime(node));
+    			n.setLatestStartTime(node, n.getLatestStartTime(node)+ n.getProcessTime(node));
+    		}
+    	}
+		
+	}
+    
+    
 
     public String getName() {
         return "Netzplantechnik";
