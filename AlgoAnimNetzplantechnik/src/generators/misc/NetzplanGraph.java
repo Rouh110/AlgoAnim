@@ -5,6 +5,7 @@ import java.util.List;
 
 public class NetzplanGraph {
 	
+	public enum CellID{EarliestStartTime, LatestStartTime, EarliestEndTime, LatesteEndTime, ProcessTime, Name};
 	
 	public void setProcessTime(int id, int time)
 	{
@@ -66,9 +67,9 @@ public class NetzplanGraph {
 		//TODO: implement
 	}
 	
-	public int getName(int id, String name)
+	public String getName(int id, String name)
 	{
-		return -1;
+		return "";
 		//TODO: implement
 	}
 	
@@ -107,5 +108,26 @@ public class NetzplanGraph {
 		return new LinkedList<Integer>();
 		//TODO: implement
 	} 
+	
+	
+	public void highlightCell(int id, CellID cell)
+	{
+		//TODO: implement
+	}
+	
+	public void unhighlightCell(int id, CellID cell)
+	{
+		//TODO: implement
+	}
+	
+	public void highlightEdge(int from, int to)
+	{
+		//TODO: implement
+	}
+	
+	public void unHighlightEdge(int from, int to)
+	{
+		//TODO: implement
+	}
 
 }
