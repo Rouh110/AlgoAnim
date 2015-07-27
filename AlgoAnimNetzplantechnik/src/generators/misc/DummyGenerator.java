@@ -21,6 +21,7 @@ public class DummyGenerator implements GeneratorBundle {
   public Vector<Generator> getGenerators() {
     Vector<Generator> generators = new Vector<Generator>(35, 15);
     
+    generators.add(new Netzplan());
     generators.add(new CandidateElimination());
     generators.add(new ClockPageReplacement());
     generators.add(new OPTICS());
