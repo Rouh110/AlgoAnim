@@ -495,7 +495,7 @@ public class PageRank implements Generator {
     	
     	AnimalStringMatrixGenerator matrixGenerator = new AnimalStringMatrixGenerator(
 				(AnimalScript) lang);
-    	
+    	 
         //String[][] strValues = {{"Hallo", "und",},{"Ciao","!"}};
     	String[][] strValues = new String[2][g.getSize()];
     	//String[][] strValues = new String[2][2];
