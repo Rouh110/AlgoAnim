@@ -31,6 +31,9 @@ public class Netzplan implements Generator {
         graph = (Graph)primitives.get("graph");
         lang.addGraph(graph);
         
+        
+        
+        
         return lang.toString();
     }
 
