@@ -7,22 +7,29 @@ package generators.misc;
 
 import generators.framework.Generator;
 import generators.framework.GeneratorType;
+
 import java.util.Locale;
+
+import algoanim.primitives.Graph;
 import algoanim.primitives.generators.Language;
+
 import java.util.Hashtable;
+
 import generators.framework.properties.AnimationPropertiesContainer;
 import algoanim.animalscript.AnimalScript;
 
 public class Netzplan implements Generator {
     private Language lang;
-    private String graph;
+    private Graph graph;
 
     public void init(){
         lang = new AnimalScript("Netzplantechnik", "Jan Ulrich Schmitt & Dennis Juckwer", 800, 600);
+        lang.setStepMode(true);
     }
 
     public String generate(AnimationPropertiesContainer props,Hashtable<String, Object> primitives) {
-        graph = (String)primitives.get("graph");
+        graph = (Graph)primitives.get("graph");
+        lang.addGraph(graph);
         
         
         
