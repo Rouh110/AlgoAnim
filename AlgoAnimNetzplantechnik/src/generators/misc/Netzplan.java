@@ -24,6 +24,9 @@ public class Netzplan implements Generator {
     public String generate(AnimationPropertiesContainer props,Hashtable<String, Object> primitives) {
         graph = (String)primitives.get("graph");
         
+        
+        
+        
         return lang.toString();
     }
 
