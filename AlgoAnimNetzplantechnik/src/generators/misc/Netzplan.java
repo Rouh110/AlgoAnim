@@ -9,6 +9,8 @@ import generators.framework.Generator;
 import generators.framework.GeneratorType;
 
 import java.util.ArrayList;
+import java.util.Currency;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 
@@ -66,6 +68,10 @@ public class Netzplan implements Generator {
         for(Integer currentNode: nodesToProcess){
         	this.calculateSecondDirection(currentNode);
         }
+        for(Integer currentNode:n.getStartNodes()){
+        	this.drawCriticalPath2(currentNode);
+        }
+        
         /*
         List<Integer> nodesToProcess = n.getStartNodes();
         for(Integer currentNode: nodesToProcess){
@@ -98,8 +104,11 @@ public class Netzplan implements Generator {
 	private void calculateFirstDirection(Integer node){
     	List<Integer> predecessors = n.getPredecessors(node);
     	if(n.isStartNode(node)){
+    		lang.nextStep();
     		n.setEarliestStartTime(node, 0);
+    		lang.nextStep();
     		n.setEarliestEndTime(node, n.getProcessTime(node));
+    		//lang.nextStep();
     	}
     	
     	for(Integer currentPredecessor: predecessors){
@@ -109,7 +118,9 @@ public class Netzplan implements Generator {
     	}
     	for(Integer currentPredecessor: predecessors){
     		if(n.hasValidEntry(node, NetzplanGraph.CellID.EarliestEndTime)==false ||n.getEarliestEndTime(currentPredecessor) > n.getEarliestStartTime(node)){
+    			lang.nextStep();
     			n.setEarliestStartTime(node, n.getEarliestEndTime(currentPredecessor));
+    			lang.nextStep();
     			n.setEarliestEndTime(node, n.getEarliestStartTime(node) + n.getProcessTime(node));
     		}
     	}
@@ -119,7 +130,9 @@ public class Netzplan implements Generator {
 	private void calculateSecondDirection(Integer node) {
 		List<Integer> successors = n.getSuccessors(node);
     	if(n.isEndNode(node)){
+    		lang.nextStep();
     		n.setLatestStartTime(node, n.getEarliestStartTime(node));
+    		lang.nextStep();
     		n.setLatestEndTime(node, n.getEarliestEndTime(node));
     	}
     	
@@ -131,11 +144,48 @@ public class Netzplan implements Generator {
     	
     	for(Integer currentSuccessor: successors){
     		if(n.hasValidEntry(node, NetzplanGraph.CellID.LatestEndTime)==false || n.getLatestStartTime(currentSuccessor)< n.getLatestEndTime(node)){
+    			lang.nextStep();
     			n.setLatestStartTime(node, n.getLatestStartTime(currentSuccessor)- n.getProcessTime(node));
+    			lang.nextStep();
     			n.setLatestEndTime(node, n.getLatestStartTime(node)+ n.getProcessTime(node));
     		}
     	}
 		
+	}
+	
+	private void drawCriticalPath(){
+		LinkedList<Integer> nodesToProcess = new LinkedList<Integer>();
+		nodesToProcess.addAll(n.getEndNodes());
+		Integer actualNode;
+		while(nodesToProcess.isEmpty()==false){
+			actualNode = nodesToProcess.pop();
+			if(n.getEarliestStartTime(actualNode) == n.getLatestStartTime(actualNode)){
+				for(Integer actualPredecessor: n.getPredecessors(actualNode)){
+					lang.nextStep();
+					n.highlightEdge(actualPredecessor, actualNode);
+					nodesToProcess.add(actualPredecessor);
+				}
+				
+			}
+		}
+	
+	}
+	
+	private boolean drawCriticalPath2(Integer actualNode){
+		LinkedList<Integer> currentSuccessors = new LinkedList<Integer>();
+		currentSuccessors.addAll(n.getSuccessors(actualNode));
+		boolean isCriticalStep = false;
+		for(Integer actualSuccessor: currentSuccessors){
+			if(n.getEarliestStartTime(actualNode) == n.getLatestStartTime(actualNode) && (n.isEndNode(actualSuccessor)||drawCriticalPath2(actualSuccessor) )){
+				//lang.nextStep();
+				n.highlightEdge(actualNode, actualSuccessor);
+				isCriticalStep = true;
+			}
+			
+		}
+				
+		
+		return isCriticalStep;
 	}
     
     
