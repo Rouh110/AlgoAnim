@@ -409,6 +409,7 @@ public class PageRankGraph{
 		}
 	}
 	
+	
 	public void setNodeHighlightColor(int nodeNr, Color newColor)
 	{
 		if(newColor == null)

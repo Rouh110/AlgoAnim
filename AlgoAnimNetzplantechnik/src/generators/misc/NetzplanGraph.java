@@ -308,6 +308,96 @@ public class NetzplanGraph {
 		}
 	}
 	
+	public void setAllNodeHighlightColor(Color color)
+	{
+		for(Integer nodeId : nodes.keySet())
+		{
+			setNodeHighlightColor(nodeId, color);
+		}
+	}
+	
+	public void setNodeHighlightColor(int nodeId, Color color)
+	{
+		if(hasNode(nodeId))
+		{
+			//TODO: implement
+			//nodes.get(nodeId).values.getProperties().set(AnimationPropertiesKeys.CELLHIGHLIGHT_PROPERTY, color);
+			//lang.addLine(line);
+			//nodes.get(nodeId).values.changeColor(AnimationPropertiesKeys.HIGHLIGHTCOLOR_PROPERTY, color, null, null);
+		}
+	}
+	
+	public void setAllNodeBaseColor(Color color)
+	{
+		for(Integer nodeId : nodes.keySet())
+		{
+			setNodeBaseColor(nodeId, color);
+		}
+	}
+	
+	public void setNodeBaseColor(int nodeId, Color color)
+	{
+		if(hasNode(nodeId))
+		{
+			nodes.get(nodeId).values.changeColor(AnimalScript.COLORCHANGE_FILLCOLOR, color, null, null);
+		}
+	}
+	
+	public void setAllEdgeHightlightColor(Color color)
+	{
+		for(Integer from : nodes.keySet())
+		{
+			NetzplanNode node =  nodes.get(from);
+			
+			for(Integer to : node.edges.keySet())
+			{
+				setEdgeHighlightColor(from, to, color);
+			}
+		}
+	}
+	
+	public void setEdgeHighlightColor(int from, int to, Color color)
+	{
+		if(hasEdge(from, to))
+		{
+			NetzplanEdge edge = getNetzplanEdge(from, to);
+			
+			edge.highlightColor = color;
+			if(edge.isHighlighted)
+			{
+				edge.line.changeColor("color", edge.highlightColor, null, null);
+			}
+		}
+	}
+	
+	public void setAllEdgeBaseColor(Color color)
+	{
+		for(Integer from : nodes.keySet())
+		{
+			NetzplanNode node =  nodes.get(from);
+			
+			for(Integer to : node.edges.keySet())
+			{
+				setEdgeBaseColor(from, to, color);
+			}
+		}
+	}
+	
+	public void setEdgeBaseColor(int from, int to, Color color)
+	{
+		if(hasEdge(from, to))
+		{
+			NetzplanEdge edge = getNetzplanEdge(from, to);
+			
+			edge.baseColor = color;
+			if(!edge.isHighlighted)
+			{
+				edge.line.changeColor("color", edge.baseColor, null, null);
+			}
+		}
+	}
+	
+	
 	public boolean hasValidEntry(int id, CellID cell)
 	{
 		
@@ -641,7 +731,6 @@ public class NetzplanGraph {
 	
 	private MatrixProperties createStringTableProperties()
 	{
-
 		
         MatrixProperties matProp = new MatrixProperties();
         matProp.set(AnimationPropertiesKeys.DEPTH_PROPERTY, getNodeDrawDepth());
@@ -650,7 +739,7 @@ public class NetzplanGraph {
         //matProp.set(AnimationPropertiesKeys.FILLED_PROPERTY, true);
         matProp.set(AnimationPropertiesKeys.CELL_HEIGHT_PROPERTY, cellHeight);
         matProp.set(AnimationPropertiesKeys.CELL_WIDTH_PROPERTY, cellWidth);
-        
+
         return matProp;
 	}
 	

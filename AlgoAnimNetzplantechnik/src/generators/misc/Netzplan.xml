@@ -24,7 +24,6 @@ edge B C weight 3
 edge B D weight 3
 edge C D weight 5
 
-
 </Graph></value>
 		</Primitive>
 	</Folder>

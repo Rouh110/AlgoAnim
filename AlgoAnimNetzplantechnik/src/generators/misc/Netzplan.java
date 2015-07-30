@@ -8,6 +8,7 @@ package generators.misc;
 import generators.framework.Generator;
 import generators.framework.GeneratorType;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -88,7 +89,11 @@ public class Netzplan implements Generator {
         }*/
         
         
-        
+        n.setAllNodeBaseColor(Color.blue);
+        n.setAllEdgeBaseColor(Color.blue);
+        n.highlightCell(0, NetzplanGraph.CellID.Name);
+        n.setNodeHighlightColor(1,Color.red);
+        n.highlightCell(1, NetzplanGraph.CellID.Name);
         
         return lang.toString();
     }

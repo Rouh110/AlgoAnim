@@ -10,5 +10,3 @@ Page rank
 Netzplantechnik
 - setzen von Farben
 - Wie soll der graph property die process time der end nodes setzten?
-- bug: Anscheinend wird nicht die längste zeit ausgesucht.
-- bug: das miximal start und end zeiten setzen scheint nicht richtig zu funktionieren. 
