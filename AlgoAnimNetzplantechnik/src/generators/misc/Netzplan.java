@@ -34,6 +34,13 @@ public class Netzplan implements Generator {
         graph = (Graph)primitives.get("graph");
         //lang.addGraph(graph);
         n = new NetzplanGraph((AnimalScript)lang, graph);
+        
+        if(n.hasLoops())
+        {
+        	//TODO: Message about invalid graph
+        	return lang.toString();
+        }
+        
         List<Integer> nodesToProcess = n.getEndNodes();
         for(Integer currentNode: nodesToProcess){
         	/*
@@ -101,7 +108,7 @@ public class Netzplan implements Generator {
     		}
     	}
     	for(Integer currentPredecessor: predecessors){
-    		if(n.hasValidEntry(node, NetzplanGraph.CellID.EarliestEndTime)==false ||n.getEarliestEndTime(currentPredecessor)< n.getEarliestStartTime(node)){
+    		if(n.hasValidEntry(node, NetzplanGraph.CellID.EarliestEndTime)==false ||n.getEarliestEndTime(currentPredecessor) > n.getEarliestStartTime(node)){
     			n.setEarliestStartTime(node, n.getEarliestEndTime(currentPredecessor));
     			n.setEarliestEndTime(node, n.getEarliestStartTime(node) + n.getProcessTime(node));
     		}
@@ -121,10 +128,11 @@ public class Netzplan implements Generator {
     			calculateSecondDirection(currentSuccessor);
     		}
     	}
+    	
     	for(Integer currentSuccessor: successors){
-    		if(n.hasValidEntry(node, NetzplanGraph.CellID.LatestEndTime)==false ||n.getLatestStartTime(currentSuccessor)< n.getLatestEndTime(node)){
+    		if(n.hasValidEntry(node, NetzplanGraph.CellID.LatestEndTime)==false || n.getLatestStartTime(currentSuccessor)< n.getLatestEndTime(node)){
     			n.setLatestStartTime(node, n.getLatestStartTime(currentSuccessor)- n.getProcessTime(node));
-    			n.setLatestStartTime(node, n.getLatestStartTime(node)+ n.getProcessTime(node));
+    			n.setLatestEndTime(node, n.getLatestStartTime(node)+ n.getProcessTime(node));
     		}
     	}
 		

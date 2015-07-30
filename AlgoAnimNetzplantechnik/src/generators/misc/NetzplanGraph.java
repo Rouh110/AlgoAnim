@@ -337,6 +337,57 @@ public class NetzplanGraph {
 		return false;
 	}
 	
+	public boolean hasLoops()
+	{
+		if(getStartNodes().isEmpty() || getEndNodes().isEmpty())
+		{
+			return true;
+		}
+		
+		LinkedList<Integer> visitedNodes = new LinkedList<Integer>();
+		LinkedList<Integer> state = new LinkedList<Integer>();
+		int currentId;
+		
+		for(Integer nodeId : getStartNodes())
+		{
+			currentId = nodeId;
+			state.push(0);
+			visitedNodes.push(nodeId);
+			
+			while(!state.isEmpty())
+			{
+				if(state.getLast() < getSuccessors(currentId).size())
+				{
+					
+					currentId = getSuccessors(currentId).get(state.getLast());
+					
+					if(visitedNodes.contains(currentId))
+					{
+						return true;
+					}else
+					{
+						visitedNodes.push(currentId);
+						state.push(currentId);
+					}
+					
+				}else
+				{
+					state.removeLast();
+					
+					if(!state.isEmpty())
+					{
+						state.push(state.removeLast()+1);
+						visitedNodes.removeLast();
+						currentId = visitedNodes.getLast();
+					}
+				}
+			}
+			
+		}
+		
+		return false;
+	}
+	
 	private String getEntry(int id, CellID cell)
 	{
 		NetzplanNode node = getNetzplanNode(id);
