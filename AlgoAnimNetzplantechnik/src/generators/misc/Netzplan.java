@@ -94,13 +94,6 @@ public class Netzplan implements Generator {
         	
         }*/
         
-        
-        n.setAllNodeBaseColor(Color.blue);
-        n.setAllEdgeBaseColor(Color.blue);
-        n.highlightCell(0, NetzplanGraph.CellID.Name);
-        n.setNodeHighlightColor(1,Color.red);
-        n.highlightCell(1, NetzplanGraph.CellID.Name);
-        
         return lang.toString();
     }
     
