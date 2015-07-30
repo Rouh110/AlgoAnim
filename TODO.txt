@@ -5,3 +5,10 @@ Page rank
 - Anzeigen ab welchem wert abgebrochen wird.
 - Anzeigen des delta werts in der ersten Iteration soll ungülitg sein.
 - Quiz-Abfragen
+
+
+Netzplantechnik
+- setzen von Farben
+- Wie soll der graph property die process time der end nodes setzten?
+- bug: Anscheinend wird nicht die längste zeit ausgesucht.
+- bug: das miximal start und end zeiten setzen scheint nicht richtig zu funktionieren. 

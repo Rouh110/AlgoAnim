@@ -5,9 +5,16 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 
+import algoanim.animalscript.AnimalScript;
+import algoanim.animalscript.AnimalStringMatrixGenerator;
+import algoanim.primitives.Graph;
 import algoanim.primitives.Polyline;
 import algoanim.primitives.StringMatrix;
+import algoanim.properties.AnimationPropertiesKeys;
+import algoanim.properties.MatrixProperties;
+import algoanim.properties.PolylineProperties;
 import algoanim.util.Coordinates;
+import algoanim.util.Node;
 
 public class NetzplanGraph {
 	
@@ -15,7 +22,12 @@ public class NetzplanGraph {
 	
 	HashMap<Integer, NetzplanNode> nodes = new HashMap<Integer, NetzplanNode>();
 	
+	AnimalScript lang;
+	
 	String invalidChar = "-";
+	
+	int cellWidth = 50;
+	int cellHeight = 20;
 	
 	int estColumn = 1;
 	int estRow = 0;
@@ -29,6 +41,16 @@ public class NetzplanGraph {
 	int ptRow = 1;
 	int nameColumn = 0;
 	int nameRow = 0;
+	
+	int drawDeph = 3;
+	int edgeDrawDepth = 0;
+	int nodeDrawDepth = 1;
+	
+	public NetzplanGraph(AnimalScript lang, Graph graph)
+	{
+		this.lang = lang;
+		init(graph);
+	}
 	
 	public void setProcessTime(int id, int time)
 	{
@@ -402,8 +424,221 @@ public class NetzplanGraph {
 		}
 	}
 	
+	
+	
+	
+	private void init(Graph graph)
+	{
+		// init cration of all nodes
+		for(int i = 0; i < graph.getSize(); i++)
+		{
+			NetzplanNode node = new NetzplanNode();
+
+			graph.getNodeForIndex(i);
+			node.values = createStringTable(((Coordinates)graph.getNodeForIndex(i)).getX(), ((Coordinates)graph.getNodeForIndex(i)).getY());
+			node.id = i;
+			nodes.put(i, node);
+		}
+		
+		//create all edges
+		int[][] adjacencyMatrix = graph.getAdjacencyMatrix();
+		for(int to = 0; to < graph.getSize(); to++)
+		{
+			for(int from = 0; from < graph.getSize(); from++)
+			{
+				if(adjacencyMatrix[from][to] != 0)
+				{
+					NetzplanEdge edge = new NetzplanEdge();
+					
+					nodes.get(from).sucsessors.add(to);
+					nodes.get(to).predecessors.add(from);
+					
+					Coordinates lineNodes[] = createEdgeCoordinates(nodes.get(from), nodes.get(to));
+					edge.line = createLine(lineNodes);			
+					edge.from = lineNodes[0];
+					edge.to = lineNodes[1];
+					
+					nodes.get(from).edges.put(to,edge);
+				}
+			}
+		}
+		
+		// set starting values
+		for(int i = 0; i < graph.getSize(); i++)
+		{
+			this.setName(i, graph.getNodeLabel(i));
+			// TODO: how to set process time of end node ???
+			if(!nodes.get(i).sucsessors.isEmpty())
+			{
+				this.setProcessTime(i, graph.getEdgeWeight(i, nodes.get(i).sucsessors.get(0)));
+			}else
+			{
+				this.setProcessTime(i,1);
+			}
+			
+		}
+	}
+	
+	private Coordinates[] createEdgeCoordinates(NetzplanNode from, NetzplanNode to)
+	{
+		
+		int additionalWidth = 8;
+		int additionalHeight = 8;
+		Coordinates fromUpperLeft = (Coordinates)from.values.getUpperLeft();
+		Coordinates fromDownRight = new Coordinates(fromUpperLeft.getX()+(from.values.getNrCols()*(cellWidth+additionalWidth)),
+				fromUpperLeft.getY()+(from.values.getNrRows()*(cellHeight+additionalHeight)));
+		
+		Coordinates toUpperLeft = (Coordinates)to.values.getUpperLeft();
+		Coordinates toDownRight = new Coordinates(toUpperLeft.getX()+(to.values.getNrCols()*(cellWidth+additionalWidth)),
+				toUpperLeft.getY()+(to.values.getNrRows()*(cellHeight+additionalHeight)));
+		
+		float fromCenterX = (float)(fromUpperLeft.getX()+fromDownRight.getX())/2f;
+		float fromCenterY = (float)(fromUpperLeft.getY()+fromDownRight.getY())/2f;
+		
+		float toCenterX = (float)(toUpperLeft.getX()+toDownRight.getX())/2f;
+		float toCenterY = (float)(toUpperLeft.getY()+toDownRight.getY())/2f;
+		
+		Coordinates pointA = createLineCoordinate(fromUpperLeft.getX(), fromUpperLeft.getY(), fromDownRight.getX(), fromDownRight.getY(),
+				toCenterX-fromCenterX, toCenterY - fromCenterY);
+		
+		Coordinates pointB = createLineCoordinate(toUpperLeft.getX(), toUpperLeft.getY(), toDownRight.getX(), toDownRight.getY(),
+				fromCenterX-toCenterX, fromCenterY - toCenterY);
+		
+		
+		Coordinates result[] = {pointA, pointB};
+		
+		System.out.println("LineCoordiate creation:\npointA: "+ pointA.getX()+" ; " +pointA.getY() +"\n"+pointB.getX() +" ; "+ pointB.getY());
+		return result;
+	}
+	
+	private Coordinates createLineCoordinate(float minX, float minY, float maxX, float maxY, float dirX, float dirY)
+	{
+		float centerX = (float)(minX+maxX)/2f;
+		float centerY = (float)(minY+maxY)/2f;
+		float lminX = minX-centerX;
+		float lminY = minY-centerY;
+		float lmaxX = maxX-centerX;
+		float lmaxY = maxY-centerY;
+		
+		System.out.println("dirX: "+dirX);
+		System.out.println("dirY: "+dirY);
+		System.out.println("CenterX: "+centerX);
+		System.out.println("CenterY: "+centerY);
+		System.out.println("lminX: "+lminX);
+		System.out.println("lminY: "+lminY);
+		System.out.println("lmaxX: "+lmaxX);
+		System.out.println("lmaxY: "+lmaxY);
+		
+		float nearestX = 0;
+		float nearestY = 0;
+		if(dirX < 0)
+			nearestX = lminX;
+		else
+			nearestX = lmaxX;
+		
+		if(dirY < 0)
+			nearestY = lminY;
+		else
+			nearestY = lmaxY;
+		
+		System.out.println("nearesX: "+ nearestX);
+		System.out.println("nearesY: "+ nearestY);
+		
+		float x;
+		float y;
+		
+		if(dirX == 0 || Math.abs(dirY/dirX) > Math.abs(nearestY/nearestX))
+		{
+			//y is bigger than x
+			y = nearestY;
+			x = (nearestY/dirY) * dirX;
+		}else
+		{
+			// x is bigger than y
+			y = (nearestX/dirX) * dirY;
+			x = nearestX;
+		}
+		 y += centerY;
+		 x += centerX;
+		
+		return new Coordinates((int)x, (int)y);
+	}
+	
+	private Polyline createLine(Node lineNodes[])
+	{
+		
+		PolylineProperties pp = createPolyLineProperties(null);
+		return lang.newPolyline(lineNodes, "edge", null, pp);
+	}
+	
+	private StringMatrix createStringTable(int x, int y)
+	{
+		AnimalStringMatrixGenerator matrixGenerator = new AnimalStringMatrixGenerator(lang);
+		MatrixProperties matProp = createStringTableProperties();
+		String[][] strValues = new String[2][3];
+		for(int i = 0; i < 3; i++){
+    		strValues[0][i] = invalidChar;
+    		strValues[1][i] = invalidChar;
+    	}
+		
+		StringMatrix smat = new StringMatrix(matrixGenerator,
+				new Coordinates(x, y), strValues, "Values", null,
+				matProp);
+
+		return smat;
+	}
+	
+	private MatrixProperties createStringTableProperties()
+	{
+
+		
+        MatrixProperties matProp = new MatrixProperties();
+        matProp.set(AnimationPropertiesKeys.DEPTH_PROPERTY, getNodeDrawDepth());
+        
+        matProp.set(AnimationPropertiesKeys.GRID_STYLE_PROPERTY, "table");
+        //matProp.set(AnimationPropertiesKeys.FILLED_PROPERTY, true);
+        matProp.set(AnimationPropertiesKeys.CELL_HEIGHT_PROPERTY, cellHeight);
+        matProp.set(AnimationPropertiesKeys.CELL_WIDTH_PROPERTY, cellWidth);
+        
+        return matProp;
+	}
+	
+	private PolylineProperties createPolyLineProperties(NetzplanEdge edge)
+	{
+		PolylineProperties pp = new PolylineProperties();
+		pp.set(AnimationPropertiesKeys.FWARROW_PROPERTY, true);
+		pp.set(AnimationPropertiesKeys.DEPTH_PROPERTY, getEdgeDrawDepth());
+		
+		if(edge != null)
+		{
+			if(edge.isHighlighted)
+			{
+				pp.set(AnimationPropertiesKeys.COLOR_PROPERTY, edge.highlightColor);
+			}else
+			{
+				pp.set(AnimationPropertiesKeys.COLOR_PROPERTY, edge.baseColor);
+			}
+		}else
+		{
+			pp.set(AnimationPropertiesKeys.COLOR_PROPERTY, Color.BLACK);
+		}
+		
+		return pp;
+	}
+	
+	private int getEdgeDrawDepth()
+	{
+		return this.drawDeph + edgeDrawDepth;
+	}
+	
+	private int getNodeDrawDepth()
+	{
+		return this.drawDeph + nodeDrawDepth;
+	}
+	
 	protected class NetzplanNode
 	{
+		int id;
 		List<Integer> predecessors = new LinkedList<Integer>();
 		List<Integer> sucsessors = new LinkedList<Integer>();	
 		HashMap<Integer, NetzplanEdge> edges = new HashMap<Integer, NetzplanEdge>();

@@ -33,7 +33,7 @@ public class Netzplan implements Generator {
     public String generate(AnimationPropertiesContainer props,Hashtable<String, Object> primitives) {
         graph = (Graph)primitives.get("graph");
         //lang.addGraph(graph);
-        n = new NetzplanGraph();
+        n = new NetzplanGraph((AnimalScript)lang, graph);
         List<Integer> nodesToProcess = n.getEndNodes();
         for(Integer currentNode: nodesToProcess){
         	/*
