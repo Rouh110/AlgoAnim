@@ -9,6 +9,7 @@ import generators.framework.Generator;
 import generators.framework.GeneratorType;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.util.ArrayList;
 import java.util.Currency;
 import java.util.LinkedList;
@@ -16,7 +17,12 @@ import java.util.List;
 import java.util.Locale;
 
 import algoanim.primitives.Graph;
+import algoanim.primitives.SourceCode;
 import algoanim.primitives.generators.Language;
+import algoanim.properties.AnimationPropertiesKeys;
+import algoanim.properties.SourceCodeProperties;
+import algoanim.properties.TextProperties;
+import algoanim.util.Coordinates;
 
 import java.util.Hashtable;
 
@@ -36,6 +42,9 @@ public class Netzplan implements Generator {
     public String generate(AnimationPropertiesContainer props,Hashtable<String, Object> primitives) {
         graph = (Graph)primitives.get("graph");
         //lang.addGraph(graph);
+        setHeader();
+        lang.nextStep();
+        setInformationText();
         n = new NetzplanGraph((AnimalScript)lang, graph);
         
         if(n.hasLoops())
@@ -100,13 +109,15 @@ public class Netzplan implements Generator {
     
 
 	private void calculateFirstDirection(Integer node){
-    	List<Integer> predecessors = n.getPredecessors(node);
-    	if(n.isStartNode(node)){
+		List<Integer> predecessors = null;
+		if(n.isStartNode(node)){
     		lang.nextStep();
     		n.setEarliestStartTime(node, 0);
     		lang.nextStep();
     		n.setEarliestEndTime(node, n.getProcessTime(node));
     		//lang.nextStep();
+    	}else{
+        	predecessors = n.getPredecessors(node);
     	}
     	
     	for(Integer currentPredecessor: predecessors){
@@ -185,6 +196,33 @@ public class Netzplan implements Generator {
 		
 		return isCriticalStep;
 	}
+	
+    private void setHeader(){
+    	TextProperties headerProps = new TextProperties();
+    	headerProps.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF,Font.BOLD, 24));
+    	//headerProps.set(AnimationPropertiesKeys.COLOR_PROPERTY, edgehighlightcolor);
+    	headerProps.set(AnimationPropertiesKeys.COLOR_PROPERTY, Color.BLUE);
+    	lang.newText(new Coordinates(20,30), "Die Netzplantechnik", "header", null, headerProps);
+    }
+	
+	private void setInformationText(){
+    	SourceCodeProperties infoProps = new SourceCodeProperties();
+    	infoProps.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF, Font.BOLD, 20));
+    	SourceCode infoText = lang.newSourceCode(new Coordinates(20,100), "InfoText", null, infoProps);
+    	
+    	infoText.addCodeLine("Bei der Netzplantechnik handelt es sich um eine Methode, welche im Rahmen der Terminplanung bzw. des", "Line0", 0, null);
+    	infoText.addCodeLine("des Projektmanagements zum Einsatz kommt. Das Ziel besteht darin, die Dauer eines Projektes auf Basis ", "Line1", 0, null);
+    	infoText.addCodeLine("der einzelnen Arbeitsvorgaenge und ihrer Beziehungen untereinander zu bestimmen. Die Beziehungen der  ", "Line13", 0, null);
+    	infoText.addCodeLine("einzelnen Vorgange werden dabei in Form eines gerichteten Graphen dargestellt. Dabei ist zu beachten,", "Line2", 0, null);
+    	infoText.addCodeLine("dass die Beziehungen zwischen den Arbeitsvorgaengen eindeutig zu definieren sind, weshalb Zyklen ", "Line3", 0, null);
+    	infoText.addCodeLine("nicht zulaessig sind.", "Line4", 0, null);
+    	infoText.addCodeLine("Neben der minimalen Gesamtdauer, welche das zu untersuchende Projekt im Idealfall benoetigt, werden ", "Line5", 0, null);
+    	infoText.addCodeLine("zudem fuer jeden Arbeitsvorgang sogenannte Puffer ermittelt, welche angeben in welchem Ausmass ", "Line6", 0, null);
+    	infoText.addCodeLine("Verzoegerungen eines Arbeitsvorganges moeglich sind, ohne dass sie sich negativ auf die Gesamtdauer", "Line7", 0, null);
+    	infoText.addCodeLine("des Projektes auszuwirken.", "Line8", 0, null);
+    	lang.nextStep();
+    	infoText.hide();
+    }
     
     
 
