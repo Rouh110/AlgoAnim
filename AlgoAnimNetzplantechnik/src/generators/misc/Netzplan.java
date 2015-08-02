@@ -79,7 +79,7 @@ public class Netzplan implements Generator {
         	this.calculateSecondDirection(currentNode);
         }
         for(Integer currentNode:n.getStartNodes()){
-        	this.drawCriticalPath2(currentNode);
+        	this.drawCriticalPath(currentNode);
         }
         
         /*
@@ -163,30 +163,30 @@ public class Netzplan implements Generator {
 		
 	}
 	
-	private void drawCriticalPath(){
-		LinkedList<Integer> nodesToProcess = new LinkedList<Integer>();
-		nodesToProcess.addAll(n.getEndNodes());
-		Integer actualNode;
-		while(nodesToProcess.isEmpty()==false){
-			actualNode = nodesToProcess.pop();
-			if(n.getEarliestStartTime(actualNode) == n.getLatestStartTime(actualNode)){
-				for(Integer actualPredecessor: n.getPredecessors(actualNode)){
-					lang.nextStep();
-					n.highlightEdge(actualPredecessor, actualNode);
-					nodesToProcess.add(actualPredecessor);
-				}
-				
-			}
-		}
+//	private void drawCriticalPath(){
+//		LinkedList<Integer> nodesToProcess = new LinkedList<Integer>();
+//		nodesToProcess.addAll(n.getEndNodes());
+//		Integer actualNode;
+//		while(nodesToProcess.isEmpty()==false){
+//			actualNode = nodesToProcess.pop();
+//			if(n.getEarliestStartTime(actualNode) == n.getLatestStartTime(actualNode)){
+//				for(Integer actualPredecessor: n.getPredecessors(actualNode)){
+//					lang.nextStep();
+//					n.highlightEdge(actualPredecessor, actualNode);
+//					nodesToProcess.add(actualPredecessor);
+//				}
+//				
+//			}
+//		}
+//	
+//	}
 	
-	}
-	
-	private boolean drawCriticalPath2(Integer actualNode){
+	private boolean drawCriticalPath(Integer actualNode){
 		LinkedList<Integer> currentSuccessors = new LinkedList<Integer>();
 		currentSuccessors.addAll(n.getSuccessors(actualNode));
 		boolean isCriticalStep = false;
 		for(Integer actualSuccessor: currentSuccessors){
-			if(n.getEarliestStartTime(actualNode) == n.getLatestStartTime(actualNode) && (n.isEndNode(actualSuccessor)||drawCriticalPath2(actualSuccessor) )){
+			if(n.getEarliestStartTime(actualNode) == n.getLatestStartTime(actualNode) && (n.isEndNode(actualSuccessor)||drawCriticalPath(actualSuccessor) )){
 				//lang.nextStep();
 				n.highlightEdge(actualNode, actualSuccessor);
 				isCriticalStep = true;
@@ -235,19 +235,34 @@ public class Netzplan implements Generator {
         SourceCode src = lang.newSourceCode(new Coordinates(700, 50), "SourceCode", null, sProb);
         src.addCodeLine("01. For all nodes without outgoing edges do", "Code0", 0, null);
         src.addCodeLine("02.     calculateFirstDirection(node)", "Code1", 0, null);
-        src.addCodeLine("", "Code2", 0, null);
-        src.addCodeLine("03. calculateFirstDirection(node)", "Code3", 0, null);
-        src.addCodeLine("04.     if node has no ingoing edges do", "Code4", 0, null);
-        src.addCodeLine("05.         EarliestStartTime of node = 0", "Code5", 0, null);
-        src.addCodeLine("07.          EarliestEndTime of node = EarliestStartTime of Node + ProcessTime of node", "Code7", 0, null);
-        src.addCodeLine("08.     if node has ingoing edges do:", "Code6", 0, null);
-        src.addCodeLine("09.         for each predecessor of node do", "Code7", 0, null);
-        src.addCodeLine("10.             if EarliestStartTime of Predecessor has not been set do", "Code8", 0, null);
-        src.addCodeLine("11.                 calculateFirstDirection(currentPredecessor)", "Code9", 0, null);
-        src.addCodeLine("12.     for each predecessor of node do:", "Code10", 0, null);
-        src.addCodeLine("13.         if EarliestStartTime of node has not been set or EarliestEndTime of predecssor > EarliestStartTime of node", "Code12", 0, null);
-        src.addCodeLine("14.             EarliestStartTime of node = EarliestEndTime of Predecessor", "Code12", 0, null);
-        src.addCodeLine("15.             EarliestEndTime  of node = EarliestStartTime of node + ProcessTime of node", "Code13", 0, null);
+        src.addCodeLine("03. For all nodes withoud ingoing edges do", "Code2", 0, null);
+        src.addCodeLine("04.     calculateSecendDirection(node)", "Code3", 0, null);
+        src.addCodeLine("", "Code4", 0, null);
+        src.addCodeLine("05. calculateFirstDirection(node)", "Code5", 0, null);
+        src.addCodeLine("06.     if node has no ingoing edges do", "Code6", 0, null);
+        src.addCodeLine("07.         EarliestStartTime of node = 0", "Code7", 0, null);
+        src.addCodeLine("08.          EarliestEndTime of node = EarliestStartTime of Node + ProcessTime of node", "Code8", 0, null);
+        src.addCodeLine("09.     if node has ingoing edges do:", "Code9", 0, null);
+        src.addCodeLine("10.         for each predecessor of node do", "Code10", 0, null);
+        src.addCodeLine("11.             if EarliestStartTime of Predecessor has not been set do", "Code11", 0, null);
+        src.addCodeLine("12.                 calculateFirstDirection(currentPredecessor)", "Code12", 0, null);
+        src.addCodeLine("13.     for each predecessor of node do:", "Code13", 0, null);
+        src.addCodeLine("14.         if EarliestStartTime of node has not been set or EarliestEndTime of predecssor > EarliestStartTime of node", "Code14", 0, null);
+        src.addCodeLine("15.             EarliestStartTime of node = EarliestEndTime of Predecessor", "Code15", 0, null);
+        src.addCodeLine("16.             EarliestEndTime  of node = EarliestStartTime of node + ProcessTime of node", "Code16", 0, null);
+        src.addCodeLine("", "Code17", 0, null);
+        src.addCodeLine("17. calculateSecondDirection(node)", "Code18", 0, null);
+        src.addCodeLine("18.     if node has no outgoing edges do", "Code19", 0, null);
+        src.addCodeLine("19.          LatestStartTime of node = EarliestStartTime of Node", "Code20", 0, null);
+        src.addCodeLine("20.          LatestEndTime of node = EearliestEndTime of Node", "Code21", 0, null);
+        src.addCodeLine("21.     if node has outgoing edges do:", "Code22", 0, null);
+        src.addCodeLine("22.         for each successor of node do", "Code23", 0, null);
+        src.addCodeLine("23.             if LatestStartTime of Successor has not been set do", "Code24", 0, null);
+        src.addCodeLine("24.                 calculateSecondDirection(currentSuccessor)", "Code25", 0, null);
+        src.addCodeLine("25.     for each successor of node do:", "Code26", 0, null);
+        src.addCodeLine("26.         if LatestStartTime of node has not been set or LatestStartTime of successor < LatestEndTime of node", "Code27", 0, null);
+        src.addCodeLine("27.             LatestStartTime of node = LatestStartTime of Successor - ProcessTime of node", "Code28", 0, null);
+        src.addCodeLine("28.             LatestEndTime of node = LatestStartTime of node + ProcessTime of node", "Code29", 0, null);
         src.highlight(0);
         return src;
     }
