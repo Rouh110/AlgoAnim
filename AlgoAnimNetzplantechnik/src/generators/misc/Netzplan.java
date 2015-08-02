@@ -43,8 +43,8 @@ public class Netzplan implements Generator {
         graph = (Graph)primitives.get("graph");
         //lang.addGraph(graph);
         setHeader();
-        lang.nextStep();
         setInformationText();
+        this.setSourceCode();
         n = new NetzplanGraph((AnimalScript)lang, graph);
         
         if(n.hasLoops())
@@ -109,7 +109,7 @@ public class Netzplan implements Generator {
     
 
 	private void calculateFirstDirection(Integer node){
-		List<Integer> predecessors = null;
+		List<Integer> predecessors = n.getPredecessors(node);;
 		if(n.isStartNode(node)){
     		lang.nextStep();
     		n.setEarliestStartTime(node, 0);
@@ -117,22 +117,23 @@ public class Netzplan implements Generator {
     		n.setEarliestEndTime(node, n.getProcessTime(node));
     		//lang.nextStep();
     	}else{
-        	predecessors = n.getPredecessors(node);
+        	for(Integer currentPredecessor: predecessors){
+        		if(n.hasValidEntry(currentPredecessor, NetzplanGraph.CellID.EarliestEndTime) == false){
+        			calculateFirstDirection(currentPredecessor);
+        		}
+        	}
+        	for(Integer currentPredecessor: predecessors){
+        		if(n.hasValidEntry(node, NetzplanGraph.CellID.EarliestEndTime)==false ||n.getEarliestEndTime(currentPredecessor) > n.getEarliestStartTime(node)){
+        			lang.nextStep();
+        			n.setEarliestStartTime(node, n.getEarliestEndTime(currentPredecessor));
+        			lang.nextStep();
+        			n.setEarliestEndTime(node, n.getEarliestStartTime(node) + n.getProcessTime(node));
+        		}
+        	}
+    		
     	}
     	
-    	for(Integer currentPredecessor: predecessors){
-    		if(n.hasValidEntry(currentPredecessor, NetzplanGraph.CellID.EarliestEndTime) == false){
-    			calculateFirstDirection(currentPredecessor);
-    		}
-    	}
-    	for(Integer currentPredecessor: predecessors){
-    		if(n.hasValidEntry(node, NetzplanGraph.CellID.EarliestEndTime)==false ||n.getEarliestEndTime(currentPredecessor) > n.getEarliestStartTime(node)){
-    			lang.nextStep();
-    			n.setEarliestStartTime(node, n.getEarliestEndTime(currentPredecessor));
-    			lang.nextStep();
-    			n.setEarliestEndTime(node, n.getEarliestStartTime(node) + n.getProcessTime(node));
-    		}
-    	}
+
     	
     }
 	
@@ -222,6 +223,33 @@ public class Netzplan implements Generator {
     	infoText.addCodeLine("des Projektes auszuwirken.", "Line8", 0, null);
     	lang.nextStep();
     	infoText.hide();
+    }
+	
+    private SourceCode setSourceCode(){
+    	SourceCodeProperties sProb = new  SourceCodeProperties();
+        sProb.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF,
+                Font.PLAIN, 12));
+        sProb.set(AnimationPropertiesKeys.COLOR_PROPERTY, Color.BLUE);
+        sProb.set(AnimationPropertiesKeys.HIGHLIGHTCOLOR_PROPERTY, Color.RED);
+        
+        SourceCode src = lang.newSourceCode(new Coordinates(700, 50), "SourceCode", null, sProb);
+        src.addCodeLine("01. For all nodes without outgoing edges do", "Code0", 0, null);
+        src.addCodeLine("02.     calculateFirstDirection(node)", "Code1", 0, null);
+        src.addCodeLine("", "Code2", 0, null);
+        src.addCodeLine("03. calculateFirstDirection(node)", "Code3", 0, null);
+        src.addCodeLine("04.     if node has no ingoing edges do", "Code4", 0, null);
+        src.addCodeLine("05.         EarliestStartTime of node = 0", "Code5", 0, null);
+        src.addCodeLine("07.          EarliestEndTime of node = EarliestStartTime of Node + ProcessTime of node", "Code7", 0, null);
+        src.addCodeLine("08.     if node has ingoing edges do:", "Code6", 0, null);
+        src.addCodeLine("09.         for each predecessor of node do", "Code7", 0, null);
+        src.addCodeLine("10.             if EarliestStartTime of Predecessor has not been set do", "Code8", 0, null);
+        src.addCodeLine("11.                 calculateFirstDirection(currentPredecessor)", "Code9", 0, null);
+        src.addCodeLine("12.     for each predecessor of node do:", "Code10", 0, null);
+        src.addCodeLine("13.         if EarliestStartTime of node has not been set or EarliestEndTime of predecssor > EarliestStartTime of node", "Code12", 0, null);
+        src.addCodeLine("14.             EarliestStartTime of node = EarliestEndTime of Predecessor", "Code12", 0, null);
+        src.addCodeLine("15.             EarliestEndTime  of node = EarliestStartTime of node + ProcessTime of node", "Code13", 0, null);
+        src.highlight(0);
+        return src;
     }
     
     
