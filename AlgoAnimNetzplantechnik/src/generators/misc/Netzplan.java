@@ -72,9 +72,12 @@ public class Netzplan implements Generator {
         			n.setEarliestEndTime(currentNode, n.getEarliestStartTime(currentNode) + n.getProcessTime(currentNode));
         		}
         	}*/
-        	src1.unhighlight(0);
         	lang.nextStep();
+        	src1.unhighlight(0);
         	src1.highlight(1);
+        	src1.highlight(5);
+        	n.highlightNode(currentNode);
+        	lang.nextStep();
         	this.calculateFirstDirection(currentNode);
         	
         }
@@ -117,15 +120,29 @@ public class Netzplan implements Generator {
     
 
 	private void calculateFirstDirection(Integer node){
-		List<Integer> predecessors = n.getPredecessors(node);;
+    	src1.unhighlight(1);
+    	src1.unhighlight(5);
+    	n.unhighlightNode(node);;
+		List<Integer> predecessors = n.getPredecessors(node);
 		if(n.isStartNode(node)){
+    		src1.highlight(6);
     		lang.nextStep();
-    		n.setEarliestStartTime(node, 0);
-    		lang.nextStep();
+    		src1.unhighlight(6);
+    		src1.highlight(7);
+			n.setEarliestStartTime(node, 0);
+			lang.nextStep();
+			src1.unhighlight(7);
+			src1.highlight(8);
     		n.setEarliestEndTime(node, n.getProcessTime(node));
-    		//lang.nextStep();
+    		lang.nextStep();
+    		
+
     	}else{
-        	for(Integer currentPredecessor: predecessors){
+    		src1.highlight(9);
+    		lang.nextStep();
+    		src1.unhighlight(9);
+    		lang.nextStep();
+    		for(Integer currentPredecessor: predecessors){
         		if(n.hasValidEntry(currentPredecessor, NetzplanGraph.CellID.EarliestEndTime) == false){
         			calculateFirstDirection(currentPredecessor);
         		}
@@ -149,6 +166,7 @@ public class Netzplan implements Generator {
 		List<Integer> successors = n.getSuccessors(node);
     	if(n.isEndNode(node)){
     		lang.nextStep();
+    		
     		n.setLatestStartTime(node, n.getEarliestStartTime(node));
     		lang.nextStep();
     		n.setLatestEndTime(node, n.getEarliestEndTime(node));
@@ -249,7 +267,7 @@ public class Netzplan implements Generator {
         src.addCodeLine("05. calculateFirstDirection(node)", "Code5", 0, null);
         src.addCodeLine("06.     if node has no ingoing edges do", "Code6", 0, null);
         src.addCodeLine("07.         EarliestStartTime of node = 0", "Code7", 0, null);
-        src.addCodeLine("08.          EarliestEndTime of node = EarliestStartTime of Node + ProcessTime of node", "Code8", 0, null);
+        src.addCodeLine("08.         EarliestEndTime of node = EarliestStartTime of Node + ProcessTime of node", "Code8", 0, null);
         src.addCodeLine("09.     if node has ingoing edges do:", "Code9", 0, null);
         src.addCodeLine("10.         for each predecessor of node do", "Code10", 0, null);
         src.addCodeLine("11.             if EarliestStartTime of Predecessor has not been set do", "Code11", 0, null);
