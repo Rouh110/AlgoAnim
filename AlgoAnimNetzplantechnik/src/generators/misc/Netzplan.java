@@ -76,8 +76,11 @@ public class Netzplan implements Generator {
         	src1.unhighlight(0);
         	src1.highlight(1);
         	src1.highlight(5);
-        	n.highlightNode(currentNode);
+        	//n.highlightNode(currentNode);
         	lang.nextStep();
+        	src1.unhighlight(0);
+
+        	//lang.nextStep();
         	this.calculateFirstDirection(currentNode);
         	
         }
@@ -122,6 +125,8 @@ public class Netzplan implements Generator {
 	private void calculateFirstDirection(Integer node){
     	src1.unhighlight(1);
     	src1.unhighlight(5);
+    	n.highlightNode(node);
+    	//lang.nextStep();
     	n.unhighlightNode(node);;
 		List<Integer> predecessors = n.getPredecessors(node);
 		if(n.isStartNode(node)){
@@ -132,27 +137,54 @@ public class Netzplan implements Generator {
 			n.setEarliestStartTime(node, 0);
 			lang.nextStep();
 			src1.unhighlight(7);
+			src1.unhighlight(6);
 			src1.highlight(8);
     		n.setEarliestEndTime(node, n.getProcessTime(node));
     		lang.nextStep();
+    		src1.unhighlight(8);
     		
 
     	}else{
     		src1.highlight(9);
     		lang.nextStep();
     		src1.unhighlight(9);
-    		lang.nextStep();
+    		//lang.nextStep();
     		for(Integer currentPredecessor: predecessors){
-        		if(n.hasValidEntry(currentPredecessor, NetzplanGraph.CellID.EarliestEndTime) == false){
+        		src1.highlight(10);
+        		lang.nextStep();
+        		src1.unhighlight(10);
+    			if(n.hasValidEntry(currentPredecessor, NetzplanGraph.CellID.EarliestEndTime) == false){
+        			//src1.highlight(10);
+        			src1.unhighlight(10);
+    				src1.highlight(11);
+        			src1.highlight(12);
+        			n.highlightNode(currentPredecessor);
+        			lang.nextStep();
+        			src1.unhighlight(10);
+        			src1.unhighlight(11);
+        			src1.unhighlight(12);
+        			src1.highlight(5);
+        			n.unhighlightNode(currentPredecessor);
+        			lang.nextStep();
         			calculateFirstDirection(currentPredecessor);
         		}
         	}
         	for(Integer currentPredecessor: predecessors){
+        		src1.highlight(13);
+        		lang.nextStep();
+        		src1.unhighlight(13);
         		if(n.hasValidEntry(node, NetzplanGraph.CellID.EarliestEndTime)==false ||n.getEarliestEndTime(currentPredecessor) > n.getEarliestStartTime(node)){
+        			src1.highlight(14);
         			lang.nextStep();
         			n.setEarliestStartTime(node, n.getEarliestEndTime(currentPredecessor));
+        			src1.highlight(15);
+        			src1.unhighlight(14);
         			lang.nextStep();
+        			src1.unhighlight(15);
+        			src1.highlight(16);
         			n.setEarliestEndTime(node, n.getEarliestStartTime(node) + n.getProcessTime(node));
+        			lang.nextStep();
+        			src1.unhighlight(16);
         		}
         	}
     		
