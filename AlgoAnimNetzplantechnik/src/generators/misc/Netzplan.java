@@ -33,6 +33,8 @@ public class Netzplan implements Generator {
     private Language lang;
     private Graph graph;
     NetzplanGraph n;
+    SourceCode src1;
+    SourceCode src2;
 
     public void init(){
         lang = new AnimalScript("Netzplantechnik", "Jan Ulrich Schmitt & Dennis Juckwer", 800, 600);
@@ -44,7 +46,7 @@ public class Netzplan implements Generator {
         //lang.addGraph(graph);
         setHeader();
         setInformationText();
-        this.setSourceCode();
+        src1 = setSourceCodeForward();
         n = new NetzplanGraph((AnimalScript)lang, graph);
         
         if(n.hasLoops())
@@ -70,11 +72,17 @@ public class Netzplan implements Generator {
         			n.setEarliestEndTime(currentNode, n.getEarliestStartTime(currentNode) + n.getProcessTime(currentNode));
         		}
         	}*/
+        	src1.unhighlight(0);
+        	lang.nextStep();
+        	src1.highlight(1);
         	this.calculateFirstDirection(currentNode);
         	
         }
         
         nodesToProcess = n.getStartNodes();
+        lang.nextStep("HubbiDubbi");
+        src1.hide();
+        src2 = this.setSourceCodeBackward();
         for(Integer currentNode: nodesToProcess){
         	this.calculateSecondDirection(currentNode);
         }
@@ -225,7 +233,7 @@ public class Netzplan implements Generator {
     	infoText.hide();
     }
 	
-    private SourceCode setSourceCode(){
+    private SourceCode setSourceCodeForward(){
     	SourceCodeProperties sProb = new  SourceCodeProperties();
         sProb.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF,
                 Font.PLAIN, 12));
@@ -250,20 +258,36 @@ public class Netzplan implements Generator {
         src.addCodeLine("14.         if EarliestStartTime of node has not been set or EarliestEndTime of predecssor > EarliestStartTime of node", "Code14", 0, null);
         src.addCodeLine("15.             EarliestStartTime of node = EarliestEndTime of Predecessor", "Code15", 0, null);
         src.addCodeLine("16.             EarliestEndTime  of node = EarliestStartTime of node + ProcessTime of node", "Code16", 0, null);
-        src.addCodeLine("", "Code17", 0, null);
-        src.addCodeLine("17. calculateSecondDirection(node)", "Code18", 0, null);
-        src.addCodeLine("18.     if node has no outgoing edges do", "Code19", 0, null);
-        src.addCodeLine("19.          LatestStartTime of node = EarliestStartTime of Node", "Code20", 0, null);
-        src.addCodeLine("20.          LatestEndTime of node = EearliestEndTime of Node", "Code21", 0, null);
-        src.addCodeLine("21.     if node has outgoing edges do:", "Code22", 0, null);
-        src.addCodeLine("22.         for each successor of node do", "Code23", 0, null);
-        src.addCodeLine("23.             if LatestStartTime of Successor has not been set do", "Code24", 0, null);
-        src.addCodeLine("24.                 calculateSecondDirection(currentSuccessor)", "Code25", 0, null);
-        src.addCodeLine("25.     for each successor of node do:", "Code26", 0, null);
-        src.addCodeLine("26.         if LatestStartTime of node has not been set or LatestStartTime of successor < LatestEndTime of node", "Code27", 0, null);
-        src.addCodeLine("27.             LatestStartTime of node = LatestStartTime of Successor - ProcessTime of node", "Code28", 0, null);
-        src.addCodeLine("28.             LatestEndTime of node = LatestStartTime of node + ProcessTime of node", "Code29", 0, null);
         src.highlight(0);
+        return src;
+    }
+    
+    private SourceCode setSourceCodeBackward(){
+    	SourceCodeProperties sProb = new  SourceCodeProperties();
+        sProb.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF,
+                Font.PLAIN, 12));
+        sProb.set(AnimationPropertiesKeys.COLOR_PROPERTY, Color.BLUE);
+        sProb.set(AnimationPropertiesKeys.HIGHLIGHTCOLOR_PROPERTY, Color.RED);
+        
+        SourceCode src = lang.newSourceCode(new Coordinates(700, 50), "SourceCode", null, sProb);
+        src.addCodeLine("01. For all nodes without outgoing edges do", "Code0", 0, null);
+        src.addCodeLine("02.     calculateFirstDirection(node)", "Code1", 0, null);
+        src.addCodeLine("03. For all nodes withoud ingoing edges do", "Code2", 0, null);
+        src.addCodeLine("04.     calculateSecendDirection(node)", "Code3", 0, null);
+        src.addCodeLine("", "Code4", 0, null);
+        src.addCodeLine("05. calculateSecondDirection(node)", "Code4", 0, null);
+        src.addCodeLine("06.     if node has no outgoing edges do", "Code5", 0, null);
+        src.addCodeLine("07.          LatestStartTime of node = EarliestStartTime of Node", "Code6", 0, null);
+        src.addCodeLine("08.          LatestEndTime of node = EearliestEndTime of Node", "Code7", 0, null);
+        src.addCodeLine("09.     if node has outgoing edges do:", "Code08", 0, null);
+        src.addCodeLine("10.         for each successor of node do", "Code09", 0, null);
+        src.addCodeLine("11.             if LatestStartTime of Successor has not been set do", "Code10", 0, null);
+        src.addCodeLine("12.                 calculateSecondDirection(currentSuccessor)", "Code11", 0, null);
+        src.addCodeLine("13.     for each successor of node do:", "Code12", 0, null);
+        src.addCodeLine("14.         if LatestStartTime of node has not been set or LatestStartTime of successor < LatestEndTime of node", "Code13", 0, null);
+        src.addCodeLine("15.             LatestStartTime of node = LatestStartTime of Successor - ProcessTime of node", "Code14", 0, null);
+        src.addCodeLine("16.             LatestEndTime of node = LatestStartTime of node + ProcessTime of node", "Code15", 0, null);
+        src.highlight(2);
         return src;
     }
     
