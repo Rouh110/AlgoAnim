@@ -7,6 +7,8 @@ package generators.misc;
 
 import generators.framework.Generator;
 import generators.framework.GeneratorType;
+import interactionsupport.models.AnswerModel;
+import interactionsupport.models.MultipleSelectionQuestionModel;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -46,6 +48,15 @@ public class Netzplan implements Generator {
         setInformationText();
         this.setSourceCode();
         n = new NetzplanGraph((AnimalScript)lang, graph);
+        
+        AnswerModel answer01 = new AnswerModel();
+        answer01.setID("1");
+        answer01.setFeedback("you are an idiot");
+        answer01.setText("is this the right answer");
+        answer01.setPoints(0);
+        MultipleSelectionQuestionModel question1 = new MultipleSelectionQuestionModel("Question 01");
+        question1.addAnswer(answer01);
+        lang.addMSQuestion(question1);
         
         if(n.hasLoops())
         {
@@ -213,7 +224,7 @@ public class Netzplan implements Generator {
     	
     	infoText.addCodeLine("Bei der Netzplantechnik handelt es sich um eine Methode, welche im Rahmen der Terminplanung bzw. des", "Line0", 0, null);
     	infoText.addCodeLine("des Projektmanagements zum Einsatz kommt. Das Ziel besteht darin, die Dauer eines Projektes auf Basis ", "Line1", 0, null);
-    	infoText.addCodeLine("der einzelnen Arbeitsvorgaenge und ihrer Beziehungen untereinander zu bestimmen. Die Beziehungen der  ", "Line13", 0, null);
+    	infoText.addCodeLine("der einzelnen Arbeitsvorgänge und ihrer Beziehungen untereinander zu bestimmen. Die Beziehungen der  ", "Line13", 0, null);
     	infoText.addCodeLine("einzelnen Vorgange werden dabei in Form eines gerichteten Graphen dargestellt. Dabei ist zu beachten,", "Line2", 0, null);
     	infoText.addCodeLine("dass die Beziehungen zwischen den Arbeitsvorgaengen eindeutig zu definieren sind, weshalb Zyklen ", "Line3", 0, null);
     	infoText.addCodeLine("nicht zulaessig sind.", "Line4", 0, null);

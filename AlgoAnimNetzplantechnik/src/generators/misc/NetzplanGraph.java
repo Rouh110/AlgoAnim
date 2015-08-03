@@ -243,8 +243,7 @@ public class NetzplanGraph {
 			unhighlightCell(id, CellID.LatestEndTime);
 			unhighlightCell(id, CellID.LatestStartTime);
 			unhighlightCell(id, CellID.ProcessTime);
-			unhighlightCell(id, CellID.Name);
-			
+			unhighlightCell(id, CellID.Name);	
 		}
 	}
 	

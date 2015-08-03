@@ -16,3 +16,10 @@ Fragen
 Counter (für lese und schreibzugriffe auf datenstruckturen)
 UTM 8 codierung?
 Abschnitte in animation können durch labels in nextStep(String) genutzt werden. Diese können im inhaltsverzeichnis abgecklickt werden werden
+VariablenFenster
+
+Fragen:
+Graph property mit graphen xml, dummy knoten oder anderst?
+Recursion als darstellung in ordnung?
+Labels inhaltverzeichniss
+ordnerstrctur (de/java)
