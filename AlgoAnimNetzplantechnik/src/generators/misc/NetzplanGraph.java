@@ -220,6 +220,34 @@ public class NetzplanGraph {
 		return startNodes;
 	} 
 	
+	public void highlightNode(int id)
+	{
+		if(hasNode(id))
+		{
+			highlightCell(id, CellID.EarliestEndTime);
+			highlightCell(id, CellID.EarliestStartTime);
+			highlightCell(id, CellID.LatestEndTime);
+			highlightCell(id, CellID.LatestStartTime);
+			highlightCell(id, CellID.ProcessTime);
+			highlightCell(id, CellID.Name);
+			
+		}
+	}
+	
+	public void unhighlightNode(int id)
+	{
+		if(hasNode(id))
+		{
+			unhighlightCell(id, CellID.EarliestEndTime);
+			unhighlightCell(id, CellID.EarliestStartTime);
+			unhighlightCell(id, CellID.LatestEndTime);
+			unhighlightCell(id, CellID.LatestStartTime);
+			unhighlightCell(id, CellID.ProcessTime);
+			unhighlightCell(id, CellID.Name);
+			
+		}
+	}
+	
 	
 	public void highlightCell(int id, CellID cell)
 	{
