@@ -10,3 +10,9 @@ Page rank
 Netzplantechnik
 - setzen von Farben
 - Wie soll der graph property die process time der end nodes setzten?
+
+Algeimenine Dinge:
+Fragen
+Counter (für lese und schreibzugriffe auf datenstruckturen)
+UTM 8 codierung?
+Abschnitte in animation können durch labels in nextStep(String) genutzt werden. Diese können im inhaltsverzeichnis abgecklickt werden werden
