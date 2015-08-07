@@ -43,7 +43,6 @@ public class Netzplan implements Generator {
 
     public String generate(AnimationPropertiesContainer props,Hashtable<String, Object> primitives) {
         graph = (Graph)primitives.get("graph");
-        //lang.addGraph(graph);
         setHeader();
         setInformationText();
         src1 = setSourceCodeForward();
@@ -56,86 +55,48 @@ public class Netzplan implements Generator {
         	//TODO: Message about invalid graph
         	return lang.toString();
         }
-        
+        src1.unhighlight(0);
         List<Integer> nodesToProcess = n.getEndNodes();
         for(Integer currentNode: nodesToProcess){
-        	/*
-        	n.setEarliestStartTime(currentNode, Integer.MAX_VALUE);
-        	n.setEarliestEndTime(currentNode, Integer.MAX_VALUE);
-        	List<Integer> predecessors = n.getPredecessor(currentNode);
-        	for(Integer currentPredecessor: predecessors){
-        		if(n.hasValidEntry(currentPredecessor, NetzplanGraph.CellID.EarliestEndTime)==false){
-        			calculateValue(currentPredecessor);
-        		}
-        	}
-        	for(Integer currentPredecessor: predecessors){
-        		if(n.getEarliestStartTime(currentPredecessor) < n.getEarliestStartTime(currentNode)){
-        			n.setEarliestStartTime(currentNode, n.getEarliestEndTime(currentPredecessor));
-        			n.setEarliestEndTime(currentNode, n.getEarliestStartTime(currentNode) + n.getProcessTime(currentNode));
-        		}
-        	}*/
-        	//src1.highlight(0);
-        	//lang.nextStep();
-        	src1.unhighlight(0);
-        	//src1.highlight(1);
-        	//src1.highlight(5);
-        	//n.highlightNode(currentNode);
-        	//lang.nextStep();
-        	//src1.unhighlight(0);
-
-        	//lang.nextStep();
+        	/////////////src1.unhighlight(0);
         	src1.highlight(1);
         	this.calculateFirstDirection(currentNode);
         	
         }
         
         nodesToProcess = n.getStartNodes();
-        lang.nextStep("HubbiDubbi");
         src1.hide();
+        SourceCode algorithmChange = setChangeAlgorithmInformation();
+        lang.nextStep();
+        algorithmChange.hide();
         src2 = this.setSourceCodeBackward();
+        src2.highlight(2);
+        lang.nextStep();
+        
+        src2.unhighlight(2);
         for(Integer currentNode: nodesToProcess){
+        	src2.highlight(3);
         	this.calculateSecondDirection(currentNode);
         }
+        src2.hide();
+        SourceCode criticalPathText = setCriticicalPathInformation();
         for(Integer currentNode:n.getStartNodes()){
         	this.drawCriticalPath(currentNode);
         }
-        
-        /*
-        List<Integer> nodesToProcess = n.getStartNodes();
-        for(Integer currentNode: nodesToProcess){
-        	n.setEarliestEndTime(currentNode, Integer.MAX_VALUE);
-        	n.setEarliestStartTime(currentNode, Integer.MAX_VALUE);
-        	List<Integer> currentPredecessors = n.getPredecessor(currentNode);
-        	if(currentPredecessors.isEmpty()){
-        		n.setEarliestStartTime(currentNode, 0);
-        		n.setLatestEndTime(currentNode, n.getProcessTime(currentNode));
-        	}else{
-        		for(Integer actualPredecessor: currentPredecessors){
-        			if(n.getEarliestEndTime(actualPredecessor) < n.getEarliestStartTime(currentNode)){
-        				n.setEarliestStartTime(currentNode, n.getEarliestEndTime(actualPredecessor));
-        				n.setEarliestEndTime(currentNode, n.getEarliestStartTime(currentNode) + n.getProcessTime(currentNode));
-        			}
-        		}
-        	}
-        	
-        	
-        }*/
-        
+                
         return lang.toString();
     }
     
     
 
 	private void calculateFirstDirection(Integer node){
-    	//src1.highlight(1);
+
     	src1.highlight(5);
-		//src1.unhighlight(1);
-    	//src1.unhighlight(5);
     	n.highlightNode(node);
     	lang.nextStep();
+    	src1.unhighlight(12);
     	src1.unhighlight(1);
     	src1.unhighlight(5);
-    	//n.unhighlightNode(node);;
 		List<Integer> predecessors = n.getPredecessors(node);
 		if(n.isStartNode(node)){
     		src1.highlight(6);
@@ -162,33 +123,19 @@ public class Netzplan implements Generator {
 
     		src1.unhighlight(9);
     		src1.highlight(10);
-    		//lang.nextStep();
+    		lang.nextStep();
     		for(Integer currentPredecessor: predecessors){
-        		//src1.highlight(10);
-        		lang.nextStep();
         		for(Integer innerPredecessors: predecessors){
         			n.unHighlightEdge(innerPredecessors, node);
         		}
         		src1.unhighlight(10);
     			if(n.hasValidEntry(currentPredecessor, NetzplanGraph.CellID.EarliestEndTime) == false){
-        			//src1.highlight(10);
-        			//src1.unhighlight(10);
     				n.highlightEdge(currentPredecessor, node);
     				src1.highlight(11);
     				lang.nextStep();
     				n.unHighlightEdge(currentPredecessor, node);
     				src1.unhighlight(11);
         			src1.highlight(12);
-        			n.highlightNode(currentPredecessor);
-        			//lang.nextStep();
-        			//src1.unhighlight(10);
-        			//src1.unhighlight(11);
-        			//src1.unhighlight(12);
-        			src1.highlight(5);
-        			//n.unhighlightNode(currentPredecessor);
-        			lang.nextStep();
-        			//src1.unhighlight(11);
-        			src1.unhighlight(12);
         			calculateFirstDirection(currentPredecessor);
         		}
         	}
@@ -196,10 +143,8 @@ public class Netzplan implements Generator {
     		for(Integer innerPredecessors: predecessors){
     			n.highlightEdge(innerPredecessors, node);
     		}
+    		lang.nextStep();
         	for(Integer currentPredecessor: predecessors){
-        		//src1.highlight(13);
-        		
-        		lang.nextStep();
         		for(Integer innerPredecessors: predecessors){
         			n.unHighlightEdge(innerPredecessors, node);
         		}
@@ -229,49 +174,80 @@ public class Netzplan implements Generator {
     }
 	
 	private void calculateSecondDirection(Integer node) {
+    	src2.highlight(5);
+    	n.highlightNode(node);
+    	lang.nextStep();
+    	src2.unhighlight(12);
+    	src2.unhighlight(3);
+    	src2.unhighlight(5);
 		List<Integer> successors = n.getSuccessors(node);
     	if(n.isEndNode(node)){
+    		src2.highlight(6);
     		lang.nextStep();
-    		
+    		src2.unhighlight(6);
+    		src2.highlight(7);
     		n.setLatestStartTime(node, n.getEarliestStartTime(node));
     		lang.nextStep();
+    		src2.unhighlight(7); //////////////////
+			src2.unhighlight(6);
+			src2.highlight(8);
     		n.setLatestEndTime(node, n.getEarliestEndTime(node));
-    	}
-    	
-    	for(Integer currentSuccessor: successors){
-    		if(n.hasValidEntry(currentSuccessor, NetzplanGraph.CellID.LatestEndTime) == false){
-    			calculateSecondDirection(currentSuccessor);
+    		lang.nextStep();
+    		src2.unhighlight(8);
+    	}else{
+    		src2.highlight(9);
+    		
+    		for(Integer currentSuccessor: successors){
+    			n.highlightEdge(node, currentSuccessor);
     		}
+    		lang.nextStep();
+    		
+    		src2.unhighlight(9);
+    		src2.highlight(10);
+    		lang.nextStep();
+        	for(Integer currentSuccessor: successors){
+         		for(Integer innerSuccessors: successors){
+        			n.unHighlightEdge(node, innerSuccessors);
+        		}
+         		src2.unhighlight(10);
+        		if(n.hasValidEntry(currentSuccessor, NetzplanGraph.CellID.LatestEndTime) == false){
+    				n.highlightEdge(node, currentSuccessor);
+    				src2.highlight(11);
+    				lang.nextStep();
+    				n.unHighlightEdge(node, currentSuccessor);
+    				src2.unhighlight(11);
+        			src2.highlight(12);
+        			calculateSecondDirection(currentSuccessor);
+        		}
+        	}
+        	src2.highlight(13);
+        	for(Integer currentSuccessor: successors){
+        		for(Integer innerSuccessors: successors){
+        			n.unHighlightEdge(node, innerSuccessors);
+        		}
+        		lang.nextStep();
+        		src2.unhighlight(13);
+        		if(n.hasValidEntry(node, NetzplanGraph.CellID.LatestEndTime)==false || n.getLatestStartTime(currentSuccessor)< n.getLatestEndTime(node)){
+        			n.highlightEdge(node, currentSuccessor);
+        			src2.highlight(14);
+        			lang.nextStep();
+        			n.setLatestStartTime(node, n.getLatestStartTime(currentSuccessor)- n.getProcessTime(node));
+        			src2.highlight(15);
+        			src2.unhighlight(14);
+        			lang.nextStep();
+          			src2.unhighlight(15);
+        			src2.highlight(16);
+        			n.setLatestEndTime(node, n.getLatestStartTime(node)+ n.getProcessTime(node));
+        			lang.nextStep();
+        			src2.unhighlight(16);
+        			n.unHighlightEdge(node, currentSuccessor);
+        		}
+        	}
     	}
-    	
-    	for(Integer currentSuccessor: successors){
-    		if(n.hasValidEntry(node, NetzplanGraph.CellID.LatestEndTime)==false || n.getLatestStartTime(currentSuccessor)< n.getLatestEndTime(node)){
-    			lang.nextStep();
-    			n.setLatestStartTime(node, n.getLatestStartTime(currentSuccessor)- n.getProcessTime(node));
-    			lang.nextStep();
-    			n.setLatestEndTime(node, n.getLatestStartTime(node)+ n.getProcessTime(node));
-    		}
-    	}
-		
+    	n.unhighlightNode(node);
+    		
 	}
 	
-//	private void drawCriticalPath(){
-//		LinkedList<Integer> nodesToProcess = new LinkedList<Integer>();
-//		nodesToProcess.addAll(n.getEndNodes());
-//		Integer actualNode;
-//		while(nodesToProcess.isEmpty()==false){
-//			actualNode = nodesToProcess.pop();
-//			if(n.getEarliestStartTime(actualNode) == n.getLatestStartTime(actualNode)){
-//				for(Integer actualPredecessor: n.getPredecessors(actualNode)){
-//					lang.nextStep();
-//					n.highlightEdge(actualPredecessor, actualNode);
-//					nodesToProcess.add(actualPredecessor);
-//				}
-//				
-//			}
-//		}
-//	
-//	}
 	
 	private boolean drawCriticalPath(Integer actualNode){
 		LinkedList<Integer> currentSuccessors = new LinkedList<Integer>();
@@ -279,7 +255,6 @@ public class Netzplan implements Generator {
 		boolean isCriticalStep = false;
 		for(Integer actualSuccessor: currentSuccessors){
 			if(n.getEarliestStartTime(actualNode) == n.getLatestStartTime(actualNode) && (n.isEndNode(actualSuccessor)||drawCriticalPath(actualSuccessor) )){
-				//lang.nextStep();
 				n.highlightEdge(actualNode, actualSuccessor);
 				isCriticalStep = true;
 			}
@@ -342,7 +317,6 @@ public class Netzplan implements Generator {
         src.addCodeLine("14.         if EarliestStartTime of node has not been set or EarliestEndTime of predecssor > EarliestStartTime of node", "Code14", 0, null);
         src.addCodeLine("15.             EarliestStartTime of node = EarliestEndTime of Predecessor", "Code15", 0, null);
         src.addCodeLine("16.             EarliestEndTime  of node = EarliestStartTime of node + ProcessTime of node", "Code16", 0, null);
-        //src.highlight(0);
         return src;
     }
     
@@ -371,8 +345,35 @@ public class Netzplan implements Generator {
         src.addCodeLine("14.         if LatestStartTime of node has not been set or LatestStartTime of successor < LatestEndTime of node", "Code13", 0, null);
         src.addCodeLine("15.             LatestStartTime of node = LatestStartTime of Successor - ProcessTime of node", "Code14", 0, null);
         src.addCodeLine("16.             LatestEndTime of node = LatestStartTime of node + ProcessTime of node", "Code15", 0, null);
-        src.highlight(2);
         return src;
+    }
+    
+    private SourceCode setChangeAlgorithmInformation(){
+    	SourceCodeProperties sProb = new  SourceCodeProperties();
+        sProb.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font (Font.SANS_SERIF,Font.BOLD, 24));
+        sProb.set(AnimationPropertiesKeys.COLOR_PROPERTY, Color.BLUE);
+        sProb.set(AnimationPropertiesKeys.HIGHLIGHTCOLOR_PROPERTY, Color.RED);
+        SourceCode infoText = lang.newSourceCode(new Coordinates(700,50), "InfoText", null, sProb);
+        infoText.addCodeLine("Achtung es beginnt nun der Zweite Teil", "line1", 0, null);
+        infoText.addCodeLine("Verfahrens! Der Algorithmus fährt mit", "line2", 0, null);
+        infoText.addCodeLine("der Vorwärtsrechnung fort.", "line3", 0, null);
+        return infoText;
+    
+    }
+    
+    private SourceCode setCriticicalPathInformation(){
+    	SourceCodeProperties sProb = new  SourceCodeProperties();
+        sProb.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font (Font.SANS_SERIF,Font.BOLD, 24));
+        sProb.set(AnimationPropertiesKeys.COLOR_PROPERTY, Color.BLUE);
+        sProb.set(AnimationPropertiesKeys.HIGHLIGHTCOLOR_PROPERTY, Color.RED);
+        SourceCode infoText = lang.newSourceCode(new Coordinates(700,50), "InfoText", null, sProb);
+        infoText.addCodeLine("Der kritische Pfad wird nun durch die", "line1", 0, null);
+        infoText.addCodeLine("hervorgehobenen Kanten repräsentiert", "line2", 0, null);
+        infoText.addCodeLine("auf ihm befinden sich alle Vorgänge,.", "line3", 0, null);
+        infoText.addCodeLine("deren Verzögerung eine Verzögerung des", "line4", 0, null);
+        infoText.addCodeLine("gesamten Vorhabens verursacht!", "line5", 0, null);
+        return infoText;
+    
     }
     
     
