@@ -7,6 +7,12 @@ package generators.misc;
 
 import generators.framework.Generator;
 import generators.framework.GeneratorType;
+import interactionsupport.models.AnswerModel;
+import interactionsupport.models.FillInBlanksQuestionModel;
+import interactionsupport.models.MultipleSelectionQuestionModel;
+import interactionsupport.models.QuestionGroupModel;
+import interactionsupport.views.MultipleSelectionQuestionView;
+import interactionsupport.views.QuestionView;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -20,6 +26,7 @@ import algoanim.primitives.Graph;
 import algoanim.primitives.SourceCode;
 import algoanim.primitives.generators.Language;
 import algoanim.properties.AnimationPropertiesKeys;
+import algoanim.properties.MatrixProperties;
 import algoanim.properties.SourceCodeProperties;
 import algoanim.properties.TextProperties;
 import algoanim.util.Coordinates;
@@ -40,21 +47,41 @@ public class Netzplan implements Generator {
     private SourceCodeProperties sourceCodeStyle;
 
     public void init(){
-        lang = new AnimalScript("Netzplantechnik", "Jan Ulrich Schmitt & Dennis Juckwer", 800, 600);
+        lang = new AnimalScript("Netzplantechnik", "Jan Ulrich Schmitt & Dennis Juckwer", 800, 600);        
         lang.setStepMode(true);
+        lang.setInteractionType(Language.INTERACTION_TYPE_AVINTERACTION);
     }
 
     public String generate(AnimationPropertiesContainer props,Hashtable<String, Object> primitives) {
+
         graph = (Graph)primitives.get("graph");
         informationTextStyle = (SourceCodeProperties) props.getPropertiesByName("InformationTextStyle");
         headerStyle = (TextProperties) props.getPropertiesByName("HeaderStyle");
         sourceCodeStyle = (SourceCodeProperties) props.getPropertiesByName("SourcecodeStyle");
+        Color edgeColor = (Color)primitives.get("EdgeColor");
+        MatrixProperties matrixProperties = (MatrixProperties) props.getPropertiesByName("NodeStyle");
+        
         setHeader();
         setInformationText();
-        src1 = setSourceCodeForward();
-        n = new NetzplanGraph((AnimalScript)lang, graph);
+        src1 = setSourceCodeForward();    
+        n = new NetzplanGraph((AnimalScript)lang, graph,matrixProperties);
+        n.setAllEdgeBaseColor(edgeColor);
         src1.highlight(0);
-        lang.nextStep();
+        //lang.nextStep();
+       
+        QuestionGroupModel groupInfo = new QuestionGroupModel(
+                "First question group", 1);
+
+            lang.addQuestionGroup(groupInfo);
+            MultipleSelectionQuestionModel m1 = new MultipleSelectionQuestionModel("Gegenteil");
+            m1.setPrompt("Was ist das Gegenteil von konvex?");
+            m1.addAnswer("concav", 3,
+                "Die Schreibweise ist entweder konkav, oder im englischen concave!");
+            m1.addAnswer("concave", 5, "Richtig!");
+            m1.addAnswer("konkav", 5, "Richtig!");
+            m1.setGroupID("First question group");
+            lang.addMSQuestion(m1);
+        
         
         if(n.hasLoops())
         {
@@ -70,10 +97,14 @@ public class Netzplan implements Generator {
         	
         }
         
+        
+        
         nodesToProcess = n.getStartNodes();
         src1.hide();
         SourceCode algorithmChange = setChangeAlgorithmInformation();
         lang.nextStep();
+        
+        
         algorithmChange.hide();
         src2 = this.setSourceCodeBackward();
         src2.highlight(2);
@@ -89,7 +120,10 @@ public class Netzplan implements Generator {
         for(Integer currentNode:n.getStartNodes()){
         	this.drawCriticalPath(currentNode);
         }
-                
+
+        
+        lang.finalizeGeneration();
+
         return lang.toString();
     }
     
@@ -287,7 +321,7 @@ public class Netzplan implements Generator {
     	
     	infoText.addCodeLine("Bei der Netzplantechnik handelt es sich um eine Methode, welche im Rahmen der Terminplanung bzw. des", "Line0", 0, null);
     	infoText.addCodeLine("des Projektmanagements zum Einsatz kommt. Das Ziel besteht darin, die Dauer eines Projektes auf Basis ", "Line1", 0, null);
-    	infoText.addCodeLine("der einzelnen Arbeitsvorgaenge und ihrer Beziehungen untereinander zu bestimmen. Die Beziehungen der  ", "Line13", 0, null);
+    	infoText.addCodeLine("der einzelnen Arbeitsvorgänge und ihrer Beziehungen untereinander zu bestimmen. Die Beziehungen der  ", "Line13", 0, null);
     	infoText.addCodeLine("einzelnen Vorgange werden dabei in Form eines gerichteten Graphen dargestellt. Dabei ist zu beachten,", "Line2", 0, null);
     	infoText.addCodeLine("dass die Beziehungen zwischen den Arbeitsvorgaengen eindeutig zu definieren sind, weshalb Zyklen ", "Line3", 0, null);
     	infoText.addCodeLine("nicht zulaessig sind.", "Line4", 0, null);
