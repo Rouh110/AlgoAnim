@@ -58,7 +58,8 @@ public class Netzplan implements Generator {
         n = new NetzplanGraph((AnimalScript)lang, graph);
         src1.highlight(0);
         lang.nextStep();
-        
+      
+       
         AnswerModel answer01 = new AnswerModel();
         answer01.setID("1");
         answer01.setFeedback("you are an idiot");

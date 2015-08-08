@@ -594,55 +594,102 @@ public class NetzplanGraph {
 	
 	
 	
+	private boolean isEndNodeOfAnimalGraph(int id, Graph graph)
+	{
+		int[][] adjacencyMatrix = graph.getAdjacencyMatrix();
+		
+		boolean isEndNode;
+		
+		isEndNode = true;
+		for(int child = 0; child < graph.getSize(); child++)
+		{
+			if(adjacencyMatrix[id][child] != 0)
+			{
+				isEndNode = false;
+				break;
+			}
+		}
+		
+		
+		return isEndNode;
+	}
+	
 	
 	private void init(Graph graph)
 	{
+				
 		// init cration of all nodes
 		for(int i = 0; i < graph.getSize(); i++)
 		{
-			NetzplanNode node = new NetzplanNode();
+			if(!isEndNodeOfAnimalGraph(i,graph))
+			{
+				NetzplanNode node = new NetzplanNode();
 
-			graph.getNodeForIndex(i);
-			node.values = createStringTable(((Coordinates)graph.getNodeForIndex(i)).getX(), ((Coordinates)graph.getNodeForIndex(i)).getY());
-			node.id = i;
-			nodes.put(i, node);
+				graph.getNodeForIndex(i);
+				node.values = createStringTable(((Coordinates)graph.getNodeForIndex(i)).getX(), ((Coordinates)graph.getNodeForIndex(i)).getY());
+				node.id = i;
+				nodes.put(i, node);
+			}
+			
 		}
 		
 		//create all edges
 		int[][] adjacencyMatrix = graph.getAdjacencyMatrix();
 		for(int to = 0; to < graph.getSize(); to++)
 		{
-			for(int from = 0; from < graph.getSize(); from++)
+			if(!isEndNodeOfAnimalGraph(to,graph))
 			{
-				if(adjacencyMatrix[from][to] != 0)
+				for(int from = 0; from < graph.getSize(); from++)
 				{
-					NetzplanEdge edge = new NetzplanEdge();
 					
-					nodes.get(from).sucsessors.add(to);
-					nodes.get(to).predecessors.add(from);
-					
-					Coordinates lineNodes[] = createEdgeCoordinates(nodes.get(from), nodes.get(to));
-					edge.line = createLine(lineNodes);			
-					edge.from = lineNodes[0];
-					edge.to = lineNodes[1];
-					
-					nodes.get(from).edges.put(to,edge);
+					if(!isEndNodeOfAnimalGraph(from,graph))
+					{
+						if(adjacencyMatrix[from][to] != 0)
+						{
+							NetzplanEdge edge = new NetzplanEdge();
+							
+							nodes.get(from).sucsessors.add(to);
+							nodes.get(to).predecessors.add(from);
+							
+							Coordinates lineNodes[] = createEdgeCoordinates(nodes.get(from), nodes.get(to));
+							edge.line = createLine(lineNodes);			
+							edge.from = lineNodes[0];
+							edge.to = lineNodes[1];
+							
+							nodes.get(from).edges.put(to,edge);
+						}
+					}		
 				}
 			}
+			
 		}
 		
 		// set starting values
 		for(int i = 0; i < graph.getSize(); i++)
 		{
-			this.setName(i, graph.getNodeLabel(i));
-			// TODO: how to set process time of end node ???
-			if(!nodes.get(i).sucsessors.isEmpty())
+			if(!isEndNodeOfAnimalGraph(i, graph))
 			{
-				this.setProcessTime(i, graph.getEdgeWeight(i, nodes.get(i).sucsessors.get(0)));
+				this.setName(i, graph.getNodeLabel(i));
+				// TODO: how to set process time of end node ???
+				if(!nodes.get(i).sucsessors.isEmpty())
+				{
+					this.setProcessTime(i, graph.getEdgeWeight(i, nodes.get(i).sucsessors.get(0)));
+				}else
+				{
+					
+					
+				}
 			}else
 			{
-				this.setProcessTime(i,1);
+				for(int from = 0; from < graph.getSize(); from++)
+				{
+					if(adjacencyMatrix[from][i] != 0)
+					{
+						this.setProcessTime(from,graph.getEdgeWeight(from, i));
+					}
+				}
 			}
+			
 			
 		}
 	}
