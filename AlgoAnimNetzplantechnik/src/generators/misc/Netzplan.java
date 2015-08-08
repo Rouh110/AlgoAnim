@@ -35,6 +35,9 @@ public class Netzplan implements Generator {
     NetzplanGraph n;
     SourceCode src1;
     SourceCode src2;
+    private TextProperties headerStyle; //headerStyle
+    private SourceCodeProperties informationTextStyle;
+    private SourceCodeProperties sourceCodeStyle;
 
     public void init(){
         lang = new AnimalScript("Netzplantechnik", "Jan Ulrich Schmitt & Dennis Juckwer", 800, 600);
@@ -43,6 +46,9 @@ public class Netzplan implements Generator {
 
     public String generate(AnimationPropertiesContainer props,Hashtable<String, Object> primitives) {
         graph = (Graph)primitives.get("graph");
+        informationTextStyle = (SourceCodeProperties) props.getPropertiesByName("InformationTextStyle");
+        headerStyle = (TextProperties) props.getPropertiesByName("HeaderStyle");
+        sourceCodeStyle = (SourceCodeProperties) props.getPropertiesByName("SourcecodeStyle");
         setHeader();
         setInformationText();
         src1 = setSourceCodeForward();
@@ -266,17 +272,18 @@ public class Netzplan implements Generator {
 	}
 	
     private void setHeader(){
-    	TextProperties headerProps = new TextProperties();
-    	headerProps.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF,Font.BOLD, 24));
-    	//headerProps.set(AnimationPropertiesKeys.COLOR_PROPERTY, edgehighlightcolor);
-    	headerProps.set(AnimationPropertiesKeys.COLOR_PROPERTY, Color.BLUE);
-    	lang.newText(new Coordinates(20,30), "Die Netzplantechnik", "header", null, headerProps);
+    	//TextProperties headerProps = new TextProperties();
+    	//headerProps.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF,Font.BOLD, 24));
+    	//headerProps.set(AnimationPropertiesKeys.COLOR_PROPERTY, Color.BLUE);
+    	lang.newText(new Coordinates(20,30), "Die Netzplantechnik", "header", null, headerStyle);
+
+    	
     }
 	
 	private void setInformationText(){
-    	SourceCodeProperties infoProps = new SourceCodeProperties();
-    	infoProps.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF, Font.BOLD, 20));
-    	SourceCode infoText = lang.newSourceCode(new Coordinates(20,100), "InfoText", null, infoProps);
+    	//SourceCodeProperties infoProps = new SourceCodeProperties();
+    	//infoProps.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF, Font.BOLD, 20));
+    	SourceCode infoText = lang.newSourceCode(new Coordinates(20,100), "InfoText", null, informationTextStyle);
     	
     	infoText.addCodeLine("Bei der Netzplantechnik handelt es sich um eine Methode, welche im Rahmen der Terminplanung bzw. des", "Line0", 0, null);
     	infoText.addCodeLine("des Projektmanagements zum Einsatz kommt. Das Ziel besteht darin, die Dauer eines Projektes auf Basis ", "Line1", 0, null);
@@ -293,13 +300,12 @@ public class Netzplan implements Generator {
     }
 	
     private SourceCode setSourceCodeForward(){
-    	SourceCodeProperties sProb = new  SourceCodeProperties();
-        sProb.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF,
-                Font.PLAIN, 12));
-        sProb.set(AnimationPropertiesKeys.COLOR_PROPERTY, Color.BLUE);
-        sProb.set(AnimationPropertiesKeys.HIGHLIGHTCOLOR_PROPERTY, Color.RED);
+    	//SourceCodeProperties sProb = new  SourceCodeProperties();
+        //sProb.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF, Font.PLAIN, 12));
+        //sProb.set(AnimationPropertiesKeys.COLOR_PROPERTY, Color.BLUE);
+        //sProb.set(AnimationPropertiesKeys.HIGHLIGHTCOLOR_PROPERTY, Color.RED);
         
-        SourceCode src = lang.newSourceCode(new Coordinates(700, 50), "SourceCode", null, sProb);
+        SourceCode src = lang.newSourceCode(new Coordinates(700, 50), "SourceCode", null, sourceCodeStyle);
         src.addCodeLine("01. For all nodes without outgoing edges do", "Code0", 0, null);
         src.addCodeLine("02.     calculateFirstDirection(node)", "Code1", 0, null);
         src.addCodeLine("03. For all nodes withoud ingoing edges do", "Code2", 0, null);
@@ -321,13 +327,12 @@ public class Netzplan implements Generator {
     }
     
     private SourceCode setSourceCodeBackward(){
-    	SourceCodeProperties sProb = new  SourceCodeProperties();
-        sProb.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF,
-                Font.PLAIN, 12));
-        sProb.set(AnimationPropertiesKeys.COLOR_PROPERTY, Color.BLUE);
-        sProb.set(AnimationPropertiesKeys.HIGHLIGHTCOLOR_PROPERTY, Color.RED);
+    	//SourceCodeProperties sProb = new  SourceCodeProperties();
+        //sProb.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF, Font.PLAIN, 12));
+        //sProb.set(AnimationPropertiesKeys.COLOR_PROPERTY, Color.BLUE);
+        //sProb.set(AnimationPropertiesKeys.HIGHLIGHTCOLOR_PROPERTY, Color.RED);
         
-        SourceCode src = lang.newSourceCode(new Coordinates(700, 50), "SourceCode", null, sProb);
+        SourceCode src = lang.newSourceCode(new Coordinates(700, 50), "SourceCode", null, sourceCodeStyle);
         src.addCodeLine("01. For all nodes without outgoing edges do", "Code0", 0, null);
         src.addCodeLine("02.     calculateFirstDirection(node)", "Code1", 0, null);
         src.addCodeLine("03. For all nodes withoud ingoing edges do", "Code2", 0, null);
@@ -349,11 +354,11 @@ public class Netzplan implements Generator {
     }
     
     private SourceCode setChangeAlgorithmInformation(){
-    	SourceCodeProperties sProb = new  SourceCodeProperties();
-        sProb.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font (Font.SANS_SERIF,Font.BOLD, 24));
-        sProb.set(AnimationPropertiesKeys.COLOR_PROPERTY, Color.BLUE);
-        sProb.set(AnimationPropertiesKeys.HIGHLIGHTCOLOR_PROPERTY, Color.RED);
-        SourceCode infoText = lang.newSourceCode(new Coordinates(700,50), "InfoText", null, sProb);
+    	//SourceCodeProperties sProb = new  SourceCodeProperties();
+        //sProb.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font (Font.SANS_SERIF,Font.BOLD, 24));
+        //sProb.set(AnimationPropertiesKeys.COLOR_PROPERTY, Color.BLUE);
+        //sProb.set(AnimationPropertiesKeys.HIGHLIGHTCOLOR_PROPERTY, Color.RED);
+    	SourceCode infoText = lang.newSourceCode(new Coordinates(700,50), "InfoText", null, informationTextStyle);
         infoText.addCodeLine("Achtung es beginnt nun der Zweite Teil", "line1", 0, null);
         infoText.addCodeLine("des Verfahrens! Der Algorithmus fährt mit", "line2", 0, null);
         infoText.addCodeLine("der Vorwärtsrechnung fort.", "line3", 0, null);

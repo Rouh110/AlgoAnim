@@ -25,27 +25,9 @@ edge C D weight 5
 
 </Graph></value>
 		</Primitive>
-		<AnimationProperties type="SourceCodeProperties">
-			<AnimationPropertyItem type="ColorPropertyItem">
-				<name>highlightColor</name>
-				<isEditable value="false" />
-				<label></label>
-				<value><Color>(0, 0, 0)</Color></value>
-			</AnimationPropertyItem>
-			<AnimationPropertyItem type="ColorPropertyItem">
-				<name>contextColor</name>
-				<isEditable value="false" />
-				<label></label>
-				<value><Color>(0, 0, 0)</Color></value>
-			</AnimationPropertyItem>
+<AnimationProperties type="TextProperties">
 			<AnimationPropertyItem type="IntegerPropertyItem">
 				<name>depth</name>
-				<isEditable value="false" />
-				<label></label>
-				<value><int>1</int></value>
-			</AnimationPropertyItem>
-			<AnimationPropertyItem type="IntegerPropertyItem">
-				<name>indentation</name>
 				<isEditable value="false" />
 				<label></label>
 				<value><int>1</int></value>
@@ -62,35 +44,17 @@ edge C D weight 5
 				<label></label>
 				<value><boolean value="false" /></value>
 			</AnimationPropertyItem>
-			<AnimationPropertyItem type="IntegerPropertyItem">
-				<name>size</name>
-				<isEditable value="true" />
+			<AnimationPropertyItem type="BooleanPropertyItem">
+				<name>centered</name>
+				<isEditable value="false" />
 				<label></label>
-				<value><int>10</int></value>
+				<value><boolean value="false" /></value>
 			</AnimationPropertyItem>
 			<AnimationPropertyItem type="StringPropertyItem">
 				<name>name</name>
 				<isEditable value="true" />
 				<label></label>
 				<value><String>HeaderStyle</String></value>
-			</AnimationPropertyItem>
-			<AnimationPropertyItem type="BooleanPropertyItem">
-				<name>bold</name>
-				<isEditable value="true" />
-				<label></label>
-				<value><boolean value="false" /></value>
-			</AnimationPropertyItem>
-			<AnimationPropertyItem type="IntegerPropertyItem">
-				<name>row</name>
-				<isEditable value="true" />
-				<label></label>
-				<value><int>1</int></value>
-			</AnimationPropertyItem>
-			<AnimationPropertyItem type="BooleanPropertyItem">
-				<name>italic</name>
-				<isEditable value="true" />
-				<label></label>
-				<value><boolean value="false" /></value>
 			</AnimationPropertyItem>
 			<AnimationPropertyItem type="FontPropertyItem">
 				<name>font</name>
@@ -140,7 +104,7 @@ edge C D weight 5
 				<name>size</name>
 				<isEditable value="true" />
 				<label></label>
-				<value><int>10</int></value>
+				<value><int>36</int></value>
 			</AnimationPropertyItem>
 			<AnimationPropertyItem type="StringPropertyItem">
 				<name>name</name>
@@ -152,7 +116,7 @@ edge C D weight 5
 				<name>bold</name>
 				<isEditable value="true" />
 				<label></label>
-				<value><boolean value="false" /></value>
+				<value><boolean value="true" /></value>
 			</AnimationPropertyItem>
 			<AnimationPropertyItem type="IntegerPropertyItem">
 				<name>row</name>
@@ -338,7 +302,7 @@ edge C D weight 5
 			<value><Color>(0, 0, 0)</Color></value>
 		</Primitive>
 		<Primitive type="Color">
-			<name>color</name>
+			<name>EdgeHighlightColor</name>
 			<value><Color>(0, 255, 0)</Color></value>
 		</Primitive>
 	</Folder>
