@@ -8,7 +8,11 @@ package generators.misc;
 import generators.framework.Generator;
 import generators.framework.GeneratorType;
 import interactionsupport.models.AnswerModel;
+import interactionsupport.models.FillInBlanksQuestionModel;
 import interactionsupport.models.MultipleSelectionQuestionModel;
+import interactionsupport.models.QuestionGroupModel;
+import interactionsupport.views.MultipleSelectionQuestionView;
+import interactionsupport.views.QuestionView;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -38,11 +42,14 @@ public class Netzplan implements Generator {
 
     public void init(){
         lang = new AnimalScript("Netzplantechnik", "Jan Ulrich Schmitt & Dennis Juckwer", 800, 600);
+        lang.setInteractionType(Language.INTERACTION_TYPE_AVINTERACTION);
         lang.setStepMode(true);
     }
 
     public String generate(AnimationPropertiesContainer props,Hashtable<String, Object> primitives) {
-        graph = (Graph)primitives.get("graph");
+       
+    	
+    	graph = (Graph)primitives.get("graph");
         //lang.addGraph(graph);
         setHeader();
         setInformationText();
@@ -54,9 +61,30 @@ public class Netzplan implements Generator {
         answer01.setFeedback("you are an idiot");
         answer01.setText("is this the right answer");
         answer01.setPoints(0);
-        MultipleSelectionQuestionModel question1 = new MultipleSelectionQuestionModel("Question 01");
-        question1.addAnswer(answer01);
-        lang.addMSQuestion(question1);
+        
+        AnswerModel answer02 = new AnswerModel();
+        answer02.setID("2");
+        answer02.setFeedback("you are a master puzzle solver");
+        answer02.setText("this is not the wrong answer.");
+        answer02.setPoints(1);
+        
+        MultipleSelectionQuestionModel question1 = new MultipleSelectionQuestionModel("Question_01");
+        question1.setPrompt("what is the question");
+        question1.addAnswer("whohoho", 9001, "power lvl over 9000");
+        //question1.addAnswer(answer01);
+        //question1.addAnswer(answer02);
+        //QuestionGroupModel group = null;
+        //lang.addQuestionGroup(group);
+        
+        FillInBlanksQuestionModel fibQuestion = new FillInBlanksQuestionModel("question_02");
+        fibQuestion.setPrompt("Laliali");
+        fibQuestion.addAnswer("bab", 1, "muhahah");
+        fibQuestion.setNumberOfTries(1);
+        lang.nextStep();
+        lang.addFIBQuestion(fibQuestion);
+        //lang.addMSQuestion(question1);
+        
+        
         
         if(n.hasLoops())
         {
@@ -84,6 +112,8 @@ public class Netzplan implements Generator {
         	this.calculateFirstDirection(currentNode);
         	
         }
+        
+        
         
         nodesToProcess = n.getStartNodes();
         for(Integer currentNode: nodesToProcess){
@@ -114,6 +144,7 @@ public class Netzplan implements Generator {
         	
         }*/
         
+        lang.finalizeGeneration();
         return lang.toString();
     }
     
