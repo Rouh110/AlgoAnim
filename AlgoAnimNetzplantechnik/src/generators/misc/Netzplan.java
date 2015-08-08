@@ -26,6 +26,7 @@ import algoanim.primitives.Graph;
 import algoanim.primitives.SourceCode;
 import algoanim.primitives.generators.Language;
 import algoanim.properties.AnimationPropertiesKeys;
+import algoanim.properties.MatrixProperties;
 import algoanim.properties.SourceCodeProperties;
 import algoanim.properties.TextProperties;
 import algoanim.util.Coordinates;
@@ -51,11 +52,14 @@ public class Netzplan implements Generator {
     public String generate(AnimationPropertiesContainer props,Hashtable<String, Object> primitives) {
 
         graph = (Graph)primitives.get("graph");
+        Color edgeColor = (Color)primitives.get("EdgeColor");
+        MatrixProperties matrixProperties = (MatrixProperties) props.getPropertiesByName("NodeStyle");
         
         setHeader();
         setInformationText();
         src1 = setSourceCodeForward();
-        n = new NetzplanGraph((AnimalScript)lang, graph);
+        n = new NetzplanGraph((AnimalScript)lang, graph,matrixProperties);
+        n.setAllEdgeBaseColor(edgeColor);
         src1.highlight(0);
         lang.nextStep();
       

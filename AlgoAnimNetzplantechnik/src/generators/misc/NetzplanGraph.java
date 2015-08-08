@@ -46,8 +46,16 @@ public class NetzplanGraph {
 	int edgeDrawDepth = 0;
 	int nodeDrawDepth = 1;
 	
+	MatrixProperties defaultMatrixProperties = null;
+	
 	public NetzplanGraph(AnimalScript lang, Graph graph)
 	{
+		this(lang, graph, null);
+	}
+	
+	public NetzplanGraph(AnimalScript lang, Graph graph, MatrixProperties defaultMatrixProperties)
+	{
+		this.defaultMatrixProperties = defaultMatrixProperties;
 		this.lang = lang;
 		init(graph);
 	}
@@ -805,8 +813,15 @@ public class NetzplanGraph {
 	
 	private MatrixProperties createStringTableProperties()
 	{
-		
-        MatrixProperties matProp = new MatrixProperties();
+		MatrixProperties matProp;
+		if(defaultMatrixProperties != null)
+		{
+			matProp = defaultMatrixProperties;
+		}else
+		{
+			matProp = new MatrixProperties();
+		}
+        
         matProp.set(AnimationPropertiesKeys.DEPTH_PROPERTY, getNodeDrawDepth());
         
         matProp.set(AnimationPropertiesKeys.GRID_STYLE_PROPERTY, "table");
