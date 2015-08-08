@@ -355,7 +355,7 @@ public class Netzplan implements Generator {
         sProb.set(AnimationPropertiesKeys.HIGHLIGHTCOLOR_PROPERTY, Color.RED);
         SourceCode infoText = lang.newSourceCode(new Coordinates(700,50), "InfoText", null, sProb);
         infoText.addCodeLine("Achtung es beginnt nun der Zweite Teil", "line1", 0, null);
-        infoText.addCodeLine("Verfahrens! Der Algorithmus fährt mit", "line2", 0, null);
+        infoText.addCodeLine("des Verfahrens! Der Algorithmus fährt mit", "line2", 0, null);
         infoText.addCodeLine("der Vorwärtsrechnung fort.", "line3", 0, null);
         return infoText;
     
