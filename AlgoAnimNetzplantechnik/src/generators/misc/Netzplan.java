@@ -44,9 +44,9 @@ public class Netzplan implements Generator {
     SourceCode src2;
 
     public void init(){
-        lang = new AnimalScript("Netzplantechnik", "Jan Ulrich Schmitt & Dennis Juckwer", 800, 600);
-        lang.setInteractionType(Language.INTERACTION_TYPE_AVINTERACTION);
+        lang = new AnimalScript("Netzplantechnik", "Jan Ulrich Schmitt & Dennis Juckwer", 800, 600);        
         lang.setStepMode(true);
+        lang.setInteractionType(Language.INTERACTION_TYPE_AVINTERACTION);
     }
 
     public String generate(AnimationPropertiesContainer props,Hashtable<String, Object> primitives) {
@@ -57,41 +57,24 @@ public class Netzplan implements Generator {
         
         setHeader();
         setInformationText();
-        src1 = setSourceCodeForward();
+        src1 = setSourceCodeForward();    
         n = new NetzplanGraph((AnimalScript)lang, graph,matrixProperties);
         n.setAllEdgeBaseColor(edgeColor);
         src1.highlight(0);
-        lang.nextStep();
-      
+        //lang.nextStep();
        
-        AnswerModel answer01 = new AnswerModel();
-        answer01.setID("1");
-        answer01.setFeedback("you are an idiot");
-        answer01.setText("is this the right answer");
-        answer01.setPoints(0);
-        
-        AnswerModel answer02 = new AnswerModel();
-        answer02.setID("2");
-        answer02.setFeedback("you are a master puzzle solver");
-        answer02.setText("this is not the wrong answer.");
-        answer02.setPoints(1);
-        
-        MultipleSelectionQuestionModel question1 = new MultipleSelectionQuestionModel("Question_01");
-        question1.setPrompt("what is the question");
-        question1.addAnswer("whohoho", 9001, "power lvl over 9000");
-        //question1.addAnswer(answer01);
-        //question1.addAnswer(answer02);
-        //QuestionGroupModel group = null;
-        //lang.addQuestionGroup(group);
-        
-        FillInBlanksQuestionModel fibQuestion = new FillInBlanksQuestionModel("question_02");
-        fibQuestion.setPrompt("Laliali");
-        fibQuestion.addAnswer("bab", 1, "muhahah");
-        fibQuestion.setNumberOfTries(1);
-        lang.nextStep();
-        lang.addFIBQuestion(fibQuestion);
-        //lang.addMSQuestion(question1);
-        
+        QuestionGroupModel groupInfo = new QuestionGroupModel(
+                "First question group", 1);
+
+            lang.addQuestionGroup(groupInfo);
+            MultipleSelectionQuestionModel m1 = new MultipleSelectionQuestionModel("Gegenteil");
+            m1.setPrompt("Was ist das Gegenteil von konvex?");
+            m1.addAnswer("concav", 3,
+                "Die Schreibweise ist entweder konkav, oder im englischen concave!");
+            m1.addAnswer("concave", 5, "Richtig!");
+            m1.addAnswer("konkav", 5, "Richtig!");
+            m1.setGroupID("First question group");
+            lang.addMSQuestion(m1);
         
         
         if(n.hasLoops())
@@ -114,6 +97,8 @@ public class Netzplan implements Generator {
         src1.hide();
         SourceCode algorithmChange = setChangeAlgorithmInformation();
         lang.nextStep();
+        
+        
         algorithmChange.hide();
         src2 = this.setSourceCodeBackward();
         src2.highlight(2);
