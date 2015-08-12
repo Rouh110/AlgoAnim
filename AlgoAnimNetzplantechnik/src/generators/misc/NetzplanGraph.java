@@ -155,7 +155,7 @@ public class NetzplanGraph {
 		this.setEntry(id, CellID.Name, name);
 	}
 	
-	public String getName(int id, String name)
+	public String getName(int id)
 	{
 		return this.getEntry(id, CellID.Name);
 	}
@@ -176,6 +176,17 @@ public class NetzplanGraph {
 			return getNetzplanNode(id).predecessors;
 		}
 		return new LinkedList<Integer>();
+	}
+	
+	public List<Integer> getAllNodes()
+	{
+		LinkedList<Integer> allNodes = new LinkedList<Integer>();
+		
+		for(Integer nodeId : nodes.keySet())
+		{
+			allNodes.add(nodeId);
+		}
+		return allNodes;
 	}
 	
 	public boolean isStartNode(int id)
