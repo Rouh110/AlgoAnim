@@ -56,14 +56,6 @@ import algoanim.properties.SourceCodeProperties;
 public class PageRank implements Generator {
     private Language lang;
     private Graph g;
-    /*
-    private PolylineProperties edgeProperties;
-    private SourceCodeProperties sourceCodeProperties;
-    private TextProperties headerTextProperties;
-    private RectProperties headerRectangleProperties;
-    private CircleProperties nodeColorProperties;
-    private MatrixProperties resultAnimationProperties;
-    */
     Circle graphCircles[];
     Text graphText[];
     
@@ -73,6 +65,7 @@ public class PageRank implements Generator {
     private float initValue;
     private float difference=100.0f;
     private int iterations = 1;
+    private double dampingFactor;
     
     
     private Color color_for_lowest_PRValue;
@@ -82,14 +75,11 @@ public class PageRank implements Generator {
     private Color color_for_highest_PRValue;
     private Color color_of_edges;
     private Color color_of_nodetext;
-    //private Color boardercolor_of_nodes;
-    private Color matrixfillcolor;
-    private Color matrixhighlightcolor;
     private Color edgehighlightcolor;
     private Color color_of_dangling_nodes;
     
     public PageRank(){
-    	//System.out.println("Hello World");
+
     }
 
     public void init(){
@@ -130,17 +120,7 @@ public class PageRank implements Generator {
     }
 
     public String generate(AnimationPropertiesContainer props,Hashtable<String, Object> primitives) {
-    	
-        /*
-    	edgeProperties = (PolylineProperties)props.getPropertiesByName("edgeProperties");
-        sourceCodeProperties = (SourceCodeProperties)props.getPropertiesByName("sourceCodeProperties");
-        headerTextProperties = (TextProperties)props.getPropertiesByName("headerTextProperties");
-        headerRectangleProperties = (RectProperties)props.getPropertiesByName("headerRectangleProperties");
-        nodeColorProperties = (CircleProperties)props.getPropertiesByName("nodeColorProperties");
-        resultAnimationProperties = (MatrixProperties)props.getPropertiesByName("resultAnimationProperties");
-    	*/
-    	
-    	//TODO: MatrixHighlightColor, MatrixFillColor
+
         color_for_lowest_PRValue = (Color)primitives.get("color_for_lowest_PRValue");
         sourceCode = (SourceCodeProperties)props.getPropertiesByName("sourceCode");
         nodehighlightcolor = (Color)primitives.get("nodehighlightcolor");
@@ -148,33 +128,25 @@ public class PageRank implements Generator {
         color_for_highest_PRValue = (Color)primitives.get("color_for_highest_PRValue");
         color_of_edges = (Color)primitives.get("color_of_edges");
         color_of_nodetext = (Color)primitives.get("color_of_nodetext");
-        //boardercolor_of_nodes = (Color)primitives.get("boardercolor_of_nodes");
-        matrixfillcolor = (Color)primitives.get("matrixfillcolor");
-        matrixhighlightcolor = (Color)primitives.get("matrixhighlightcolor");
         edgehighlightcolor = (Color)primitives.get("edgehighlightcolor");
         color_of_dangling_nodes = (Color)primitives.get("color_of_dangling_nodes");
+        dampingFactor = (double)primitives.get("dampingFactor");
     	setHeader();
     	setInformationText();
     	g = (Graph)primitives.get("graph");
     	initalValues(g.getAdjacencyMatrix());
     	PageRankGraph p = setupGraph(nodehighlightcolor, color_of_edges,color_of_nodetext);
     	p.setAllDangingEdgeBaseColor(color_of_dangling_nodes);
-        //PageRankCalculator prc = new PageRankCalculator(g.getAdjacencyMatrix());
         SourceCode src = setSourceCode(sourceCode);
         StringMatrix smat = setupMatrix(700,250, initValue);
         StringMatrix actMat = setupMatrix(700, 400, 0.0f);
         Text lastText = setCounter(700, 210, "Die PageRank-Werte nach der Initialisierung:");
         Text currentText = setCounter(700, 360, "Die PageRank-Werte von Iteration 1:");
-        //Text actualValueText = setCounter(700, 490, "");
-        //actualValueText.changeColor(AnimationPropertiesKeys.COLOR_PROPERTY, Color.BLUE, null, null);
         Text formulaV = setCounter(50, 400, "");
         Text formulaC = setCounter(50, 450, "");
         lang.nextStep();
         src.unhighlight(0);
-        
-        //float minDelta = 0.001f;
-        //int i = 0;
-        //System.out.println("iteration "+i+":\n"+prc.toString()+"\n");
+
 		while(difference > 0.01){ // Counter fuer Iterationen
 			formulaV.setText("Manhattan-Distanz zwischen letzter und vorletzter Iteration: " + new DecimalFormat("#.#####").format(difference) , null, null);
 			formulaC.setText("", null, null);
@@ -188,23 +160,22 @@ public class PageRank implements Generator {
 			src.unhighlight(2);
 			formulaV.setText("", null, null);
 
-			//results.add(new float[adjacencymatrix.length]);
+
 			for(int to = 0; to < adjacencymatrix.length; to++){
 				String fV = "PR(" + g.getNodeLabel(to) +") = (1-d)/|G| "; 
 				formulaV.setText(fV, null, null);
-				currentResults[to] = 0.15f / adjacencymatrix.length;
-				String fC = "PR(" + g.getNodeLabel(to) + ") = 0.15/" + g.getSize() + " = " + new DecimalFormat("#.#####").format(currentResults[to]);
+				//currentResults[to] = 0.15f / adjacencymatrix.length;
+				currentResults[to] = (float) ((1.0f - dampingFactor) / adjacencymatrix.length);
+				//String fC = "PR(" + g.getNodeLabel(to) + ") = 0.15/" + g.getSize() + " = " + new DecimalFormat("#.#####").format(currentResults[to]);
+				String fC = "PR(" + g.getNodeLabel(to) + ") = " + new DecimalFormat("#.##").format((1.0 - dampingFactor) )+ " /" + g.getSize() + " = " + new DecimalFormat("#.#####").format(currentResults[to]);
 				formulaC.setText(fC, null, null);
 				p.highlightNode(to);
 				actMat.highlightCell(0, to, null, null);
 				src.highlight(3);
 				
-				//actualValueText.setText("(1-d)/|G| : " + new DecimalFormat("#.#####").format(currentResults[to]), null, null);
 				actMat.put(1, to, new DecimalFormat("#.#####").format(currentResults[to]), null, null);
-				//p.setNodeFillColor(to, colorLin(color_for_lowest_PRValue, color_for_highest_PRValue, (float)0.15/g.getSize(), (float)1, currentResults[to]));
 				p.setNodeSize(to, this.calcNodeSize(currentResults[to], p.getmaxRadius(), p.getminRadius(), g));
 				lang.nextStep();
-				//actualValueText.setText("", null, null);
 				src.unhighlight(3);
 				src.highlight(4);
 				lang.nextStep();
@@ -215,27 +186,22 @@ public class PageRank implements Generator {
 						fV = "PR(" + g.getNodeLabel(to) + ") = PR(" +  g.getNodeLabel(to) + ") + d * PR(" + g.getNodeLabel(from) + ")/"  + "outgoing edges from " + g.getNodeLabel(from) + " ";
 						formulaV.setText(fV, null, null);
 						float tempResult = currentResults[to];
-						currentResults[to] = (float) (currentResults[to] + 0.85f* (predecValues[from]/numberOfOutgoingEdges[from]));
-						fC = "PR(" + g.getNodeLabel(to) + ") = " + new DecimalFormat("#.#####").format(tempResult)  + " + 0.85 * " + new DecimalFormat("#.#####").format(results.get(results.size()-1)[from]) + "/" + numberOfOutgoingEdges[from] + " = " + new DecimalFormat("#.#####").format(currentResults[to]) ;
+						//currentResults[to] = (float) (currentResults[to] + 0.85f* (predecValues[from]/numberOfOutgoingEdges[from]));
+						currentResults[to] = (float) (currentResults[to] + dampingFactor* (predecValues[from]/numberOfOutgoingEdges[from]));
+						//fC = "PR(" + g.getNodeLabel(to) + ") = " + new DecimalFormat("#.#####").format(tempResult)  + " + 0.85 * " + new DecimalFormat("#.#####").format(results.get(results.size()-1)[from]) + "/" + numberOfOutgoingEdges[from] + " = " + new DecimalFormat("#.#####").format(currentResults[to]) ;
+						fC = "PR(" + g.getNodeLabel(to) + ") = " + new DecimalFormat("#.#####").format(tempResult)  + " + " + new DecimalFormat("#.##").format(dampingFactor )   + " * " + new DecimalFormat("#.#####").format(results.get(results.size()-1)[from]) + "/" + numberOfOutgoingEdges[from] + " = " + new DecimalFormat("#.#####").format(currentResults[to]) ;
 						formulaC.setText(fC, null, null);
 						src.highlight(5);
 						p.highlightEdge(from, to, null, null);
 						
 						p.setNodeSize(to, this.calcNodeSize(currentResults[to], p.getmaxRadius(), p.getminRadius(), g));
 						float [] lastValues = (float []) results.get(iterations - 2);
-						//float tempVal = lastValues[from];
-//						smat.highlightCell(1, from, null, null);
 						smat.highlightElem(1, from, null, null);
-						//actualValueText.setText("PR of p in the last step: " + new DecimalFormat("#.#####").format(lastValues[from]), null, null);
 						actMat.put(1, to, new DecimalFormat("#.#####").format(currentResults[to]), null, null);
-						//p.setNodeFillColor(to, colorLin(color_for_lowest_PRValue, color_for_highest_PRValue, (float)0.15/g.getSize(), (float)1, currentResults[to]));
 						lang.nextStep();
-						//actualValueText.setText("", null, null);
-//						smat.unhighlightCell(1, from, null, null);
 						smat.unhighlightElem(1, from, null, null);
 						src.unhighlight(5);
 						p.unhighlightEdge(from, to, null, null);
-						//lang.nextStep();
 						
 					}
 				}
@@ -250,8 +216,10 @@ public class PageRank implements Generator {
 					fV = "PR( " + g.getNodeLabel(to)+ ") = PR(" + g.getNodeLabel(to) + ") + d * 1/|G| ";
 					formulaV.setText(fV, null, null);
 					float tempResult = currentResults[to];
-					currentResults[to] = (float) (currentResults[to] + 0.85f * (predecValues[dangNode]/adjacencymatrix.length));
-					fC = "PR(" + g.getNodeLabel(to) + ") = " + new DecimalFormat("#.#####").format(tempResult) + " +  0.85 * 1/" + g.getSize() + " = " + new DecimalFormat("#.#####").format(currentResults[to]);
+					//currentResults[to] = (float) (currentResults[to] + 0.85f * (predecValues[dangNode]/adjacencymatrix.length));
+					currentResults[to] = (float) (currentResults[to] + dampingFactor * (predecValues[dangNode]/adjacencymatrix.length));
+					//fC = "PR(" + g.getNodeLabel(to) + ") = " + new DecimalFormat("#.#####").format(tempResult) + " +  0.85 * 1/" + g.getSize() + " = " + new DecimalFormat("#.#####").format(currentResults[to]);
+					fC = "PR(" + g.getNodeLabel(to) + ") = " + new DecimalFormat("#.#####").format(tempResult) + " + " + dampingFactor + " * 1/" + g.getSize() + " = " + new DecimalFormat("#.#####").format(currentResults[to]);
 					formulaC.setText(fC, null, null);
 					p.setNodeHighlightColor(dangNode, color_of_dangling_nodes);
 					p.highlightNode(dangNode);
@@ -259,7 +227,8 @@ public class PageRank implements Generator {
 					p.hideEdge(to, dangNode);
 					p.setNodeSize(to, this.calcNodeSize(currentResults[to], p.getmaxRadius(), p.getminRadius(), g));
 					actMat.put(1, to, new DecimalFormat("#.#####").format(currentResults[to]), null, null);
-					p.setNodeFillColor(to, colorLin(color_for_lowest_PRValue, color_for_highest_PRValue, (float)0.15/g.getSize(), (float)1, currentResults[to]));
+					//p.setNodeFillColor(to, colorLin(color_for_lowest_PRValue, color_for_highest_PRValue, (float)0.15/g.getSize(), (float)1, currentResults[to]));
+					p.setNodeFillColor(to, colorLin(color_for_lowest_PRValue, color_for_highest_PRValue, (float)(1.0f - dampingFactor)/g.getSize(), (float)1, currentResults[to]));
 					lang.nextStep();
 					src.unhighlight(7);
 					p.unhighlightNode(dangNode);
@@ -271,7 +240,6 @@ public class PageRank implements Generator {
 				
 				p.unhighlightNode(to);
 				actMat.unhighlightCell(0, to, null, null);
-				//smat.unhighlightCell(0, to, null, null);
 			}
 			
 			for(int i = 0; i< adjacencymatrix.length; i++){
@@ -292,7 +260,8 @@ public class PageRank implements Generator {
         
     
     private int calcNodeSize(float prValue, int max, int min, Graph g){
-    	float minPRValue = (float)0.15/(float)(g.getAdjacencyMatrix().length);
+    	//float minPRValue = (float)0.15/(float)(g.getAdjacencyMatrix().length);
+    	float minPRValue = (float)(1.0f - dampingFactor)/(float)(g.getAdjacencyMatrix().length);
     	float newSize = ((prValue-(float)minPRValue)/(float)(1.0f - minPRValue)) * ((float)(max - min)) + (float)min;
     	return (int) newSize;
     }
@@ -315,25 +284,25 @@ public class PageRank implements Generator {
         return "Der PageRank-Algorithmus ist ein Algorithmus zur Bewertung von Knoten in einem Netzwerk."
  +" Larry Page und Sergei Brin entwickelten ihn an der Stanford University zur Bewertung von"
  +" Webseiten im Rahmen ihrer mittlerweile weltweit bekannnten Suchmaschine Google. Das Bewertungsprinzip"
- +" sieht dabei vor, dass das Gewicht einer Seite umso gr��er ist, je mehr andere Seiten auf sie verweisen."
- +" Der Effekt wird dabei von dem Gewicht der auf diese Seite verweisenden Seiten verst�rtk."
+ +" sieht dabei vor, dass das Gewicht einer Seite umso größer ist, je mehr andere Seiten auf sie verweisen."
+ +" Der Effekt wird dabei von dem Gewicht der auf diese Seite verweisenden Seiten verstärkt."
  +"\n"
- +"\nEine moegliche Interpretation des PageRanks liefert das sogenannte Random Surfer Modell. Im Rahmen dieses"
+ +"\nEine mögliche Interpretation des PageRanks liefert das sogenannte Random Surfer Modell. Im Rahmen dieses"
  +" Modells repraesentiert der PageRank eines Knotens bzw. einer Webseite (bei einer Normierung der Summe der PageRanks auf 1) die"
- +" Wahrscheinlichkeit mit der sich ein sogenannter Zufallssurfer auf einer bestimmten Webseite befindet. Hierbei gilt, dass"
+ +" Wahrscheinlichkeit, mit der sich ein sogenannter Zufallssurfer auf einer bestimmten Webseite befindet. Hierbei gilt, dass"
  + " der Zufallssurfer mit einer Wahrscheinlichkeit von d den Links auf der Webseite folgt, auf der er sich gerade befindet."
- + " Mit einer Wahrscheinlichkeit von 1-d ruft er manuell in seinem Browser eine der anderen Webseiten auf.";
+ + " Mit einer Wahrscheinlichkeit von 1-d ruft er manuell in seinem Browser eine der Webseiten auf.";
     }
 
     public String getCodeExample(){
-        return "PageRank (Graph G, dampingfactor d)"
-      + "\n    while PageRank Values change signifficantly"
-      + "\n        for all nodes in G do"
-      + "\n            PageRank of actual node n <- (1-d)/|G|"
-      + "\n        for each predecessor p of actual node n do"
-      + "\n	           PR of n <- PR of n + d*((PR of p in the last step)/outgoing edges from p)"
-      + "\n	       for each dangling node dn do// dangling nodes are nodes with no successors"
-      + "\n 	       PR of n <- PR of n + d * (1/|G|)";
+        return "PageRank (Graph G, dampingfactor d) \n"
+      + "    while PageRankValues change signifficantly \n"
+      + "            for all nodes in G do \n"
+      + "                    PageRank of actual node n - (1-d)/|G| \n"
+      + "            for each predecessor p of actual node n do \n"
+      + "                    PR of n - PR of n + d*((PR of p in the last step)/outgoing edges from p) \n"
+      + "            for each dangling node dn do// dangling nodes are nodes with no successors \n"
+      + "                    PR of n - PR of n + d * (1/|G|)";
     }
 
     public String getFileExtension(){
@@ -386,59 +355,26 @@ public class PageRank implements Generator {
     	return colorLin(startColor, endColor,((value-minValue)/(maxValue-minValue)));
     }
     
-   /*
-    private void setUpAdditionalGraphProperties(Graph g)
-    {
-    	PageRankGraph p = new PageRankGraph(g,lang);
-    	
-    	p.setNodeText(3, "Hallo");
-    	p.setNodeSize(3, 100);
-    	p.setNodeFillColor(3, Color.CYAN);
-    	lang.nextStep();
-    	p.setNodeSize(3, 1);
-    	p.highlightNode(1);
-    	p.setNodeFillColor(1, Color.BLUE);
-    	p.setNodeHighlightColor(1, Color.RED);
-    	lang.nextStep();
-    	p.unhighlightNode(1);*/
-    	
-    	/*
-    	p.highlightEdge(3,1, null, null);
-    	p.setEdgeHighlightColor(3, 1, Color.BLUE);
-    	p.setNodeSize(1, 20);
-    	lang.nextStep();
-    	p.unhighlightEdge(3, 1, null, null);
-    	p.setEdgeBaseColor(3, 1, Color.GRAY);
-    	
-    	
-    }*/
     
     private void setHeader(){
     	TextProperties headerProps = new TextProperties();
     	headerProps.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF,Font.BOLD, 24));
-    	//headerProps.set(AnimationPropertiesKeys.COLOR_PROPERTY, color_of_headertext);
-    	headerProps.set(AnimationPropertiesKeys.COLOR_PROPERTY, edgehighlightcolor);
+    	headerProps.set(AnimationPropertiesKeys.COLOR_PROPERTY, color_of_headertext);
     	lang.newText(new Coordinates(20,30), "Der PageRank-Algorithmus", "header", null, headerProps);
     }
     
     private void setInformationText(){
-    	/*TextProperties infoProps = new TextProperties();
-    	infoProps.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF, Font.BOLD, 20));
-    	Text infoText = lang.newText(new Coordinates(20,100),getDescription() , "infoText", null, infoProps);
-    	lang.nextStep();
-    	infoText.hide();
-    	*/
     	SourceCodeProperties infoProps = new SourceCodeProperties();
     	infoProps.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF, Font.BOLD, 20));
     	SourceCode infoText = lang.newSourceCode(new Coordinates(20,100), "InfoText", null, infoProps);
     	infoText.addCodeLine("Der PageRank-Algorithmus ist ein Algorithmus zur Bewertung von Knoten in einem Netzwerk.", "Line0", 0, null);
     	infoText.addCodeLine("Larry Page und Sergei Brin entwickelten ihn an der Stanford University zur Bewertung von", "Line1", 0, null);
     	infoText.addCodeLine("Webseiten im Rahmen ihrer mittlerweile weltweit bekannnten Suchmaschine Google. Das Bewertungsprinzip", "Line2", 0, null);
-    	infoText.addCodeLine("sieht dabei vor, dass das Gewicht einer Seite umso groesser ist, je mehr andere Seiten auf sie verweisen.", "Line3", 0, null);
-    	infoText.addCodeLine("Der Effekt wird dabei von dem Gewicht der auf diese Seite verweisenden Seiten verstaertk.", "Line4", 0, null);
+    	infoText.addCodeLine("sieht dabei vor, dass das Gewicht einer Seite umso größer ist, je mehr andere Seiten auf sie verweisen.", "Line3", 0, null);
+    	infoText.addCodeLine("Der Effekt wird dabei von dem Gewicht der auf diese Seite verweisenden Seiten verstärkt.", "Line4", 0, null);
     	infoText.addCodeLine("", "Line5", 0, null);
-    	infoText.addCodeLine("Eine moegliche Interpretation des PageRanks liefert das sogenannte Random Surfer Modell. Im Rahmen dieses", "Line6", 0, null);
-    	infoText.addCodeLine("Modells repraesentiert der PageRank eines Knotens bzw. einer Webseite (bei einer Normierung der Summe der PageRanks auf 1) die", "Line7", 0, null);
+    	infoText.addCodeLine("Eine mögliche Interpretation des PageRanks liefert das sogenannte Random Surfer Modell. Im Rahmen dieses", "Line6", 0, null);
+    	infoText.addCodeLine("Modells repräsentiert der PageRank eines Knotens bzw. einer Webseite (bei einer Normierung der Summe der PageRanks auf 1) die", "Line7", 0, null);
     	infoText.addCodeLine("Wahrscheinlichkeit mit der sich ein sogenannter Zufallssurfer auf einer bestimmten Webseite befindet. Hierbei gilt, dass", "Line8", 0, null);
     	infoText.addCodeLine("der Zufallssurfer mit einer Wahrscheinlichkeit von d den Links auf der Webseite folgt, auf der er sich gerade befindet.", "Line9", 0, null);
     	infoText.addCodeLine("Mit einer Wahrscheinlichkeit von 1-d ruft er manuell in seinem Browser eine der anderen Webseiten auf.", "Line10", 0, null);
@@ -455,15 +391,10 @@ public class PageRank implements Generator {
     }
     
     private SourceCode setSourceCode(SourceCodeProperties sProb){
-//    	SourceCodeProperties sProb = new  SourceCodeProperties();
-//        sProb.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF,
-//                Font.PLAIN, 12));
-//        sProb.set(AnimationPropertiesKeys.COLOR_PROPERTY, Color.BLUE);
-//        sProb.set(AnimationPropertiesKeys.HIGHLIGHTCOLOR_PROPERTY, Color.RED);
         
         SourceCode src = lang.newSourceCode(new Coordinates(700, 50), "SourceCode", null, sProb);
         src.addCodeLine("1. PageRank (Graph G, dampingfactor d)", "Code0", 0, null);
-        src.addCodeLine("2. while PageRank Values change signifficantly", "Code1", 0, null);
+        src.addCodeLine("2. while PageRankValues change signifficantly", "Code1", 0, null);
         src.addCodeLine("3.     for all nodes in G do", "Code2", 0, null);
         src.addCodeLine("4.         PageRank of actual node n <- (1-d)/|G|", "Code3", 0, null);
         src.addCodeLine("5.         for each predecessor p of actual node n do", "Code4", 0, null);
@@ -475,7 +406,6 @@ public class PageRank implements Generator {
     }
     
     private PageRankGraph setupGraph(Color nodehighlightcolor,Color color_of_edges,Color color_of_nodetext){
-    	//Graph graph = (Graph)primitives.get("graph");
     	GraphProperties gProps = new GraphProperties("graphprop");
         gProps.set(AnimationPropertiesKeys.FILL_PROPERTY, Color.WHITE);
         gProps.set(AnimationPropertiesKeys.HIGHLIGHTCOLOR_PROPERTY, nodehighlightcolor);
@@ -495,11 +425,8 @@ public class PageRank implements Generator {
     	
     	AnimalStringMatrixGenerator matrixGenerator = new AnimalStringMatrixGenerator(
 				(AnimalScript) lang);
-    	 
-        //String[][] strValues = {{"Hallo", "und",},{"Ciao","!"}};
+    	
     	String[][] strValues = new String[2][g.getSize()];
-    	//String[][] strValues = new String[2][2];
-    	//float initValue =  0.3f;
 
     	for(int i = 0; i < g.getSize(); i++){
     		strValues[0][i] = g.getNodeLabel(i);
@@ -508,14 +435,12 @@ public class PageRank implements Generator {
     	
         MatrixProperties matProp = new MatrixProperties();
         matProp.set(AnimationPropertiesKeys.GRID_STYLE_PROPERTY, "table");
-        //matProp.set(AnimationPropertiesKeys.FILLED_PROPERTY, false);
         matProp.set(AnimationPropertiesKeys.CELL_HEIGHT_PROPERTY, 30);
         matProp.set(AnimationPropertiesKeys.CELL_WIDTH_PROPERTY, 80);
         StringMatrix smat = new StringMatrix(matrixGenerator,
 				new Coordinates(x, y), strValues, "Matrix", null,
 				matProp);
-        
-        //StringMatrix smat = lang.newStringMatrix(new Coordinates(x, y), strValues, "Matrix", null, matProp);
+
     	return smat;
     }
     
@@ -528,90 +453,6 @@ public class PageRank implements Generator {
     }
     
     
-    /*
-    private void visualizeIteration(PageRankCalculator prc, PageRankGraph p, SourceCode  src, StringMatrix smat){
-    	src.highlight(1);
-    	lang.nextStep();
-    	src.unhighlight(1);
-    	//lang.nextStep();
-    	src.highlight(2);
-    	lang.nextStep();
-    	src.unhighlight(2);
-
-    	int[][] adjacencyMatrix = g.getAdjacencyMatrix();
-    	for(int to = 0; to < prc.getCurrentValues().length; to++){
-    		boolean highlightedEdges = false;
-        	//src.highlight(2);
-        	//lang.nextStep();
-        	//src.unhighlight(2);
-        	//lang.nextStep();
-    		p.highlightNode(to);
-    		//lang.nextStep();
-    		src.highlight(3);
-    		lang.nextStep();
-    		src.unhighlight(3);
-    		src.highlight(4);
-    		lang.nextStep();
-    		src.unhighlight(4);
-    		for(int from = 0; from < prc.getCurrentValues().length; from++){
-    			if(adjacencyMatrix[from][to] != 0){
-    				src.highlight(5);
-    				p.highlightEdge(from, to, null, null);
-    				lang.nextStep();
-    				//src.unhighlight(5);
-    				//lang.nextStep();
-    				highlightedEdges = true;
-    			}
-    		}
-    		src.unhighlight(5);
-    		//p.unhighlightNode(to);
-    		if(highlightedEdges){
-    			for(int from = 0; from < prc.getCurrentValues().length; from++){
-    				if(adjacencyMatrix[from][to]!=0){
-    					p.unhighlightEdge(from, to, null, null);
-    				}
-    			}
-    			//p.unhighlightNode(to);
-    			//lang.nextStep();
-    		}
-    		src.highlight(6);
-    		lang.nextStep();
-    		src.unhighlight(6);
-    		for(int i = 0; i < g.getSize(); i++){
-    			if(prc.outcomingEdges[i]==0){
-    				src.highlight(7);
-    				if(p.nodes[i].isHighlighted){
-    					p.setNodeHighlightColor(i, color_of_dangling_nodes);
-    					lang.nextStep();
-    					p.setNodeHighlightColor(i, nodehighlightcolor);
-    					src.unhighlight(7);
-    				}else{
-    					Color tempColor = p.nodes[i].fillColor;
-    					p.setNodeFillColor(i, color_of_dangling_nodes);
-    					lang.nextStep();
-    					p.setNodeFillColor(i, tempColor);
-    					src.unhighlight(7);
-    				}
-    			}
-    		}
-    		
-    		//src.highlight(7);
-    		//lang.nextStep();
-    		//src.unhighlight(7);
-    		p.unhighlightNode(to);
-    		//lang.nextStep();
-    		
-    	}
-    	
-    	for(int nodes = 0; nodes < prc.getCurrentValues().length; nodes++){
-    		p.setNodeSize(nodes, this.calcNodeSize(prc.getCurrentValues()[nodes], p.getmaxRadius(), p.getminRadius(), g));
-    		p.setNodeFillColor(nodes, colorLin(color_for_lowest_PRValue, color_for_highest_PRValue, (float)0.15/g.getSize(), (float)1, prc.getCurrentValues()[nodes]));
-    	}
-    	//lang.nextStep();
- 
-  
-    }
-    */
     
     
 

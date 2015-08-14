@@ -506,7 +506,7 @@ public class Netzplan implements Generator {
     }
 
     public String getDescription(){
-        return "Berechnung der fruehesten und spaetesten Anfangs- und Endzeitpunkte einzelner Arbeitsschritte, "
+        return "Berechnung der frühesten und spätesten Anfangs- und Endzeitpunkte einzelner Arbeitsschritte, "
  +"\n"
  +"sowie Identifikation kritischer Pfade. ";
     }
