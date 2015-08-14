@@ -109,7 +109,7 @@ public class Netzplan implements Generator {
         	src2.highlight(3);
         	this.calculateSecondDirection(currentNode);
         }
-        src2.hide();
+        
         
         LinkedList<Integer> critcalPathNodes = new LinkedList<Integer>();
         
@@ -120,24 +120,25 @@ public class Netzplan implements Generator {
         
         
         MultipleSelectionQuestionModel m1 = new MultipleSelectionQuestionModel("Kritischer Pfad");
-        m1.setPrompt("Welche Knoten gehören alles zu einem Kritischen Pfad? (Es kann mehr als ein Kritischer Pfad geben.)");
+        m1.setPrompt("Welche Knoten gehören alles zu einem kritischen Pfad? (Es kann mehr als einen kritischen Pfad geben.)");
         
         for(Integer currentNode : n.getAllNodes())
         {
         	if(critcalPathNodes.contains(currentNode))
         	{
-        		m1.addAnswer(n.getName(currentNode), 5,n.getName(currentNode) + " gehört zu einem Kritischen Pfad.\n");
+        		m1.addAnswer(n.getName(currentNode), 5,n.getName(currentNode) + " gehört zu einem kritischen Pfad.\n");
         	}else
         	{
-        		m1.addAnswer(n.getName(currentNode), -5,n.getName(currentNode) + " gehört nicht zu einem Kritischen Pfad.\n");
+        		m1.addAnswer(n.getName(currentNode), -5,n.getName(currentNode) + " gehört nicht zu einem kritischen Pfad.\n");
         	}
         	
         }
         lang.addMSQuestion(m1);
-       
-        
+          
+        lang.nextStep();
+        src2.hide();
         SourceCode criticalPathText = setCriticicalPathInformation();
-        for(Integer currentNode:n.getStartNodes()){
+        for(Integer currentNode : n.getStartNodes()){
         	this.drawCriticalPath(currentNode);
         }
 
