@@ -133,6 +133,11 @@ public class PageRank implements Generator {
         dampingFactor = (double)primitives.get("dampingFactor");
     	setHeader();
     	setInformationText();
+    	
+    	if(dampingFactor > 1.0f){
+    		dampingFactor = 0.85f;
+    		showWarningMessageForDamp();
+    	}
     	g = (Graph)primitives.get("graph");
     	initalValues(g.getAdjacencyMatrix());
     	PageRankGraph p = setupGraph(nodehighlightcolor, color_of_edges,color_of_nodetext);
@@ -259,7 +264,9 @@ public class PageRank implements Generator {
     }
         
     
-    private int calcNodeSize(float prValue, int max, int min, Graph g){
+
+
+	private int calcNodeSize(float prValue, int max, int min, Graph g){
     	//float minPRValue = (float)0.15/(float)(g.getAdjacencyMatrix().length);
     	float minPRValue = (float)(1.0f - dampingFactor)/(float)(g.getAdjacencyMatrix().length);
     	float newSize = ((prValue-(float)minPRValue)/(float)(1.0f - minPRValue)) * ((float)(max - min)) + (float)min;
@@ -451,6 +458,19 @@ public class PageRank implements Generator {
     	}
     	return difference;
     }
+    
+    private void showWarningMessageForDamp() {
+    	SourceCodeProperties infoProps = new SourceCodeProperties();
+    	infoProps.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF, Font.BOLD, 14));
+    	infoProps.set(AnimationPropertiesKeys.COLOR_PROPERTY, Color.RED);
+    	SourceCode warningMessage = lang.newSourceCode(new Coordinates(20,100), "InfoText", null, infoProps);
+    	warningMessage.addCodeLine("Der von Ihnen eingegebene Wert des Dämpfungsfaktors liegt nicht", "Line0", 0, null);
+    	warningMessage.addCodeLine("zwischen 0 und 1! Er wurde daher auf den üblichen Wert von 0.85" , "Line1", 0, null);
+    	warningMessage.addCodeLine("gesetzt!", "Line3", 0, null);
+    	lang.nextStep();
+    	warningMessage.hide();
+		
+	}
     
     
     
