@@ -9,8 +9,10 @@ import generators.framework.Generator;
 import generators.framework.GeneratorType;
 import interactionsupport.models.AnswerModel;
 import interactionsupport.models.FillInBlanksQuestionModel;
+import interactionsupport.models.MultipleChoiceQuestionModel;
 import interactionsupport.models.MultipleSelectionQuestionModel;
 import interactionsupport.models.QuestionGroupModel;
+import interactionsupport.models.TrueFalseQuestionModel;
 import interactionsupport.views.MultipleSelectionQuestionView;
 import interactionsupport.views.QuestionView;
 
@@ -46,6 +48,11 @@ public class Netzplan implements Generator {
     private TextProperties headerStyle; //headerStyle
     private SourceCodeProperties informationTextStyle;
     private SourceCodeProperties sourceCodeStyle;
+    
+    
+    String qg01 = "firstDirectionQuestions";
+    String qg02 = "secondDirectionQuestions";
+    String qg03 = "finnishQuestions";
 
     public void init(){
         lang = new AnimalScript("Netzplantechnik", "Jan Ulrich Schmitt & Dennis Juckwer", 800, 600);        
@@ -70,20 +77,6 @@ public class Netzplan implements Generator {
         src1.highlight(0);
         //lang.nextStep();
        
-        QuestionGroupModel groupInfo = new QuestionGroupModel(
-                "First question group", 1);
-
-            lang.addQuestionGroup(groupInfo);
-            MultipleSelectionQuestionModel m1 = new MultipleSelectionQuestionModel("Gegenteil");
-            m1.setPrompt("Was ist das Gegenteil von konvex?");
-            m1.addAnswer("concav", 3,
-                "Die Schreibweise ist entweder konkav, oder im englischen concave!");
-            m1.addAnswer("concave", 5, "Richtig!");
-            m1.addAnswer("konkav", 5, "Richtig!");
-            m1.setGroupID("First question group");
-            lang.addMSQuestion(m1);
-        
-        
         if(n.hasLoops())
         {
         	//TODO: Message about invalid graph
@@ -117,11 +110,38 @@ public class Netzplan implements Generator {
         	this.calculateSecondDirection(currentNode);
         }
         src2.hide();
+        
+        LinkedList<Integer> critcalPathNodes = new LinkedList<Integer>();
+        
+        
+        for(Integer currentNode:n.getStartNodes()){
+        	this.getCriticalPath(currentNode,critcalPathNodes);
+        }
+        
+        
+        MultipleSelectionQuestionModel m1 = new MultipleSelectionQuestionModel("Kritischer Pfad");
+        m1.setPrompt("Welche Knoten gehören alles zu einem Kritischen Pfad? (Es kann mehr als ein Kritischer Pfad geben.)");
+        
+        for(Integer currentNode : n.getAllNodes())
+        {
+        	if(critcalPathNodes.contains(currentNode))
+        	{
+        		m1.addAnswer(n.getName(currentNode), 5,n.getName(currentNode) + " gehört zu einem Kritischen Pfad.\n");
+        	}else
+        	{
+        		m1.addAnswer(n.getName(currentNode), -5,n.getName(currentNode) + " gehört nicht zu einem Kritischen Pfad.\n");
+        	}
+        	
+        }
+        lang.addMSQuestion(m1);
+       
+        
         SourceCode criticalPathText = setCriticicalPathInformation();
         for(Integer currentNode:n.getStartNodes()){
         	this.drawCriticalPath(currentNode);
         }
 
+        
         
         lang.finalizeGeneration();
 
@@ -306,6 +326,30 @@ public class Netzplan implements Generator {
 		return isCriticalStep;
 	}
 	
+	private boolean getCriticalPath(Integer actualNode, List<Integer> criticalNodes)
+	{
+		LinkedList<Integer> currentSuccessors = new LinkedList<Integer>();
+		currentSuccessors.addAll(n.getSuccessors(actualNode));
+		boolean isCriticalStep = false;
+		for(Integer actualSuccessor: currentSuccessors){
+			if(n.getEarliestStartTime(actualNode) == n.getLatestStartTime(actualNode) && (n.isEndNode(actualSuccessor)||drawCriticalPath(actualSuccessor) )){
+				criticalNodes.add(actualSuccessor);
+				isCriticalStep = true;
+			}
+			
+		}
+		
+		if(isCriticalStep)
+		{
+			criticalNodes.add(actualNode);
+		}
+				
+		
+		return isCriticalStep;
+	}
+	
+	
+	
     private void setHeader(){
     	//TextProperties headerProps = new TextProperties();
     	//headerProps.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF,Font.BOLD, 24));
@@ -402,6 +446,7 @@ public class Netzplan implements Generator {
     }
     
     private SourceCode setCriticicalPathInformation(){
+    	
     	SourceCodeProperties sProb = new  SourceCodeProperties();
         sProb.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font (Font.SANS_SERIF,Font.BOLD, 24));
         sProb.set(AnimationPropertiesKeys.COLOR_PROPERTY, Color.BLUE);
@@ -416,6 +461,36 @@ public class Netzplan implements Generator {
     
     }
     
+    
+    private void setupQuestions()
+    {
+
+        lang.addQuestionGroup(new QuestionGroupModel(qg01, 1));
+        lang.addQuestionGroup(new QuestionGroupModel(qg02, 1));
+        lang.addQuestionGroup(new QuestionGroupModel(qg03, 1));
+        
+        
+    }
+    
+    
+    private void startQuestion(FillInBlanksQuestionModel questionModel)
+    {
+    	lang.addFIBQuestion(questionModel);
+    }
+    
+    private void startQuestion(MultipleSelectionQuestionModel questionModel)
+    {
+    	lang.addMSQuestion(questionModel);
+    }
+    private void startQuestion(MultipleChoiceQuestionModel questionModel)
+    {
+    	lang.addMCQuestion(questionModel);
+    }
+    
+    private void startQuestion(TrueFalseQuestionModel questionModel)
+    {
+    	lang.addTFQuestion(questionModel);
+    }
     
 
     public String getName() {
