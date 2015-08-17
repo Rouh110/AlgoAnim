@@ -69,6 +69,8 @@ public class Netzplan implements Generator {
         Color edgeColor = (Color)primitives.get("EdgeColor");
         MatrixProperties matrixProperties = (MatrixProperties) props.getPropertiesByName("NodeStyle");
         
+        setupQuestions();
+        
         setHeader();
         setInformationText();
         src1 = setSourceCodeForward();    
@@ -472,26 +474,9 @@ public class Netzplan implements Generator {
         
         
     }
+
     
-    
-    private void startQuestion(FillInBlanksQuestionModel questionModel)
-    {
-    	lang.addFIBQuestion(questionModel);
-    }
-    
-    private void startQuestion(MultipleSelectionQuestionModel questionModel)
-    {
-    	lang.addMSQuestion(questionModel);
-    }
-    private void startQuestion(MultipleChoiceQuestionModel questionModel)
-    {
-    	lang.addMCQuestion(questionModel);
-    }
-    
-    private void startQuestion(TrueFalseQuestionModel questionModel)
-    {
-    	lang.addTFQuestion(questionModel);
-    }
+
     
 
     public String getName() {
