@@ -30,6 +30,7 @@ import algoanim.util.Timing;
 
 
 
+
 /*
 import generators.framework.properties.AnimationPropertiesContainer;
 import algoanim.animalscript.AnimalScript;
@@ -50,6 +51,8 @@ import algoanim.animalscript.AnimalStringMatrixGenerator;
 
 import algoanim.counter.model.TwoValueCounter;
 
+import algoanim.counter.view.TwoValueView;
+
 ///*
 import java.util.Locale;
 import java.awt.Color;
@@ -67,7 +70,7 @@ public class PageRank implements Generator {
     private ArrayList<float[]> results;
     private float initValue;
     private float difference=100.0f;
-    private int iterations = 1;
+    private int iterations = 0;
     private double dampingFactor;
     
     
@@ -135,7 +138,9 @@ public class PageRank implements Generator {
         color_of_dangling_nodes = (Color)primitives.get("color_of_dangling_nodes");
         dampingFactor = (double)primitives.get("dampingFactor");
     	setHeader();
-    	setInformationText();
+    	SourceCode informationText = setInformationText();
+    	lang.nextStep("Einleitung");
+    	informationText.hide();
     	
     	if(dampingFactor > 1.0f){
     		dampingFactor = 0.85f;
@@ -148,17 +153,25 @@ public class PageRank implements Generator {
     	initalValues(g.getAdjacencyMatrix());
     	PageRankGraph p = setupGraph(nodehighlightcolor, color_of_edges,color_of_nodetext);
     	
-    	TwoValueCounter counter = lang.newCounter(g);
+    	
     	
     	p.setAllDangingEdgeBaseColor(color_of_dangling_nodes);
         SourceCode src = setSourceCode(sourceCode);
         StringMatrix smat = setupMatrix(700,250, initValue);
         StringMatrix actMat = setupMatrix(700, 400, 0.0f);
+        
+        TwoValueCounter counter = lang.newCounter(smat);
+        CounterProperties cp = new CounterProperties();
+        cp.set(AnimationPropertiesKeys.FILLED_PROPERTY, true);
+        cp.set(AnimationPropertiesKeys.FILL_PROPERTY, Color.BLUE);
+        TwoValueView view = lang.newCounterView(counter,
+        		new Coordinates(1100, 430), cp, true, true);
+
         Text lastText = setCounter(700, 210, "Die PageRank-Werte nach der Initialisierung:");
         Text currentText = setCounter(700, 360, "Die PageRank-Werte von Iteration 1:");
         Text formulaV = setCounter(50, 400, "");
         Text formulaC = setCounter(50, 450, "");
-        lang.nextStep();
+        lang.nextStep("Aufruf und Initialisierung");
         src.unhighlight(0);
 
 		while(difference > 0.01){ // Counter fuer Iterationen
@@ -166,7 +179,9 @@ public class PageRank implements Generator {
 			formulaC.setText("", null, null);
 			iterations += 1;
 			src.highlight(1);
-			lang.nextStep();
+			int chapterIntCorrect = iterations - 1;
+			String outputChapter = chapterIntCorrect + ". Iteration";
+			lang.nextStep(outputChapter);
 			src.unhighlight(1);
 			float[] currentResults = new float[adjacencymatrix.length];
 			src.highlight(2);
@@ -178,9 +193,7 @@ public class PageRank implements Generator {
 			for(int to = 0; to < adjacencymatrix.length; to++){
 				String fV = "PR(" + g.getNodeLabel(to) +") = (1-d)/|G| "; 
 				formulaV.setText(fV, null, null);
-				//currentResults[to] = 0.15f / adjacencymatrix.length;
 				currentResults[to] = (float) ((1.0f - dampingFactor) / adjacencymatrix.length);
-				//String fC = "PR(" + g.getNodeLabel(to) + ") = 0.15/" + g.getSize() + " = " + new DecimalFormat("#.#####").format(currentResults[to]);
 				String fC = "PR(" + g.getNodeLabel(to) + ") = " + new DecimalFormat("#.##").format((1.0 - dampingFactor) )+ " /" + g.getSize() + " = " + new DecimalFormat("#.#####").format(currentResults[to]);
 				formulaC.setText(fC, null, null);
 				p.highlightNode(to);
@@ -198,11 +211,10 @@ public class PageRank implements Generator {
 				for(int from = 0; from < adjacencymatrix.length; from++){
 					if(adjacencymatrix[from][to] == 1){
 						fV = "PR(" + g.getNodeLabel(to) + ") = PR(" +  g.getNodeLabel(to) + ") + d * PR(" + g.getNodeLabel(from) + ")/"  + "outgoing edges from " + g.getNodeLabel(from) + " ";
+						smat.getElement(0, 0); //// Hilfsabfrage fuer Counter
 						formulaV.setText(fV, null, null);
 						float tempResult = currentResults[to];
-						//currentResults[to] = (float) (currentResults[to] + 0.85f* (predecValues[from]/numberOfOutgoingEdges[from]));
 						currentResults[to] = (float) (currentResults[to] + dampingFactor* (predecValues[from]/numberOfOutgoingEdges[from]));
-						//fC = "PR(" + g.getNodeLabel(to) + ") = " + new DecimalFormat("#.#####").format(tempResult)  + " + 0.85 * " + new DecimalFormat("#.#####").format(results.get(results.size()-1)[from]) + "/" + numberOfOutgoingEdges[from] + " = " + new DecimalFormat("#.#####").format(currentResults[to]) ;
 						fC = "PR(" + g.getNodeLabel(to) + ") = " + new DecimalFormat("#.#####").format(tempResult)  + " + " + new DecimalFormat("#.##").format(dampingFactor )   + " * " + new DecimalFormat("#.#####").format(results.get(results.size()-1)[from]) + "/" + numberOfOutgoingEdges[from] + " = " + new DecimalFormat("#.#####").format(currentResults[to]) ;
 						formulaC.setText(fC, null, null);
 						src.highlight(5);
@@ -230,9 +242,7 @@ public class PageRank implements Generator {
 					fV = "PR( " + g.getNodeLabel(to)+ ") = PR(" + g.getNodeLabel(to) + ") + d * 1/|G| ";
 					formulaV.setText(fV, null, null);
 					float tempResult = currentResults[to];
-					//currentResults[to] = (float) (currentResults[to] + 0.85f * (predecValues[dangNode]/adjacencymatrix.length));
 					currentResults[to] = (float) (currentResults[to] + dampingFactor * (predecValues[dangNode]/adjacencymatrix.length));
-					//fC = "PR(" + g.getNodeLabel(to) + ") = " + new DecimalFormat("#.#####").format(tempResult) + " +  0.85 * 1/" + g.getSize() + " = " + new DecimalFormat("#.#####").format(currentResults[to]);
 					fC = "PR(" + g.getNodeLabel(to) + ") = " + new DecimalFormat("#.#####").format(tempResult) + " + " + dampingFactor + " * 1/" + g.getSize() + " = " + new DecimalFormat("#.#####").format(currentResults[to]);
 					formulaC.setText(fC, null, null);
 					p.setNodeHighlightColor(dangNode, color_of_dangling_nodes);
@@ -241,7 +251,6 @@ public class PageRank implements Generator {
 					p.hideEdge(to, dangNode);
 					p.setNodeSize(to, this.calcNodeSize(currentResults[to], p.getmaxRadius(), p.getminRadius(), g));
 					actMat.put(1, to, new DecimalFormat("#.#####").format(currentResults[to]), null, null);
-					//p.setNodeFillColor(to, colorLin(color_for_lowest_PRValue, color_for_highest_PRValue, (float)0.15/g.getSize(), (float)1, currentResults[to]));
 					p.setNodeFillColor(to, colorLin(color_for_lowest_PRValue, color_for_highest_PRValue, (float)(1.0f - dampingFactor)/g.getSize(), (float)1, currentResults[to]));
 					lang.nextStep();
 					src.unhighlight(7);
@@ -268,15 +277,28 @@ public class PageRank implements Generator {
 		}
         
         
-        System.out.println(lang.toString());
+        SourceCode endText = showEndText();
+        p.hideAllDanglingEdges();
+        p.hideGraph();
+        smat.hide();
+        actMat.hide();
+        lastText.hide();
+        currentText.hide();
+        formulaC.hide();
+        formulaV.hide();
+        view.hide();
+        src.hide();
+        lang.nextStep("Fazit");
+		System.out.println(lang.toString());
 		return lang.toString();
     }
         
     
 
 
+
+
 	private int calcNodeSize(float prValue, int max, int min, Graph g){
-    	//float minPRValue = (float)0.15/(float)(g.getAdjacencyMatrix().length);
     	float minPRValue = (float)(1.0f - dampingFactor)/(float)(g.getAdjacencyMatrix().length);
     	float newSize = ((prValue-(float)minPRValue)/(float)(1.0f - minPRValue)) * ((float)(max - min)) + (float)min;
     	return (int) newSize;
@@ -379,7 +401,7 @@ public class PageRank implements Generator {
     	lang.newText(new Coordinates(20,30), "Der PageRank-Algorithmus", "header", null, headerProps);
     }
     
-    private void setInformationText(){
+    private SourceCode setInformationText(){
     	SourceCodeProperties infoProps = new SourceCodeProperties();
     	infoProps.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF, Font.BOLD, 20));
     	SourceCode infoText = lang.newSourceCode(new Coordinates(20,100), "InfoText", null, infoProps);
@@ -394,8 +416,7 @@ public class PageRank implements Generator {
     	infoText.addCodeLine("Wahrscheinlichkeit mit der sich ein sogenannter Zufallssurfer auf einer bestimmten Webseite befindet. Hierbei gilt, dass", "Line8", 0, null);
     	infoText.addCodeLine("der Zufallssurfer mit einer Wahrscheinlichkeit von d den Links auf der Webseite folgt, auf der er sich gerade befindet.", "Line9", 0, null);
     	infoText.addCodeLine("Mit einer Wahrscheinlichkeit von 1-d ruft er manuell in seinem Browser eine der anderen Webseiten auf.", "Line10", 0, null);
-    	lang.nextStep();
-    	infoText.hide();
+    	return infoText;
     }
     
     private Text setCounter(int x, int y, String Text){
@@ -479,6 +500,25 @@ public class PageRank implements Generator {
     	lang.nextStep();
     	warningMessage.hide();
 		
+	}
+    
+	private SourceCode showEndText() {
+    	int actualCount = iterations - 1;
+		SourceCodeProperties infoProps = new SourceCodeProperties();
+    	infoProps.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF, Font.BOLD, 20));
+    	SourceCode infoText = lang.newSourceCode(new Coordinates(20,100), "InfoText", null, infoProps);
+    	infoText.addCodeLine("Der PageRank-Algorithmus ist ein Algorithmus zur Bewertung von Knoten in einem Netzwerk.", "Line0", 0, null);
+    	infoText.addCodeLine("Larry Page und Sergei Brin entwickelten ihn an der Stanford University zur Bewertung von", "Line1", 0, null);
+    	infoText.addCodeLine("Webseiten im Rahmen ihrer mittlerweile weltweit bekannnten Suchmaschine Google. Das Bewertungsprinzip", "Line2", 0, null);
+    	infoText.addCodeLine("sieht dabei vor, dass das Gewicht einer Seite umso größer ist, je mehr andere Seiten auf sie verweisen.", "Line3", 0, null);
+    	infoText.addCodeLine("Der Effekt wird dabei von dem Gewicht der auf diese Seite verweisenden Seiten verstärkt.", "Line4", 0, null);
+    	infoText.addCodeLine("", "Line5", 0, null);
+    	infoText.addCodeLine("Eine mögliche Interpretation des PageRanks liefert das sogenannte Random Surfer Modell. Im Rahmen dieses", "Line6", 0, null);
+    	infoText.addCodeLine("Modells repräsentiert der PageRank eines Knotens bzw. einer Webseite (bei einer Normierung der Summe der PageRanks auf 1) die", "Line7", 0, null);
+    	infoText.addCodeLine("Wahrscheinlichkeit mit der sich ein sogenannter Zufallssurfer auf einer bestimmten Webseite befindet. Hierbei gilt, dass", "Line8", 0, null);
+    	infoText.addCodeLine("der Zufallssurfer mit einer Wahrscheinlichkeit von d den Links auf der Webseite folgt, auf der er sich gerade befindet.", "Line9", 0, null);
+    	infoText.addCodeLine("Mit einer Wahrscheinlichkeit von 1-d ruft er manuell in seinem Browser eine der anderen Webseiten auf.", "Line10", 0, null);
+    	return infoText;
 	}
     
     

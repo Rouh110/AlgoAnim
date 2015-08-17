@@ -223,6 +223,11 @@ public class PageRankGraph{
 		}
 	}
 	
+	//TODO hide graph completely
+	public void hideGraph(){
+		
+	}
+	
 	public void setEdgeBaseColor(int from, int to, Color newColor)
 	{
 		if(newColor == null)
@@ -619,4 +624,6 @@ public class PageRankGraph{
 		public Coordinates to;
 		public boolean isDanglingEdge = false;
 	}
+	
+	
 }
