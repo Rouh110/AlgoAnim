@@ -77,6 +77,7 @@ public class PageRank implements Generator {
     private float difference=100.0f;
     private int iterations = 0;
     private double dampingFactor;
+    private double breakValue;
     PageRankGraph p;
     
     
@@ -94,7 +95,7 @@ public class PageRank implements Generator {
     private String qgName02 = "DanglingNodeQuestions";
     
     private String dampingFactorName = "dampingFactor";
-    private String breakValue = "breakValue";
+    private String breakValueName = "breakValue";
     private String currentIterationChangeName = "currentIterationChange";
     private String currentNodeName = "currentNode";
     private String currentPredecessorName = "currentPredecessor";
@@ -160,6 +161,7 @@ public class PageRank implements Generator {
         edgehighlightcolor = (Color)primitives.get("edgehighlightcolor");
         color_of_dangling_nodes = (Color)primitives.get("color_of_dangling_nodes");
         dampingFactor = (double)primitives.get("dampingFactor");
+        breakValue = (double)primitives.get("breakValue");
         
         
         
@@ -181,7 +183,7 @@ public class PageRank implements Generator {
     	setupVars(g);
     	
     	vars.set(dampingFactorName, String.valueOf(dampingFactor));
-    	vars.set(breakValue, String.valueOf(0.01));
+    	vars.set(breakValueName, String.valueOf(breakValue));
     	
     	
 
@@ -222,7 +224,7 @@ public class PageRank implements Generator {
         
         vars.declare("double", currentIterationChangeName,String.valueOf(difference),"most recent holder");
         
-		while(difference > 0.01){ // Counter fuer Iterationen
+		while(difference > breakValue){ // Counter fuer Iterationen
 			formulaV.setText("Manhattan-Distanz zwischen letzter und vorletzter Iteration: " + new DecimalFormat("#.#####").format(difference) , null, null);
 			formulaC.setText("", null, null);
 			iterations += 1;
@@ -420,7 +422,7 @@ public class PageRank implements Generator {
 		
 		vars.declare("int", numberOfNodesName, String.valueOf(g.getSize()),"fixed value");
 		vars.declare("double",dampingFactorName, "0","fixed value");
-		vars.declare("double",breakValue, "0","fixed value");
+		vars.declare("double",breakValueName, "0","fixed value");
 		
 		for(int i = 0; i < g.getSize(); i++)
 		{
