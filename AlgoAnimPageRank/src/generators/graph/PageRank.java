@@ -27,6 +27,7 @@ import algoanim.primitives.Graph;
 import algoanim.primitives.SourceCode;
 import algoanim.primitives.StringMatrix;
 import algoanim.primitives.Text;
+import algoanim.primitives.Variables;
 import algoanim.primitives.generators.GraphGenerator;
 import algoanim.primitives.generators.Language;
 import algoanim.properties.*;
@@ -35,6 +36,10 @@ import algoanim.util.Node;
 import algoanim.util.Offset;
 import algoanim.util.Timing;
 
+
+
+import algoanim.variables.Variable;
+import algoanim.variables.VariableTypes;
 
 import java.util.Hashtable;
 
@@ -45,14 +50,18 @@ import algoanim.animalscript.AnimalStringMatrixGenerator;
 
 
 import algoanim.counter.model.TwoValueCounter;
-
 import algoanim.counter.view.TwoValueView;
+
+
+
+
 
 ///*
 import java.util.Locale;
 import java.awt.Color;
 
 import algoanim.properties.SourceCodeProperties;
+import animal.variables.VariableRoles;
 //*/
 
 public class PageRank implements Generator {
@@ -83,6 +92,18 @@ public class PageRank implements Generator {
     private String qgName01 = "NextValueQuestion";
     private String qgName02 = "DanglingNodeQuestions";
     
+    private String dampingFactorName = "dampingFactor";
+    private String breakValue = "breakValue";
+    private String currentIterationChangeName = "currentIterationChange";
+    private String currentNodeName = "currentNode";
+    private String currentPredecessorName = "currentPredecessor";
+    private String currentDanglingNodeName = "currentDanglingNode";
+    private String tempValueName = "tempValue";
+    private String numberOfPredecessorName = "numberOfPredecessor";
+    private String numberOfNodesName = "numberOfNodes";
+    
+    private Variables vars;
+    
     public PageRank(){
 
     }
@@ -91,6 +112,7 @@ public class PageRank implements Generator {
         lang = new AnimalScript("PageRank", "Jan Ulrich Schmitt, Dennis Juckwer", 800, 600);
         lang.setStepMode(true);
         lang.setInteractionType(Language.INTERACTION_TYPE_AVINTERACTION);
+        vars = lang.newVariables();
         
     }
     
@@ -138,12 +160,15 @@ public class PageRank implements Generator {
         color_of_dangling_nodes = (Color)primitives.get("color_of_dangling_nodes");
         dampingFactor = (double)primitives.get("dampingFactor");
         
+        
+        
         setupQuestions();
             
     	setHeader();
     	SourceCode informationText = setInformationText();
     	lang.nextStep("Einleitung");
     	informationText.hide();
+    	
     	
     	if(dampingFactor > 1.0f){
     		dampingFactor = 0.85f;
@@ -152,11 +177,21 @@ public class PageRank implements Generator {
     	int [] temparray = {0, 1, 2};
     	
     	g = (Graph)primitives.get("graph");
+    	setupVars(g);
     	
+    	vars.set(dampingFactorName, String.valueOf(dampingFactor));
+    	vars.set(breakValue, String.valueOf(0.01));
+    	
+    	
+
     	initalValues(g.getAdjacencyMatrix());
     	PageRankGraph p = setupGraph(nodehighlightcolor, color_of_edges,color_of_nodetext);
     	
-    	
+    
+    	for(int i = 0; i < g.getSize(); i++)
+    	{
+    		vars.set("Node"+g.getNodeLabel(i), String.valueOf(initValue));
+    	}
     	
     	p.setAllDangingEdgeBaseColor(color_of_dangling_nodes);
         SourceCode src = setSourceCode(sourceCode);
@@ -184,6 +219,8 @@ public class PageRank implements Generator {
         int nodeToQuestion = rg.nextInt(adjacencymatrix.length-1);
         nodeToQuestion++;
         
+        vars.declare("double", currentIterationChangeName,String.valueOf(difference),"most recent holder");
+        
 		while(difference > 0.01){ // Counter fuer Iterationen
 			formulaV.setText("Manhattan-Distanz zwischen letzter und vorletzter Iteration: " + new DecimalFormat("#.#####").format(difference) , null, null);
 			formulaC.setText("", null, null);
@@ -198,8 +235,15 @@ public class PageRank implements Generator {
 			lang.nextStep();
 			src.unhighlight(2);
 			formulaV.setText("", null, null);
+			
+			
+			vars.declare("string", currentNodeName,"","temporary");
 
 			for(int to = 0; to < adjacencymatrix.length; to++){
+				
+				
+				vars.set(currentNodeName, "Node"+g.getNodeLabel(to));
+				vars.declare("double", tempValueName+g.getNodeLabel(to), "0", "temporary");
 				
 				
 				if(nodeToQuestion == to)
@@ -213,6 +257,7 @@ public class PageRank implements Generator {
 				String fV = "PR(" + g.getNodeLabel(to) +") = (1-d)/|G| "; 
 				formulaV.setText(fV, null, null);
 				currentResults[to] = (float) ((1.0f - dampingFactor) / adjacencymatrix.length);
+				vars.set(tempValueName+g.getNodeLabel(to),String.valueOf(currentResults[to]));
 				String fC = "PR(" + g.getNodeLabel(to) + ") = " + new DecimalFormat("#.##").format((1.0 - dampingFactor) )+ " /" + g.getSize() + " = " + new DecimalFormat("#.#####").format(currentResults[to]);
 				formulaC.setText(fC, null, null);
 				p.highlightNode(to);
@@ -222,18 +267,22 @@ public class PageRank implements Generator {
 				actMat.put(1, to, new DecimalFormat("#.#####").format(currentResults[to]), null, null);
 				p.setNodeSize(to, this.calcNodeSize(currentResults[to], p.getmaxRadius(), p.getminRadius(), g));
 				lang.nextStep();
+				
 				src.unhighlight(3);
 				src.highlight(4);
 				lang.nextStep();
 				src.unhighlight(4);
 				float[] predecValues = (float[]) results.get(results.size()-1);
+				vars.declare("string", currentPredecessorName,"", "walker");
 				for(int from = 0; from < adjacencymatrix.length; from++){
 					if(adjacencymatrix[from][to] == 1){
+						vars.set(currentPredecessorName, g.getNodeLabel(from));
 						fV = "PR(" + g.getNodeLabel(to) + ") = PR(" +  g.getNodeLabel(to) + ") + d * PR(" + g.getNodeLabel(from) + ")/"  + "outgoing edges from " + g.getNodeLabel(from) + " ";
 						smat.getElement(0, 0); //// Hilfsabfrage fuer Counter
 						formulaV.setText(fV, null, null);
 						float tempResult = currentResults[to];
 						currentResults[to] = (float) (currentResults[to] + dampingFactor* (predecValues[from]/numberOfOutgoingEdges[from]));
+						vars.set(tempValueName+g.getNodeLabel(to),String.valueOf(currentResults[to]));
 						fC = "PR(" + g.getNodeLabel(to) + ") = " + new DecimalFormat("#.#####").format(tempResult)  + " + " + new DecimalFormat("#.##").format(dampingFactor )   + " * " + new DecimalFormat("#.#####").format(results.get(results.size()-1)[from]) + "/" + numberOfOutgoingEdges[from] + " = " + new DecimalFormat("#.#####").format(currentResults[to]) ;
 						formulaC.setText(fC, null, null);
 						src.highlight(5);
@@ -249,19 +298,25 @@ public class PageRank implements Generator {
 						p.unhighlightEdge(from, to, null, null);
 						
 					}
+					
 				}
+				vars.discard(currentPredecessorName);
 				src.highlight(6);
 				lang.nextStep();
 				src.unhighlight(6);
 	
+				vars.declare("String", currentDanglingNodeName, "", "walker");
 				for(Integer dangNode : p.getAllDanglingNodeNrs())
 				{
+					vars.set(currentDanglingNodeName, g.getNodeLabel(dangNode));
 					src.highlight(7);
 					smat.highlightElem(0, dangNode, null, null);
 					fV = "PR( " + g.getNodeLabel(to)+ ") = PR(" + g.getNodeLabel(to) + ") + d * 1/|G| ";
 					formulaV.setText(fV, null, null);
 					float tempResult = currentResults[to];
+					vars.set(tempValueName+g.getNodeLabel(to),String.valueOf(currentResults[to]));
 					currentResults[to] = (float) (currentResults[to] + dampingFactor * (predecValues[dangNode]/adjacencymatrix.length));
+					vars.set(tempValueName+g.getNodeLabel(to),String.valueOf(currentResults[to]));
 					fC = "PR(" + g.getNodeLabel(to) + ") = " + new DecimalFormat("#.#####").format(tempResult) + " + " + dampingFactor + " * 1/" + g.getSize() + " = " + new DecimalFormat("#.#####").format(currentResults[to]);
 					formulaC.setText(fC, null, null);
 					p.setNodeHighlightColor(dangNode, color_of_dangling_nodes);
@@ -279,6 +334,7 @@ public class PageRank implements Generator {
 					p.hideEdge(dangNode, to);
 					smat.unhighlightElem(0, dangNode, null, null);
 				}
+				vars.discard(currentDanglingNodeName);
 				
 				p.unhighlightNode(to);
 				actMat.unhighlightCell(0, to, null, null);
@@ -287,12 +343,17 @@ public class PageRank implements Generator {
 			for(int i = 0; i< adjacencymatrix.length; i++){
 				smat.put(1, i, new DecimalFormat("#.#####").format(currentResults[i]), null, null);
 				actMat.put(1,i,"0.0",null,null);
+				vars.set("Node"+g.getNodeLabel(i), String.valueOf(currentResults[i]));
+				vars.discard(tempValueName+g.getNodeLabel(i));
 			}
 			results.add(currentResults);
 			difference = getDifference((float[])results.get(results.size()-2), (float[])results.get(results.size()-1));
+			vars.set(currentIterationChangeName, String.valueOf(difference));
 			//iterations += 1;
 			lastText.setText("Die Werte von Iteration " + (iterations -1) + ":" , null, null);
 			currentText.setText("Die Werte von Iteration " + iterations + ":", null, null);
+			
+			vars.discard(currentNodeName);
 		}
         
       
@@ -346,6 +407,21 @@ public class PageRank implements Generator {
     	float newSize = ((prValue-(float)minPRValue)/(float)(1.0f - minPRValue)) * ((float)(max - min)) + (float)min;
     	return (int) newSize;
     }
+	
+	private void setupVars(Graph g)
+	{
+		VariableTypes.FLOAT.toString();
+		VariableRoles.UNKNOWN.toString();
+		
+		vars.declare("int", numberOfNodesName, String.valueOf(g.getSize()),"fixed value");
+		vars.declare("double",dampingFactorName, "0","fixed value");
+		vars.declare("double",breakValue, "0","fixed value");
+		
+		for(int i = 0; i < g.getSize(); i++)
+		{
+			vars.declare("double","Node"+g.getNodeLabel(i), "0","most recent holder" );
+		}
+	}
     
     private void setupQuestions()
     {
@@ -570,6 +646,16 @@ public class PageRank implements Generator {
     			question.addAnswer(nodeLabel, -5, "Knoten "+ nodeLabel+" ist kein dangling node.");
     		}
     	}
+    	
+    	if(danglingNodes.isEmpty())
+    	{
+    		question.addAnswer("Keiner", 5, "Es gibt keine Dangling Nodes in diesem Graphen.");
+    	}else
+    	{
+    		question.addAnswer("Keiner",-5, "Es gibt Dangling Nodes in diesem Graphen.");
+    	}
+    	
+    	
     	
     	lang.addMSQuestion(question);
     	
