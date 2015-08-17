@@ -305,5 +305,9 @@ edge C D weight 5
 			<name>EdgeHighlightColor</name>
 			<value><Color>(0, 255, 0)</Color></value>
 		</Primitive>
+				<Primitive type="double">
+			<name>dampingFactor</name>
+			<value><double>0.85</double></value>
+		</Primitive>
 	</Folder>
 </PropertiesTreeModel>
