@@ -7,12 +7,20 @@ package generators.graph;
 
 import generators.framework.Generator;
 import generators.framework.GeneratorType;
+import interactionsupport.models.AnswerModel;
+import interactionsupport.models.FillInBlanksQuestionModel;
+import interactionsupport.models.MultipleChoiceQuestionModel;
+import interactionsupport.models.MultipleSelectionQuestionModel;
+import interactionsupport.models.QuestionGroupModel;
 
 import java.awt.Color;
 import java.awt.Font;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Locale;
+import java.util.Random;
 
 import algoanim.primitives.Circle;
 import algoanim.primitives.Graph;
@@ -26,6 +34,14 @@ import algoanim.util.Coordinates;
 import algoanim.util.Node;
 import algoanim.util.Offset;
 import algoanim.util.Timing;
+
+
+
+
+
+
+
+
 
 
 
@@ -45,6 +61,14 @@ import generators.framework.properties.AnimationPropertiesContainer;
 import algoanim.animalscript.AnimalCircleGenerator;
 import algoanim.animalscript.AnimalScript;
 import algoanim.animalscript.AnimalStringMatrixGenerator;
+
+
+
+
+
+
+
+
 
 
 ///*
@@ -88,6 +112,9 @@ public class PageRank implements Generator {
     private Color edgehighlightcolor;
     private Color color_of_dangling_nodes;
     
+    private String qgName01 = "NextValueQuestion";
+    private String qgName02 = "DanglingNodeQuestions";
+    
     public PageRank(){
     	//System.out.println("Hello World");
     }
@@ -95,6 +122,7 @@ public class PageRank implements Generator {
     public void init(){
         lang = new AnimalScript("PageRank", "Jan Ulrich Schmitt, Dennis Juckwer", 800, 600);
         lang.setStepMode(true);
+        lang.setInteractionType(Language.INTERACTION_TYPE_AVINTERACTION);
         
     }
     
@@ -153,6 +181,9 @@ public class PageRank implements Generator {
         matrixhighlightcolor = (Color)primitives.get("matrixhighlightcolor");
         edgehighlightcolor = (Color)primitives.get("edgehighlightcolor");
         color_of_dangling_nodes = (Color)primitives.get("color_of_dangling_nodes");
+        
+        setupQuestions();
+        
     	setHeader();
     	setInformationText();
     	g = (Graph)primitives.get("graph");
@@ -169,6 +200,8 @@ public class PageRank implements Generator {
         //actualValueText.changeColor(AnimationPropertiesKeys.COLOR_PROPERTY, Color.BLUE, null, null);
         Text formulaV = setCounter(50, 400, "");
         Text formulaC = setCounter(50, 450, "");
+        
+        startDanglingNodeQuestion(p, g);
         lang.nextStep();
         src.unhighlight(0);
         
@@ -189,7 +222,12 @@ public class PageRank implements Generator {
 			formulaV.setText("", null, null);
 
 			//results.add(new float[adjacencymatrix.length]);
+			
+			
 			for(int to = 0; to < adjacencymatrix.length; to++){
+				float nextValueResult = getNextValue(to, p);
+				startNextValueQuestion(nextValueResult, to, g);
+				
 				String fV = "PR(" + g.getNodeLabel(to) +") = (1-d)/|G| "; 
 				formulaV.setText(fV, null, null);
 				currentResults[to] = 0.15f / adjacencymatrix.length;
@@ -286,10 +324,33 @@ public class PageRank implements Generator {
 		}
         
         
-        System.out.println(lang.toString());
+        lang.finalizeGeneration();
 		return lang.toString();
     }
-        
+    
+    private float getNextValue(int node, PageRankGraph p)
+    {
+    		
+		float[] predecValues = (float[]) results.get(results.size()-1);
+		
+		float result = 0.15f / adjacencymatrix.length;
+		
+		for(int from = 0; from < adjacencymatrix.length; from++){
+			if(adjacencymatrix[from][node] == 1){
+				result = (float) (result + 0.85f* (predecValues[from]/numberOfOutgoingEdges[from]));				
+			}
+		}
+
+
+		for(Integer dangNode : p.getAllDanglingNodeNrs())
+		{
+			
+			result = (float) (result + 0.85f * (predecValues[dangNode]/adjacencymatrix.length));		
+		}
+			
+		return result;
+		
+    }
     
     private int calcNodeSize(float prValue, int max, int min, Graph g){
     	float minPRValue = (float)0.15/(float)(g.getAdjacencyMatrix().length);
@@ -297,7 +358,236 @@ public class PageRank implements Generator {
     	return (int) newSize;
     }
     
+    private void setupQuestions()
+    {
+    	lang.addQuestionGroup(new QuestionGroupModel(qgName01));
+    }
     
+    int nqvId = 0;
+    private void startNextValueQuestion(float nextValue,int node ,Graph g)
+    {
+    
+    	Random randomGenerator = new Random();
+    	nqvId ++;
+    	float roundedValue = nextValue * 1000;
+    	roundedValue = Math.round(roundedValue);
+    	roundedValue = roundedValue/ 1000;
+    	
+    	MultipleChoiceQuestionModel question = new MultipleChoiceQuestionModel("NÃ¤chter Wert " +nqvId);
+    	question.setPrompt("Welchen Wert hat Knoten "+ g.getNodeLabel(node) + " am Ende der kompletten Iteration? (gerundet auf die dritte Nachkommastelle)");
+    	
+        String valueString = String.valueOf(roundedValue);
+        
+        LinkedList<Float> values = new LinkedList<Float>();
+        values.add(roundedValue);
+        
+        for(int i =0; i < 3; i++)
+        {
+        	float newValue;
+        	int maxPercent = 100;
+        	int minPercent = 10;
+        	
+        	do
+        	{
+        		float randomValue = randomGenerator.nextInt(maxPercent-minPercent);
+        		randomValue += minPercent;
+            	randomValue -= ((float)(maxPercent-minPercent))/2.f;
+            	
+            	randomValue = randomValue/100;
+            	
+            	
+            	if(randomValue == 0)
+            	{
+            		randomValue += 0.01;
+            	}
+            	
+            	newValue = roundedValue+ 1.0f * randomValue;
+            	
+            	
+            	newValue = newValue * 1000;
+            	newValue = Math.round(newValue);
+            	newValue = newValue/ 1000;
+            	
+            	if(newValue >= 1)
+            		newValue = 1.f;
+            	
+            	if(newValue <= 0)
+            		newValue = 0.001f;
+            	
+        	}while(values.contains(newValue));
+        	
+        	values.add(newValue);       	
+        }
+        
+        while(!values.isEmpty())
+        {
+        	int index = randomGenerator.nextInt(values.size());
+        	float questionValue = values.remove(index);
+        	
+        	System.out.println(questionValue);
+        	
+        	if(questionValue == roundedValue)
+        	{
+        		question.addAnswer(float2String(questionValue),5,"Richtig.");
+        		
+        	}else
+        	{
+        		question.addAnswer(float2String(questionValue),-5,"Falsch.");
+        	}
+        }
+        
+        question.setGroupID(qgName01);
+        
+        lang.addMCQuestion(question);
+        
+    	
+    	//FillInBlanksQuestionModel m1 = new FillInBlanksQuestionModel("NÃ¤chter Wert " +nqvId);
+    	
+    	
+//        m1.setPrompt("Gebe den nÃ¤chsten Wert fÃ¼r " + g.getNodeLabel(node) + " an. (gerundet auf die dritte Nachkommastelle)");
+//        
+//        String valueString = String.valueOf(roundedValue);
+        
+        
+        
+//        String[] splittedValue = valueString.split(".");
+//        splittedValue = new String[2];
+//        
+//        splittedValue[0] = "0";
+//        splittedValue[1] = "004";
+//        
+//        if(splittedValue == null)
+//        {
+//        	splittedValue = valueString.split(",");
+//        }
+//        
+//        String beforePoint = splittedValue[0];
+//        String afterPoint = "";
+//        
+//        if(splittedValue.length == 2)
+//        {
+//        	afterPoint = splittedValue[1];
+//        }
+//        
+//        
+//        for(int i = 1;  i < beforePoint.length(); i++)
+//        {
+//        	if(beforePoint.substring(i, i+1).equals("0"))
+//        	{
+//        		beforePoint = beforePoint.substring(i+1, beforePoint.length());
+//        	}else
+//        	{
+//        		break;
+//        	}
+//        }
+//        
+//        for(int i = afterPoint.length(); i > 0; i++)
+//        {
+//        	if(afterPoint.substring(i-1, i).equals("0"))
+//        	{
+//        		afterPoint = afterPoint.substring(0, i-1);
+//        	}else
+//        	{
+//        		break;
+//        	}
+//        }
+//        
+//        
+//        
+//        if(afterPoint.length() != 0)
+//        {
+//        	m1.addAnswer("0",beforePoint +String.valueOf('.')+afterPoint,5,"Richtig!");
+//            m1.addAnswer("1",beforePoint + ","+afterPoint,5,"Richtig!");
+//        }else
+//        {
+//        	m1.addAnswer("3",beforePoint,5,"Richtig!");
+//        }
+//        
+//        boolean editAnswer = false;
+//        
+//        for(int i = 0; i < 3; i++)
+//        {
+//        	if(afterPoint.length() < i)
+//        	{
+//        		afterPoint = afterPoint+"0";
+//        		editAnswer = true;
+//        	}
+//        }
+//        
+//        if(editAnswer)
+//        {
+//        	m1.addAnswer("4",beforePoint + String.valueOf('.')+afterPoint,5,"Richtig!");
+//            m1.addAnswer("5",beforePoint + ","+afterPoint,5,"Richtig!");
+//        }
+//        
+//        m1.addAnswer("6", "0,0101", 5, "jooooo");
+//        m1.setGroupID(qgName01);
+//        
+//        
+//        System.out.println("Starting next question. nextValue: "+ nextValue);
+//        for(AnswerModel a : m1.getAnswers())
+//        {
+//        	System.out.println(a.getText());
+//        }
+//        
+//        System.out.println("Trim Values:");
+//        System.out.println("0,0101".trim());
+//        System.out.println("0.0101".trim());
+//        for(AnswerModel a : m1.getAnswers())
+//        {
+//        	System.out.println(a.getText().trim());
+//        }
+//        
+//        System.out.println("Trim Values end");
+//        
+//        System.out.println("answerIDs:");
+//        
+//        for(AnswerModel a : m1.getAnswers())
+//        {
+//        	System.out.println(m1.getAnswerID(a.getText().trim()));
+//        }
+//        
+//        System.out.println(m1.getAnswerID("0,004".trim()));
+//        System.out.println("answerIDs end");
+//        
+//        lang.addFIBQuestion(m1);
+        
+    
+    }
+    
+    
+    private void startDanglingNodeQuestion(PageRankGraph prg, Graph g)
+    {
+    	MultipleSelectionQuestionModel question = new MultipleSelectionQuestionModel("Dangling Nodes");
+    	question.setPrompt("Welche Knoten sind Dangling Nodes?");
+    	question.setGroupID(qgName02);
+    	
+    	List<Integer> danglingNodes = prg.getAllDanglingNodeNrs();
+    	
+    	for(int nodeId = 0; nodeId < g.getSize(); nodeId++)
+    	{
+    		String nodeLabel = g.getNodeLabel(nodeId);
+    	
+    		if(danglingNodes.contains(nodeId))
+    		{
+    			question.addAnswer(nodeLabel, 5, "Knoten "+ nodeLabel+" ist ein dangling node.");
+    		}else
+    		{
+    			question.addAnswer(nodeLabel, -5, "Knoten "+ nodeLabel+" ist kein dangling node.");
+    		}
+    	}
+    	
+    	lang.addMSQuestion(question);
+    	
+    	
+    }
+    
+    private String float2String(float value)
+    {
+    	String stringValue = new DecimalFormat("#.###").format(value);
+    	stringValue = stringValue.replaceAll("0", "O");
+    	return stringValue;
+    }
 
     public String getName() {
         return "PageRank";
@@ -315,8 +605,8 @@ public class PageRank implements Generator {
         return "Der PageRank-Algorithmus ist ein Algorithmus zur Bewertung von Knoten in einem Netzwerk."
  +" Larry Page und Sergei Brin entwickelten ihn an der Stanford University zur Bewertung von"
  +" Webseiten im Rahmen ihrer mittlerweile weltweit bekannnten Suchmaschine Google. Das Bewertungsprinzip"
- +" sieht dabei vor, dass das Gewicht einer Seite umso größer ist, je mehr andere Seiten auf sie verweisen."
- +" Der Effekt wird dabei von dem Gewicht der auf diese Seite verweisenden Seiten verstärtk."
+ +" sieht dabei vor, dass das Gewicht einer Seite umso grï¿½ï¿½er ist, je mehr andere Seiten auf sie verweisen."
+ +" Der Effekt wird dabei von dem Gewicht der auf diese Seite verweisenden Seiten verstï¿½rtk."
  +"\n"
  +"\nEine moegliche Interpretation des PageRanks liefert das sogenannte Random Surfer Modell. Im Rahmen dieses"
  +" Modells repraesentiert der PageRank eines Knotens bzw. einer Webseite (bei einer Normierung der Summe der PageRanks auf 1) die"
