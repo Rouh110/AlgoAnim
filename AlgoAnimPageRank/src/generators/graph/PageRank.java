@@ -178,7 +178,12 @@ public class PageRank implements Generator {
         startDanglingNodeQuestion(p, g);
         lang.nextStep("Aufruf und Initialisierung");
         src.unhighlight(0);
+        
+        Random rg = new Random();
 
+        int nodeToQuestion = rg.nextInt(adjacencymatrix.length-1);
+        nodeToQuestion++;
+        
 		while(difference > 0.01){ // Counter fuer Iterationen
 			formulaV.setText("Manhattan-Distanz zwischen letzter und vorletzter Iteration: " + new DecimalFormat("#.#####").format(difference) , null, null);
 			formulaC.setText("", null, null);
@@ -195,8 +200,15 @@ public class PageRank implements Generator {
 			formulaV.setText("", null, null);
 
 			for(int to = 0; to < adjacencymatrix.length; to++){
-				float nextValueResult = getNextValue(to, p);
-				startNextValueQuestion(nextValueResult, to, g);
+				
+				
+				if(nodeToQuestion == to)
+				{
+					float nextValueResult = getNextValue(to, p);
+					startNextValueQuestion(nextValueResult, to, g);
+					nodeToQuestion = rg.nextInt(adjacencymatrix.length);
+				}
+				
 				
 				String fV = "PR(" + g.getNodeLabel(to) +") = (1-d)/|G| "; 
 				formulaV.setText(fV, null, null);
@@ -337,7 +349,14 @@ public class PageRank implements Generator {
     
     private void setupQuestions()
     {
-    	lang.addQuestionGroup(new QuestionGroupModel(qgName01));
+    	QuestionGroupModel questionGroup = new QuestionGroupModel(qgName01);
+    	questionGroup.setNumberOfRepeats(2);
+    	lang.addQuestionGroup(questionGroup);
+    	
+    	questionGroup = new QuestionGroupModel(qgName02);
+    	questionGroup.setNumberOfRepeats(1);
+    	lang.addQuestionGroup(questionGroup);
+    	
     }
     
     int nqvId = 0;
@@ -400,9 +419,7 @@ public class PageRank implements Generator {
         {
         	int index = randomGenerator.nextInt(values.size());
         	float questionValue = values.remove(index);
-        	
-        	System.out.println(questionValue);
-        	
+        	        	
         	if(questionValue == roundedValue)
         	{
         		question.addAnswer(float2String(questionValue),5,"Richtig.");

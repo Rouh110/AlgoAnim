@@ -223,9 +223,49 @@ public class PageRankGraph{
 		}
 	}
 	
-	//TODO hide graph completely
 	public void hideGraph(){
 		
+		//hide nodes
+		for(int i = 0; i < nodes.length; i++)
+		{
+			nodes[i].circle.hide();
+			nodes[i].text.hide();
+		}
+		
+		// hide edges
+		for(int from = 0; from < graph.getSize(); from++)
+		{
+			for(int to = 0; to < graph.getSize(); to++)
+			{
+				if(edgeMatrix[from][to] != null)
+				{
+					edgeMatrix[from][to].line.hide();
+				}
+			}
+		}
+	}
+	
+	public void showGraph()
+	{
+		//show nodes
+		for(int i = 0; i < nodes.length; i++)
+		{
+			nodes[i].circle.show();
+			nodes[i].text.show();
+		}
+		
+		// show edges
+		for(int from = 0; from < graph.getSize(); from++)
+		{
+			for(int to = 0; to < graph.getSize(); to++)
+			{
+				if(edgeMatrix[from][to] != null)
+				{
+					edgeMatrix[from][to].line.show();
+				}
+			}
+		}
+				
 	}
 	
 	public void setEdgeBaseColor(int from, int to, Color newColor)
