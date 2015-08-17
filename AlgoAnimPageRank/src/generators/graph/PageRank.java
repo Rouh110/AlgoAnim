@@ -29,6 +29,7 @@ import algoanim.util.Timing;
 
 
 
+
 /*
 import generators.framework.properties.AnimationPropertiesContainer;
 import algoanim.animalscript.AnimalScript;
@@ -46,6 +47,8 @@ import algoanim.animalscript.AnimalCircleGenerator;
 import algoanim.animalscript.AnimalScript;
 import algoanim.animalscript.AnimalStringMatrixGenerator;
 
+
+import algoanim.counter.model.TwoValueCounter;
 
 ///*
 import java.util.Locale;
@@ -138,9 +141,15 @@ public class PageRank implements Generator {
     		dampingFactor = 0.85f;
     		showWarningMessageForDamp();
     	}
+    	int [] temparray = {0, 1, 2};
+    	
     	g = (Graph)primitives.get("graph");
+    	
     	initalValues(g.getAdjacencyMatrix());
     	PageRankGraph p = setupGraph(nodehighlightcolor, color_of_edges,color_of_nodetext);
+    	
+    	TwoValueCounter counter = lang.newCounter(g);
+    	
     	p.setAllDangingEdgeBaseColor(color_of_dangling_nodes);
         SourceCode src = setSourceCode(sourceCode);
         StringMatrix smat = setupMatrix(700,250, initValue);
