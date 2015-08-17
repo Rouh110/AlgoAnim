@@ -276,8 +276,10 @@ public class PageRank implements Generator {
 			currentText.setText("Die Werte von Iteration " + iterations + ":", null, null);
 		}
         
-        
-        SourceCode endText = showEndText();
+        currentText.hide();
+        actMat.hide();
+		lang.nextStep();
+        SourceCode endText = showEndText(counter);
         p.hideAllDanglingEdges();
         p.hideGraph();
         smat.hide();
@@ -502,23 +504,18 @@ public class PageRank implements Generator {
 		
 	}
     
-	private SourceCode showEndText() {
+	private SourceCode showEndText(TwoValueCounter counter) {
     	int actualCount = iterations - 1;
 		SourceCodeProperties infoProps = new SourceCodeProperties();
-    	infoProps.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF, Font.BOLD, 20));
-    	SourceCode infoText = lang.newSourceCode(new Coordinates(20,100), "InfoText", null, infoProps);
-    	infoText.addCodeLine("Der PageRank-Algorithmus ist ein Algorithmus zur Bewertung von Knoten in einem Netzwerk.", "Line0", 0, null);
-    	infoText.addCodeLine("Larry Page und Sergei Brin entwickelten ihn an der Stanford University zur Bewertung von", "Line1", 0, null);
-    	infoText.addCodeLine("Webseiten im Rahmen ihrer mittlerweile weltweit bekannnten Suchmaschine Google. Das Bewertungsprinzip", "Line2", 0, null);
-    	infoText.addCodeLine("sieht dabei vor, dass das Gewicht einer Seite umso größer ist, je mehr andere Seiten auf sie verweisen.", "Line3", 0, null);
-    	infoText.addCodeLine("Der Effekt wird dabei von dem Gewicht der auf diese Seite verweisenden Seiten verstärkt.", "Line4", 0, null);
-    	infoText.addCodeLine("", "Line5", 0, null);
-    	infoText.addCodeLine("Eine mögliche Interpretation des PageRanks liefert das sogenannte Random Surfer Modell. Im Rahmen dieses", "Line6", 0, null);
-    	infoText.addCodeLine("Modells repräsentiert der PageRank eines Knotens bzw. einer Webseite (bei einer Normierung der Summe der PageRanks auf 1) die", "Line7", 0, null);
-    	infoText.addCodeLine("Wahrscheinlichkeit mit der sich ein sogenannter Zufallssurfer auf einer bestimmten Webseite befindet. Hierbei gilt, dass", "Line8", 0, null);
-    	infoText.addCodeLine("der Zufallssurfer mit einer Wahrscheinlichkeit von d den Links auf der Webseite folgt, auf der er sich gerade befindet.", "Line9", 0, null);
-    	infoText.addCodeLine("Mit einer Wahrscheinlichkeit von 1-d ruft er manuell in seinem Browser eine der anderen Webseiten auf.", "Line10", 0, null);
-    	return infoText;
+    	infoProps.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF, Font.PLAIN, 14));
+    	SourceCode endText = lang.newSourceCode(new Coordinates(20,100), "InfoText", null, infoProps);
+    	endText.addCodeLine("Informationen zu dem zuvor angzeigten Ablauf des Algorithmus:", "Line0", 0, null);
+    	endText.addCodeLine("", "Line1", 0, null);
+    	endText.addCodeLine("", "Line2", 0, null);
+    	endText.addCodeLine("Anzahl Iterationen: " + actualCount, "Line3", 0, null);
+    	endText.addCodeLine("Anzahl Schreibzugriffe: " + counter.getAssigments(), "Line4", 0, null);
+    	endText.addCodeLine("Anzahl Lesezugriffe: " + counter.getAccess(), "Line5", 0, null);
+    	return endText;
 	}
     
     
