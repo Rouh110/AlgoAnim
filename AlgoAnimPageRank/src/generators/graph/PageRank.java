@@ -68,6 +68,7 @@ public class PageRank implements Generator {
     private float difference=100.0f;
     private int iterations = 0;
     private double dampingFactor;
+    PageRankGraph p;
     
     
     private Color color_for_lowest_PRValue;
@@ -154,7 +155,7 @@ public class PageRank implements Generator {
     	g = (Graph)primitives.get("graph");
     	
     	initalValues(g.getAdjacencyMatrix());
-    	PageRankGraph p = setupGraph(nodehighlightcolor, color_of_edges,color_of_nodetext);
+    	p = setupGraph(nodehighlightcolor, color_of_edges,color_of_nodetext);
     	
     	
     	
@@ -168,7 +169,7 @@ public class PageRank implements Generator {
         cp.set(AnimationPropertiesKeys.FILLED_PROPERTY, true);
         cp.set(AnimationPropertiesKeys.FILL_PROPERTY, Color.BLUE);
         TwoValueView view = lang.newCounterView(counter,
-        		new Coordinates(1100, 430), cp, true, true);
+        		new Coordinates(700, 490), cp, true, true);
 
         Text lastText = setCounter(700, 210, "Die PageRank-Werte nach der Initialisierung:");
         Text currentText = setCounter(700, 360, "Die PageRank-Werte von Iteration 1:");
@@ -298,19 +299,19 @@ public class PageRank implements Generator {
 
         currentText.hide();
         actMat.hide();
-		lang.nextStep();
-        SourceCode endText = showEndText(counter);
-
-        p.hideAllDanglingEdges();
-        p.hideGraph();
-        smat.hide();
-        actMat.hide();
-        lastText.hide();
-        currentText.hide();
+        src.hide();
         formulaC.hide();
         formulaV.hide();
+        SourceCode stopInformation = showStopInformation();
+		lang.nextStep();
+        
+		stopInformation.hide();
+		SourceCode endText = showEndText(counter, smat);
+        p.hideAllDanglingEdges();
+        p.hideGraph();
         view.hide();
-        src.hide();
+        smat.hide();
+        lastText.hide();
         lang.nextStep("Fazit");
         
 		lang.finalizeGeneration();
@@ -603,14 +604,17 @@ public class PageRank implements Generator {
         return "Der PageRank-Algorithmus ist ein Algorithmus zur Bewertung von Knoten in einem Netzwerk."
  +" Larry Page und Sergei Brin entwickelten ihn an der Stanford University zur Bewertung von"
  +" Webseiten im Rahmen ihrer mittlerweile weltweit bekannnten Suchmaschine Google. Das Bewertungsprinzip"
- +" sieht dabei vor, dass das Gewicht einer Seite umso größer ist, je mehr andere Seiten auf sie verweisen."
- +" Der Effekt wird dabei von dem Gewicht der auf diese Seite verweisenden Seiten verstärkt."
+ +" sieht dabei vor, dass der Rank einer Seite umso größer ist, je mehr andere Seiten auf sie verweisen."
+ +" Der Effekt wird dabei von dem Rank der auf diese Seite verweisenden Seiten verstärkt."
  +"\n"
  +"\nEine mögliche Interpretation des PageRanks liefert das sogenannte Random Surfer Modell. Im Rahmen dieses"
- +" Modells repraesentiert der PageRank eines Knotens bzw. einer Webseite (bei einer Normierung der Summe der PageRanks auf 1) die"
+ +" Modells repräsentiert der PageRank eines Knotens bzw. einer Webseite (bei einer Normierung der Summe der PageRanks auf 1) die"
  +" Wahrscheinlichkeit, mit der sich ein sogenannter Zufallssurfer auf einer bestimmten Webseite befindet. Hierbei gilt, dass"
- + " der Zufallssurfer mit einer Wahrscheinlichkeit von d den Links auf der Webseite folgt, auf der er sich gerade befindet."
- + " Mit einer Wahrscheinlichkeit von 1-d ruft er manuell in seinem Browser eine der Webseiten auf.";
+ +" der Zufallssurfer mit einer Wahrscheinlichkeit von d den Links auf der Webseite folgt, auf der er sich gerade befindet."
+ +" Mit einer Wahrscheinlichkeit von 1-d ruft er manuell in seinem Browser eine der Webseiten auf. Diese Wahrscheinlichkeit d"
+ +" wird im Allgemeinen als Dämpfungsfaktor bezeichnet und kann im Rahmen dieser Visualisierung konfiguriert werden."
+ +"\n\nEbenfalls als besonders hervorzuheben sind die sogenannten Dangling Nodes. Bei Ihnen handelt es sich um Knoten bzw. Webseiten,"
+ +" welche keine Verweise besitzen.";
     }
 
     public String getCodeExample(){
@@ -689,14 +693,18 @@ public class PageRank implements Generator {
     	infoText.addCodeLine("Der PageRank-Algorithmus ist ein Algorithmus zur Bewertung von Knoten in einem Netzwerk.", "Line0", 0, null);
     	infoText.addCodeLine("Larry Page und Sergei Brin entwickelten ihn an der Stanford University zur Bewertung von", "Line1", 0, null);
     	infoText.addCodeLine("Webseiten im Rahmen ihrer mittlerweile weltweit bekannnten Suchmaschine Google. Das Bewertungsprinzip", "Line2", 0, null);
-    	infoText.addCodeLine("sieht dabei vor, dass das Gewicht einer Seite umso größer ist, je mehr andere Seiten auf sie verweisen.", "Line3", 0, null);
-    	infoText.addCodeLine("Der Effekt wird dabei von dem Gewicht der auf diese Seite verweisenden Seiten verstärkt.", "Line4", 0, null);
+    	infoText.addCodeLine("sieht dabei vor, dass der Rank einer Seite umso größer ist, je mehr andere Seiten auf sie verweisen.", "Line3", 0, null);
+    	infoText.addCodeLine("Der Effekt wird dabei von dem Rank der auf diese Seite verweisenden Seiten verstärkt.", "Line4", 0, null);
     	infoText.addCodeLine("", "Line5", 0, null);
     	infoText.addCodeLine("Eine mögliche Interpretation des PageRanks liefert das sogenannte Random Surfer Modell. Im Rahmen dieses", "Line6", 0, null);
     	infoText.addCodeLine("Modells repräsentiert der PageRank eines Knotens bzw. einer Webseite (bei einer Normierung der Summe der PageRanks auf 1) die", "Line7", 0, null);
     	infoText.addCodeLine("Wahrscheinlichkeit mit der sich ein sogenannter Zufallssurfer auf einer bestimmten Webseite befindet. Hierbei gilt, dass", "Line8", 0, null);
     	infoText.addCodeLine("der Zufallssurfer mit einer Wahrscheinlichkeit von d den Links auf der Webseite folgt, auf der er sich gerade befindet.", "Line9", 0, null);
     	infoText.addCodeLine("Mit einer Wahrscheinlichkeit von 1-d ruft er manuell in seinem Browser eine der anderen Webseiten auf.", "Line10", 0, null);
+    	infoText.addCodeLine("Dieser Wahrscheinlichkeit d wird im Allgemeinen als Dämpfungsfaktor bezeichnet.", "Line11", 0, null);
+    	infoText.addCodeLine("", "Line12", 0, null);
+    	infoText.addCodeLine("Ebenfalls als besonders hervorzugeben sind die sogenannten Dangling Nodes. Bei Ihnen handelt es sich um Knoten bzw. ", "Line13", 0, null);
+    	infoText.addCodeLine("Webseiten, welche keine Verweise besitzen.", "Line14", 0, null);
     	return infoText;
     }
     
@@ -783,18 +791,32 @@ public class PageRank implements Generator {
 		
 	}
     
-	private SourceCode showEndText(TwoValueCounter counter) {
+	private SourceCode showEndText(TwoValueCounter counter, StringMatrix smat) {
     	int actualCount = iterations - 1;
 		SourceCodeProperties infoProps = new SourceCodeProperties();
     	infoProps.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF, Font.PLAIN, 14));
     	SourceCode endText = lang.newSourceCode(new Coordinates(20,100), "InfoText", null, infoProps);
     	endText.addCodeLine("Informationen zu dem zuvor angzeigten Ablauf des Algorithmus:", "Line0", 0, null);
     	endText.addCodeLine("", "Line1", 0, null);
-    	endText.addCodeLine("", "Line2", 0, null);
-    	endText.addCodeLine("Anzahl Iterationen: " + actualCount, "Line3", 0, null);
-    	endText.addCodeLine("Anzahl Schreibzugriffe: " + counter.getAssigments(), "Line4", 0, null);
-    	endText.addCodeLine("Anzahl Lesezugriffe: " + counter.getAccess(), "Line5", 0, null);
+    	endText.addCodeLine("Anzahl Iterationen: " + actualCount, "Line2", 0, null);
+    	endText.addCodeLine("Anzahl Schreibzugriffe: " + counter.getAssigments(), "Line3", 0, null);
+    	endText.addCodeLine("Anzahl Lesezugriffe: " + counter.getAccess(), "Line4", 0, null);
+    	
+    	for(int i = 0; i < adjacencymatrix.length; i++){
+    		endText.addCodeLine("PR(" + g.getNodeLabel(i) + ") = " + smat.getElement(1, i), "Line" + (i + 3), 0, null);	
+    	}
     	return endText;
+	}
+	
+	private SourceCode showStopInformation(){
+    	int actualCount = iterations - 1;
+		SourceCodeProperties infoProps = new SourceCodeProperties();
+    	infoProps.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF, Font.BOLD, 14));
+    	infoProps.set(AnimationPropertiesKeys.COLOR_PROPERTY, Color.RED);
+    	SourceCode stopInformation = lang.newSourceCode(new Coordinates(700,400), "InfoText", null, infoProps);
+    	stopInformation.addCodeLine("Der Algorithmus endet an dieser Stelle nach", "Line0", 0, null);
+    	stopInformation.addCodeLine(actualCount + " Iterationen, da er konvergiert!", "Line1", 0, null);
+    	return stopInformation;
 	}
     
     
