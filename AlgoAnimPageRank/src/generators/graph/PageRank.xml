@@ -132,6 +132,10 @@ edge D B weight 1
 			<name>dampingFactor</name>
 			<value><double>0.85</double></value>
 		</Primitive>
+								<Primitive type="double">
+			<name>breakValue</name>
+			<value><double>0.01</double></value>
+		</Primitive>
 		
 	</Folder>
 </PropertiesTreeModel>
