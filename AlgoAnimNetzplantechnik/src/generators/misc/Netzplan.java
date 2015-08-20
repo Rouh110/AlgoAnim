@@ -45,8 +45,6 @@ public class Netzplan implements Generator {
     NetzplanGraph n;
     SourceCode src1;
     SourceCode src2;
-    private TextProperties headerStyle; //headerStyle
-    private SourceCodeProperties informationTextStyle;
     private SourceCodeProperties sourceCodeStyle;
     
     
@@ -63,8 +61,6 @@ public class Netzplan implements Generator {
     public String generate(AnimationPropertiesContainer props,Hashtable<String, Object> primitives) {
 
         graph = (Graph)primitives.get("graph");
-        informationTextStyle = (SourceCodeProperties) props.getPropertiesByName("InformationTextStyle");
-        headerStyle = (TextProperties) props.getPropertiesByName("HeaderStyle");
         sourceCodeStyle = (SourceCodeProperties) props.getPropertiesByName("SourcecodeStyle");
         Color edgeColor = (Color)primitives.get("EdgeColor");
         MatrixProperties matrixProperties = (MatrixProperties) props.getPropertiesByName("NodeStyle");
@@ -77,7 +73,7 @@ public class Netzplan implements Generator {
         n = new NetzplanGraph((AnimalScript)lang, graph,matrixProperties);
         n.setAllEdgeBaseColor(edgeColor);
         src1.highlight(0);
-        //lang.nextStep();
+        lang.nextStep();   // wieder einkommentiert 20.08
        
         if(n.hasLoops())
         {
@@ -354,29 +350,32 @@ public class Netzplan implements Generator {
 	
 	
     private void setHeader(){
-    	//TextProperties headerProps = new TextProperties();
-    	//headerProps.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF,Font.BOLD, 24));
-    	//headerProps.set(AnimationPropertiesKeys.COLOR_PROPERTY, Color.BLUE);
-    	lang.newText(new Coordinates(20,30), "Die Netzplantechnik", "header", null, headerStyle);
+    	TextProperties headerProps = new TextProperties();
+    	headerProps.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF,Font.BOLD, 24));
+    	headerProps.set(AnimationPropertiesKeys.COLOR_PROPERTY, Color.BLUE);
+    	lang.newText(new Coordinates(20,30), "Die Netzplantechnik", "header", null, headerProps);
 
     	
     }
 	
 	private void setInformationText(){
-    	//SourceCodeProperties infoProps = new SourceCodeProperties();
-    	//infoProps.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF, Font.BOLD, 20));
-    	SourceCode infoText = lang.newSourceCode(new Coordinates(20,100), "InfoText", null, informationTextStyle);
+    	SourceCodeProperties infoProps = new SourceCodeProperties();
+    	infoProps.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF, Font.BOLD, 20));
+    	SourceCode infoText = lang.newSourceCode(new Coordinates(20,60), "InfoText", null, infoProps);
     	
     	infoText.addCodeLine("Bei der Netzplantechnik handelt es sich um eine Methode, welche im Rahmen der Terminplanung bzw. des", "Line0", 0, null);
-    	infoText.addCodeLine("des Projektmanagements zum Einsatz kommt. Das Ziel besteht darin, die Dauer eines Projektes auf Basis ", "Line1", 0, null);
-    	infoText.addCodeLine("der einzelnen Arbeitsvorgänge und ihrer Beziehungen untereinander zu bestimmen. Die Beziehungen der  ", "Line13", 0, null);
-    	infoText.addCodeLine("einzelnen Vorgange werden dabei in Form eines gerichteten Graphen dargestellt. Dabei ist zu beachten,", "Line2", 0, null);
-    	infoText.addCodeLine("dass die Beziehungen zwischen den Arbeitsvorgaengen eindeutig zu definieren sind, weshalb Zyklen ", "Line3", 0, null);
-    	infoText.addCodeLine("nicht zulaessig sind.", "Line4", 0, null);
-    	infoText.addCodeLine("Neben der minimalen Gesamtdauer, welche das zu untersuchende Projekt im Idealfall benoetigt, werden ", "Line5", 0, null);
-    	infoText.addCodeLine("zudem fuer jeden Arbeitsvorgang sogenannte Puffer ermittelt, welche angeben in welchem Ausmass ", "Line6", 0, null);
-    	infoText.addCodeLine("Verzoegerungen eines Arbeitsvorganges moeglich sind, ohne dass sie sich negativ auf die Gesamtdauer", "Line7", 0, null);
-    	infoText.addCodeLine("des Projektes auszuwirken.", "Line8", 0, null);
+    	infoText.addCodeLine("Projektmanagements zum Einsatz kommt. Das Ziel besteht darin die Mindestdauer eines Projektes auf Basis", "Line1", 0, null);
+    	infoText.addCodeLine("der einzelnen Arbeitsvorgänge und ihrer Beziehungen untereinander zu bestimmen. Die Beziehungen der  ", "Line2", 0, null);
+    	infoText.addCodeLine("einzelnen Vorgänge werden dabei in Form eines gerichteten Graphen dargestellt.", "Line3", 0, null);
+    	infoText.addCodeLine("Neben der minimalen Gesamtdauer, welche das zu untersuchende Projekt im Idealfall benötigt, werden", "Line4", 0, null);
+    	infoText.addCodeLine("zudem für jeden Arbeitsvorgang sogenannte Pufferzeiten ermittelt. Diese geben an in welchem Ausmaß", "Line5", 0, null);
+    	infoText.addCodeLine("Verzögerungen eines Arbeitsvorganges möglich sind, ohne dass sie sich negativ auf die Gesamtdauer des", "Line6", 0, null);
+    	infoText.addCodeLine("Projektes auszuwirken.", "Line7", 0, null);
+    	infoText.addCodeLine("", "Line8", 0, null);
+    	infoText.addCodeLine("Es ist zu beachten, dass die Beziehungen zwischen den Arbeitsvorgaengen eindeutig zu definieren sind.", "Line9", 0, null);
+    	infoText.addCodeLine("Zyklen sind daher nicht zulässig!", "Line10", 0, null);
+
+
     	lang.nextStep();
     	infoText.hide();
     }
@@ -436,11 +435,11 @@ public class Netzplan implements Generator {
     }
     
     private SourceCode setChangeAlgorithmInformation(){
-    	//SourceCodeProperties sProb = new  SourceCodeProperties();
-        //sProb.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font (Font.SANS_SERIF,Font.BOLD, 24));
-        //sProb.set(AnimationPropertiesKeys.COLOR_PROPERTY, Color.BLUE);
-        //sProb.set(AnimationPropertiesKeys.HIGHLIGHTCOLOR_PROPERTY, Color.RED);
-    	SourceCode infoText = lang.newSourceCode(new Coordinates(700,50), "InfoText", null, informationTextStyle);
+    	SourceCodeProperties sProb = new  SourceCodeProperties();
+        sProb.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font (Font.SANS_SERIF,Font.BOLD, 24));
+        sProb.set(AnimationPropertiesKeys.COLOR_PROPERTY, Color.BLUE);
+        sProb.set(AnimationPropertiesKeys.HIGHLIGHTCOLOR_PROPERTY, Color.RED);
+    	SourceCode infoText = lang.newSourceCode(new Coordinates(700,50), "InfoText", null, sProb);
         infoText.addCodeLine("Achtung es beginnt nun der Zweite Teil", "line1", 0, null);
         infoText.addCodeLine("des Verfahrens! Der Algorithmus fährt mit", "line2", 0, null);
         infoText.addCodeLine("der Vorwärtsrechnung fort.", "line3", 0, null);
@@ -492,17 +491,51 @@ public class Netzplan implements Generator {
     }
 
     public String getDescription(){
-        return "Berechnung der frühesten und spätesten Anfangs- und Endzeitpunkte einzelner Arbeitsschritte, "
- +"\n"
- +"sowie Identifikation kritischer Pfade. ";
+        return "Bei der Netzplantechnik handelt es sich um eine Methode, welche im Rahmen der Terminplanung bzw. des "
+ +"Projektmanagements zum Einsatz kommt. Das Ziel besteht darin die Mindestdauer eines Projektes auf Basis "
+ +"der einzelnen Arbeitsvorgänge und ihrer Beziehungen untereinander zu bestimmen. Die Beziehungen der "
+ +"einzelnen Vorgänge werden dabei in Form eines gerichteten Graphen dargestellt. \n"
+ +"Neben der minimalen Gesamtdauer, welche das zu untersuchende Projekt im Idealfall benötigt, werden "
+ +"zudem für jeden Arbeitsvorgang sogenannte Pufferzeiten ermittelt. Diese geben an in welchem Ausmaß "
+ +"Verzögerungen eines Arbeitsvorganges möglicht sind, ohne dass sie sich negativ auf die Gesamtdauer des "
+ +"Projektes auswirken."
+ +"\n \n"
+ +"Es ist zu beachten, dass die Beziehungen zwischen den Arbeitsvorgängen eindeutig zu definieren sind. "
+ +"Zyklen sind daher nicht zulässig!";
     }
 
     public String getCodeExample(){
-        return "Code1"
+        return
+ "01. For all nodes without outgoing edges do \n"
+ +"02.     calcualteFirstDirection(node) \n"
+ +"03. For all nodes without ingoing edges do \n"
+ +"04.     calculateSecondDirection(node) \n"
  +"\n"
- +"Code2"
+ +"05. calculateFirstDirection(node) \n"
+ +"06.     if node has no ingoing edges do: \n"
+ +"07.         EarliestStartTime of node = 0 \n"
+ +"08.         EarliestEndTime of node = EarliestStartTime of Node + ProcessTime of node \n"
+ +"09.     if node has no ingoing edges do: \n"
+ +"10.         for each predecessor of node do: \n"
+ +"11.             if EarliestStartTime of Predecessor has not been set do: \n"
+ +"12.                 calculateFirstDirection(currentPredecessor) \n"
+ +"13.     for each predecessor of node do: \n"
+ +"14.         if EearliestStartTime of node has not been set or EarliestEndTime of predecessor > EarliestStartTime of node \n"
+ +"15.             EarliestStartTime of node = EarliestEndTime of predecessor \n"
+ +"16.             EarliestEndTime of node = EarliestStartTime of node + ProcessTime of node \n"
  +"\n"
- +"Code3";
+ +"17. calculateSecondDirection(node) \n"
+ +"18.     if node has no outgoing edges do: \n"
+ +"19.         LatestStartTime of node = EarliestStartTime of node \n"
+ +"20.         LatestEndTime of node = EarliestEndTime of node \n"
+ +"21.     if node has outgoing edges do: \n"
+ +"22.         for each successor of node do: \n"
+ +"23.             if LatestStartTime of successor has not been set do: \n"
+ +"24.                 calculateSecondDirection(currentSuccessor) \n"
+ +"25.     for each successor of node do: \n"
+ +"26.         if LatestStartTime of node has not been set or LatestStartTime of successor < LatestEndTime of node: \n"
+ +"27.             LatestStartTime of node = LatestStartTime of successor - ProcessTime of node \n"
+ +"28.             LatestEndTime of node = LatestStartTime of node + ProcessTime of node \n";
     }
 
     public String getFileExtension(){
