@@ -63,17 +63,20 @@ public class Netzplan implements Generator {
         graph = (Graph)primitives.get("graph");
         sourceCodeStyle = (SourceCodeProperties) props.getPropertiesByName("SourcecodeStyle");
         Color edgeColor = (Color)primitives.get("EdgeColor");
+        Color edgeHighlightColor = (Color)primitives.get("EdgeHighlightColor");
+        Color headerColor = (Color)primitives.get("headerColor");
         MatrixProperties matrixProperties = (MatrixProperties) props.getPropertiesByName("NodeStyle");
         
         setupQuestions();
         
-        setHeader();
+        setHeader(headerColor);
         setInformationText();
         src1 = setSourceCodeForward();    
         n = new NetzplanGraph((AnimalScript)lang, graph,matrixProperties);
         n.setAllEdgeBaseColor(edgeColor);
+        n.setAllEdgeHightlightColor(edgeHighlightColor);
         src1.highlight(0);
-        lang.nextStep();   // wieder einkommentiert 20.08
+        lang.nextStep("Beginn der Rückwärtsrechnung");
        
         if(n.hasLoops())
         {
@@ -94,13 +97,13 @@ public class Netzplan implements Generator {
         nodesToProcess = n.getStartNodes();
         src1.hide();
         SourceCode algorithmChange = setChangeAlgorithmInformation();
-        lang.nextStep();
+        lang.nextStep("Wechsel Rückwärts- zu Vorwärtsrechnung");
         
         
         algorithmChange.hide();
         src2 = this.setSourceCodeBackward();
         src2.highlight(2);
-        lang.nextStep();
+        lang.nextStep("Beginn der Vorwärtsrechnung");
         
         src2.unhighlight(2);
         for(Integer currentNode: nodesToProcess){
@@ -139,6 +142,7 @@ public class Netzplan implements Generator {
         for(Integer currentNode : n.getStartNodes()){
         	this.drawCriticalPath(currentNode);
         }
+        lang.nextStep("Darstellung kritischer Pfad");
 
         
         
@@ -153,7 +157,7 @@ public class Netzplan implements Generator {
 
     	src1.highlight(5);
     	n.highlightNode(node);
-    	lang.nextStep();
+    	lang.nextStep("Aufruf Rückwärtsrechnung Knoten " + graph.getNodeLabel(node));
     	src1.unhighlight(12);
     	src1.unhighlight(1);
     	src1.unhighlight(5);
@@ -236,7 +240,7 @@ public class Netzplan implements Generator {
 	private void calculateSecondDirection(Integer node) {
     	src2.highlight(5);
     	n.highlightNode(node);
-    	lang.nextStep();
+    	lang.nextStep("Aufruf Vorwärtsrechnung Knoten " + graph.getNodeLabel(node));
     	src2.unhighlight(12);
     	src2.unhighlight(3);
     	src2.unhighlight(5);
@@ -349,10 +353,10 @@ public class Netzplan implements Generator {
 	
 	
 	
-    private void setHeader(){
+    private void setHeader(Color headerColor){
     	TextProperties headerProps = new TextProperties();
     	headerProps.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF,Font.BOLD, 24));
-    	headerProps.set(AnimationPropertiesKeys.COLOR_PROPERTY, Color.BLUE);
+    	headerProps.set(AnimationPropertiesKeys.COLOR_PROPERTY, headerColor);
     	lang.newText(new Coordinates(20,30), "Die Netzplantechnik", "header", null, headerProps);
 
     	
@@ -376,7 +380,7 @@ public class Netzplan implements Generator {
     	infoText.addCodeLine("Zyklen sind daher nicht zulässig!", "Line10", 0, null);
 
 
-    	lang.nextStep();
+    	lang.nextStep("Einleitung");
     	infoText.hide();
     }
 	
@@ -436,13 +440,13 @@ public class Netzplan implements Generator {
     
     private SourceCode setChangeAlgorithmInformation(){
     	SourceCodeProperties sProb = new  SourceCodeProperties();
-        sProb.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font (Font.SANS_SERIF,Font.BOLD, 24));
-        sProb.set(AnimationPropertiesKeys.COLOR_PROPERTY, Color.BLUE);
-        sProb.set(AnimationPropertiesKeys.HIGHLIGHTCOLOR_PROPERTY, Color.RED);
+        sProb.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font (Font.SANS_SERIF,Font.BOLD, 16));
+        sProb.set(AnimationPropertiesKeys.COLOR_PROPERTY, Color.RED);
+        //sProb.set(AnimationPropertiesKeys.HIGHLIGHTCOLOR_PROPERTY, Color.RED);
     	SourceCode infoText = lang.newSourceCode(new Coordinates(700,50), "InfoText", null, sProb);
         infoText.addCodeLine("Achtung es beginnt nun der Zweite Teil", "line1", 0, null);
         infoText.addCodeLine("des Verfahrens! Der Algorithmus fährt mit", "line2", 0, null);
-        infoText.addCodeLine("der Vorwärtsrechnung fort.", "line3", 0, null);
+        infoText.addCodeLine("der Vorwärtsrechnung fort!", "line3", 0, null);
         return infoText;
     
     }
@@ -450,9 +454,9 @@ public class Netzplan implements Generator {
     private SourceCode setCriticicalPathInformation(){
     	
     	SourceCodeProperties sProb = new  SourceCodeProperties();
-        sProb.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font (Font.SANS_SERIF,Font.BOLD, 24));
+        sProb.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font (Font.SANS_SERIF,Font.BOLD, 16));
         sProb.set(AnimationPropertiesKeys.COLOR_PROPERTY, Color.BLUE);
-        sProb.set(AnimationPropertiesKeys.HIGHLIGHTCOLOR_PROPERTY, Color.RED);
+        //sProb.set(AnimationPropertiesKeys.HIGHLIGHTCOLOR_PROPERTY, Color.RED);
         SourceCode infoText = lang.newSourceCode(new Coordinates(700,50), "InfoText", null, sProb);
         infoText.addCodeLine("Der kritische Pfad wird nun durch die", "line1", 0, null);
         infoText.addCodeLine("hervorgehobenen Kanten repräsentiert", "line2", 0, null);
