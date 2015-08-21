@@ -27,8 +27,10 @@ import java.util.Set;
 
 import algoanim.primitives.Graph;
 import algoanim.primitives.SourceCode;
+import algoanim.primitives.StringMatrix;
 import algoanim.primitives.generators.Language;
 import algoanim.properties.AnimationPropertiesKeys;
+import algoanim.properties.CounterProperties;
 import algoanim.properties.MatrixProperties;
 import algoanim.properties.SourceCodeProperties;
 import algoanim.properties.TextProperties;
@@ -38,6 +40,9 @@ import java.util.Hashtable;
 
 import generators.framework.properties.AnimationPropertiesContainer;
 import algoanim.animalscript.AnimalScript;
+import algoanim.animalscript.AnimalStringMatrixGenerator;
+import algoanim.counter.model.TwoValueCounter;
+import algoanim.counter.view.TwoValueView;
 
 public class Netzplan implements Generator {
     private Language lang;
@@ -46,6 +51,7 @@ public class Netzplan implements Generator {
     SourceCode src1;
     SourceCode src2;
     private SourceCodeProperties sourceCodeStyle;
+    StringMatrix smat;
     
     
     String qg01 = "firstDirectionQuestions";
@@ -76,6 +82,28 @@ public class Netzplan implements Generator {
         n.setAllEdgeBaseColor(edgeColor);
         n.setAllEdgeHightlightColor(edgeHighlightColor);
         src1.highlight(0);
+        
+        // Zähler Anfang
+        AnimalStringMatrixGenerator matrixGenerator = new AnimalStringMatrixGenerator((AnimalScript) lang);
+		MatrixProperties matProp = new MatrixProperties();
+		String[][] strValues = new String[2][3];
+		for(int i = 0; i < 3; i++){
+    		strValues[0][i] = "-1";
+    		strValues[1][i] = "-1";
+    	}
+		
+		smat = new StringMatrix(matrixGenerator,
+				new Coordinates(700, 490), strValues, "Values", null,
+				matProp);
+		smat.hide();
+        TwoValueCounter counter = lang.newCounter(smat);
+        CounterProperties cp = new CounterProperties();
+        cp.set(AnimationPropertiesKeys.FILLED_PROPERTY, true);
+        cp.set(AnimationPropertiesKeys.FILL_PROPERTY, Color.BLUE);
+        TwoValueView view = lang.newCounterView(counter,
+        		new Coordinates(700, 490), cp, true, true);
+        //Zähler Ende
+        
         lang.nextStep("Beginn der Rückwärtsrechnung");
        
         if(n.hasLoops())
@@ -168,11 +196,14 @@ public class Netzplan implements Generator {
     		src1.unhighlight(6);
     		src1.highlight(7);
 			n.setEarliestStartTime(node, 0);
+			smat.put(0, 0, "-1", null, null);
 			lang.nextStep();
 			src1.unhighlight(7);
 			src1.unhighlight(6);
 			src1.highlight(8);
     		n.setEarliestEndTime(node, n.getProcessTime(node));
+    		smat.put(0, 0, "-1", null, null);
+    		smat.getElement(0, 0);
     		lang.nextStep();
     		src1.unhighlight(8);
     		
@@ -214,16 +245,23 @@ public class Netzplan implements Generator {
         		}
         		src1.unhighlight(13);
         		if(n.hasValidEntry(node, NetzplanGraph.CellID.EarliestEndTime)==false ||n.getEarliestEndTime(currentPredecessor) > n.getEarliestStartTime(node)){
+        			if(n.hasValidEntry(node, NetzplanGraph.CellID.EarliestEndTime)==true){
+        				smat.getElement(0, 0);
+        			}
         			n.highlightEdge(currentPredecessor, node);
         			src1.highlight(14);
         			lang.nextStep();
         			n.setEarliestStartTime(node, n.getEarliestEndTime(currentPredecessor));
+        			smat.getElement(0, 0);
+        			smat.put(0, 0, "-1", null, null);
         			src1.highlight(15);
         			src1.unhighlight(14);
         			lang.nextStep();
         			src1.unhighlight(15);
         			src1.highlight(16);
         			n.setEarliestEndTime(node, n.getEarliestStartTime(node) + n.getProcessTime(node));
+        			smat.getElement(0, 0);
+        			smat.put(0, 0, "-1", null, null);
         			lang.nextStep();
         			src1.unhighlight(16);
         			n.unHighlightEdge(currentPredecessor, node);
