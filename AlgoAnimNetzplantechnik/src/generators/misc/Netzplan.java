@@ -20,9 +20,11 @@ import java.awt.Color;
 import java.awt.Font;
 import java.util.ArrayList;
 import java.util.Currency;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Random;
 import java.util.Set;
 
 import algoanim.primitives.Graph;
@@ -56,7 +58,8 @@ public class Netzplan implements Generator {
     
     String qg01 = "firstDirectionQuestions";
     String qg02 = "secondDirectionQuestions";
-    String qg03 = "finnishQuestions";
+    String qg03 = "criticalPathQuestion";
+    String qg04 = "delayQuestion";
 
     public void init(){
         lang = new AnimalScript("Netzplantechnik", "Jan Ulrich Schmitt & Dennis Juckwer", 800, 600);        
@@ -140,29 +143,10 @@ public class Netzplan implements Generator {
         }
         
         
-        LinkedList<Integer> critcalPathNodes = new LinkedList<Integer>();
         
         
-        for(Integer currentNode:n.getStartNodes()){
-        	this.getCriticalPath(currentNode,critcalPathNodes);
-        }
-        
-        
-        MultipleSelectionQuestionModel m1 = new MultipleSelectionQuestionModel("Kritischer Pfad");
-        m1.setPrompt("Welche Knoten gehören alles zu einem kritischen Pfad? (Es kann mehr als einen kritischen Pfad geben.)");
-        
-        for(Integer currentNode : n.getAllNodes())
-        {
-        	if(critcalPathNodes.contains(currentNode))
-        	{
-        		m1.addAnswer(n.getName(currentNode), 5,n.getName(currentNode) + " gehört zu einem kritischen Pfad.\n");
-        	}else
-        	{
-        		m1.addAnswer(n.getName(currentNode), -5,n.getName(currentNode) + " gehört nicht zu einem kritischen Pfad.\n");
-        	}
-        	
-        }
-        lang.addMSQuestion(m1);
+        this.startCriticalPathQuestion(n);
+       
           
         lang.nextStep();
         src2.hide();
@@ -173,6 +157,9 @@ public class Netzplan implements Generator {
         lang.nextStep("Darstellung kritischer Pfad");
         criticalPathText.hide();
         SourceCode endInformation = this.showEndText(counter);
+        
+        
+        startDelayQuestion(n);
 
         
         
@@ -535,13 +522,137 @@ public class Netzplan implements Generator {
     	return endText;
 	}
     
+	private void startCriticalPathQuestion(NetzplanGraph npg)
+	{
+		 LinkedList<Integer> critcalPathNodes = new LinkedList<Integer>();
+	         
+	     for(Integer currentNode:npg.getStartNodes()){
+	      	this.getCriticalPath(currentNode,critcalPathNodes);
+	     }
+	        
+		 MultipleSelectionQuestionModel question = new MultipleSelectionQuestionModel("Kritischer Pfad");
+		 question.setPrompt("Welche Knoten gehören alles zu einem kritischen Pfad? (Es kann mehr als einen kritischen Pfad geben.)");
+	     question.setGroupID(qg03);
+	       
+	        
+	     for(Integer currentNode : npg.getAllNodes())
+	     {
+	      	if(critcalPathNodes.contains(currentNode))
+        	{
+	      		question.addAnswer(npg.getName(currentNode), 5,npg.getName(currentNode) + " gehört zu einem kritischen Pfad.\n");
+	        	}else
+	        	{
+	        		question.addAnswer(npg.getName(currentNode), -5,npg.getName(currentNode) + " gehört nicht zu einem kritischen Pfad.\n");
+	        	}
+	        	
+	     }
+	     
+	     lang.addMSQuestion(question);
+	}
+	
+	private void startDelayQuestion(NetzplanGraph npg)
+	{
+		int node;
+		int delay;
+		
+		Random rg = new Random();
+		
+		List<Integer> nodes = npg.getAllNodes();
+		
+		if(nodes.size() == 0)
+		{
+			return;
+		}else if(nodes.size() == 1)
+		{
+			node = nodes.get(0);
+		}else
+		{
+			Iterator<Integer> nodesIt = nodes.iterator();
+			
+			while(nodesIt.hasNext())
+			{
+				if(npg.isEndNode(nodesIt.next()))
+				{
+					nodesIt.remove();
+				}
+			}
+			
+			node = nodes.get(rg.nextInt(nodes.size()));
+		}
+		
+		delay = npg.getLatestStartTime(node)- npg.getLatestStartTime(node);
+		
+		int maxDelay = delay+4;
+		int minDelay = 1;
+		
+		delay = rg.nextInt(maxDelay-minDelay)+minDelay;
+		
+		
+		startDelayQuestion(npg, node, delay);
+	}
+	
+	private void startDelayQuestion(NetzplanGraph npg, int node, int delay)
+	{
+		String nodeLabel =  npg.getName(node);
+		int answer = getDelay(npg, node, delay);
+		
+		FillInBlanksQuestionModel question = new FillInBlanksQuestionModel("Delay Question");
+		question.setPrompt("Angenommen der Startzeitpunkt von Knoten "+ nodeLabel+" verzögert sich um "+delay+" Einheiten, um wie viel verzögert sich maximal die Fertigstellung des Endproduktes?");
+		question.setGroupID(qg04);
+		
+		question.addAnswer(""+answer, 5, answer+" war richtig.");
+		
+		lang.addFIBQuestion(question);
+		
+	}
+	
+	private int getDelay(NetzplanGraph npg, int node, int delay)
+	{
+		if(npg.isEndNode(node))
+		{
+			return delay;
+		}
+		
+		int currentDelay = delay - (npg.getLatestStartTime(node)- npg.getEarliestStartTime(node));
+		
+		if(currentDelay <= 0)
+		{
+			return 0;
+		}
+		int successorDelay = 0;
+		for(int successor : npg.getSuccessors(node))
+		{
+			int tmp = getDelay(npg, successor, currentDelay);
+			if(tmp > successorDelay)
+			{
+				successorDelay = tmp;
+			}
+		}
+		
+		return successorDelay;
+			
+	}
     
     private void setupQuestions()
     {
 
-        lang.addQuestionGroup(new QuestionGroupModel(qg01, 1));
-        lang.addQuestionGroup(new QuestionGroupModel(qg02, 1));
-        lang.addQuestionGroup(new QuestionGroupModel(qg03, 1));
+    	QuestionGroupModel model;
+      
+        model = new QuestionGroupModel(qg01, 1);
+        model.setNumberOfRepeats(2);
+        lang.addQuestionGroup(model);
+        
+        model = new QuestionGroupModel(qg02, 1);
+        model.setNumberOfRepeats(2);
+        lang.addQuestionGroup(model);
+        
+        model = new QuestionGroupModel(qg03, 1);
+        model.setNumberOfRepeats(1);
+        lang.addQuestionGroup(model);
+        
+        model = new QuestionGroupModel(qg04, 1);
+        model.setNumberOfRepeats(1);
+        lang.addQuestionGroup(model);
         
         
     }

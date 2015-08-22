@@ -78,6 +78,7 @@ public class NetzplanGraph {
 		return result;
 	}
 	
+	
 	public void setEarliestStartTime(int id, int time)
 	{
 		this.setEntry(id, CellID.EarliestStartTime, String.valueOf(time));
@@ -238,6 +239,33 @@ public class NetzplanGraph {
 		
 		return startNodes;
 	} 
+	
+	public void hideGraph()
+	{
+		for(NetzplanNode node: nodes.values())
+		{
+			node.values.hide();
+			
+			for(NetzplanEdge edge: node.edges.values())
+			{
+				edge.line.hide();
+			}
+		}
+	}
+	
+	
+	public void showGraph()
+	{
+		for(NetzplanNode node: nodes.values())
+		{
+			node.values.show();
+			
+			for(NetzplanEdge edge: node.edges.values())
+			{
+				edge.line.show();
+			}
+		}
+	}
 	
 	public void highlightNode(int id)
 	{
@@ -689,7 +717,7 @@ public class NetzplanGraph {
 			if(!isEndNodeOfAnimalGraph(i, graph))
 			{
 				this.setName(i, graph.getNodeLabel(i));
-				// TODO: how to set process time of end node ???
+				
 				if(!nodes.get(i).sucsessors.isEmpty())
 				{
 					this.setProcessTime(i, graph.getEdgeWeight(i, nodes.get(i).sucsessors.get(0)));
