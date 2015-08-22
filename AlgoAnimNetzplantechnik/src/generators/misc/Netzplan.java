@@ -171,6 +171,8 @@ public class Netzplan implements Generator {
         	this.drawCriticalPath(currentNode);
         }
         lang.nextStep("Darstellung kritischer Pfad");
+        criticalPathText.hide();
+        SourceCode endInformation = this.showEndText(counter);
 
         
         
@@ -289,6 +291,8 @@ public class Netzplan implements Generator {
     		src2.unhighlight(6);
     		src2.highlight(7);
     		n.setLatestStartTime(node, n.getEarliestStartTime(node));
+    		smat.put(0, 0, "-1", null, null);
+    		smat.getElement(0, 0);
     		lang.nextStep();
     		src2.unhighlight(7); //////////////////
 			src2.unhighlight(6);
@@ -330,16 +334,23 @@ public class Netzplan implements Generator {
         		lang.nextStep();
         		src2.unhighlight(13);
         		if(n.hasValidEntry(node, NetzplanGraph.CellID.LatestEndTime)==false || n.getLatestStartTime(currentSuccessor)< n.getLatestEndTime(node)){
+        			if(n.hasValidEntry(node, NetzplanGraph.CellID.LatestEndTime)==true){
+        				smat.getElement(0, 0);
+        			}
         			n.highlightEdge(node, currentSuccessor);
         			src2.highlight(14);
         			lang.nextStep();
         			n.setLatestStartTime(node, n.getLatestStartTime(currentSuccessor)- n.getProcessTime(node));
+        			smat.put(0, 0, "-1", null, null);
+        			smat.getElement(0, 0);
         			src2.highlight(15);
         			src2.unhighlight(14);
         			lang.nextStep();
           			src2.unhighlight(15);
         			src2.highlight(16);
         			n.setLatestEndTime(node, n.getLatestStartTime(node)+ n.getProcessTime(node));
+        			smat.put(0, 0, "-1", null, null);
+        			smat.getElement(0, 0);
         			lang.nextStep();
         			src2.unhighlight(16);
         			n.unHighlightEdge(node, currentSuccessor);
@@ -504,6 +515,25 @@ public class Netzplan implements Generator {
         return infoText;
     
     }
+    
+	private SourceCode showEndText(TwoValueCounter counter) {
+    	//int actualCount = iterations - 1;
+		SourceCodeProperties infoProps = new SourceCodeProperties();
+    	infoProps.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF, Font.PLAIN, 14));
+    	SourceCode endText = lang.newSourceCode(new Coordinates(20,100), "InfoText", null, infoProps);
+    	endText.addCodeLine("Informationen zu dem zuvor angzeigten Ablauf des Algorithmus:", "Line0", 0, null);
+    	endText.addCodeLine("", "Line1", 0, null);
+    	endText.addCodeLine("Anzahl Schreibzugriffe: " + counter.getAssigments(), "Line3", 0, null);
+    	endText.addCodeLine("Anzahl Lesezugriffe: " + counter.getAccess(), "Line4", 0, null);
+    	
+    	/*
+    	for(int i = 0; i < adjacencymatrix.length; i++){
+    		endText.addCodeLine("PR(" + g.getNodeLabel(i) + ") = " + smat.getElement(1, i), "Line" + (i + 3), 0, null);	
+    	}
+    	return endText;
+    	*/
+    	return endText;
+	}
     
     
     private void setupQuestions()
