@@ -58,6 +58,7 @@ public class Netzplan implements Generator {
     SourceCode src2;
     private SourceCodeProperties sourceCodeStyle;
     StringMatrix smat;
+    LinkedList<Integer> critcalPathNodes;
     
     
     String qg01 = "firstDirectionQuestions";
@@ -160,6 +161,7 @@ public class Netzplan implements Generator {
         }
         lang.nextStep("Darstellung kritischer Pfad");
         criticalPathText.hide();
+        n.hideGraph();
         SourceCode endInformation = this.showEndText(counter);
         
         
@@ -517,19 +519,19 @@ public class Netzplan implements Generator {
     	endText.addCodeLine("", "Line1", 0, null);
     	endText.addCodeLine("Anzahl Schreibzugriffe: " + counter.getAssigments(), "Line3", 0, null);
     	endText.addCodeLine("Anzahl Lesezugriffe: " + counter.getAccess(), "Line4", 0, null);
-    	
-    	/*
-    	for(int i = 0; i < adjacencymatrix.length; i++){
-    		endText.addCodeLine("PR(" + g.getNodeLabel(i) + ") = " + smat.getElement(1, i), "Line" + (i + 3), 0, null);	
+    	String criticalPathString = "";
+    	for(Integer currentNode: critcalPathNodes){
+    		criticalPathString = criticalPathString + " " + n.getName(currentNode);
     	}
-    	return endText;
-    	*/
+    	
+    	endText.addCodeLine("Knoten auf kritischem Pfad: " + criticalPathString, "Line 5", 0, null);
+
     	return endText;
 	}
     
 	private void startCriticalPathQuestion(NetzplanGraph npg)
 	{
-		 LinkedList<Integer> critcalPathNodes = new LinkedList<Integer>();
+		 critcalPathNodes = new LinkedList<Integer>(); // habe es zu gloabelen Vairable gemacht, um auf die Knoten im Pfad zuzuggreifen zu koennen
 	         
 	     for(Integer currentNode:npg.getStartNodes()){
 	      	this.getCriticalPath(currentNode,critcalPathNodes);
