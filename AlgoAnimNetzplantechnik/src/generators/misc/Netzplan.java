@@ -30,6 +30,7 @@ import java.util.Set;
 import algoanim.primitives.Graph;
 import algoanim.primitives.SourceCode;
 import algoanim.primitives.StringMatrix;
+import algoanim.primitives.Variables;
 import algoanim.primitives.generators.Language;
 import algoanim.properties.AnimationPropertiesKeys;
 import algoanim.properties.CounterProperties;
@@ -45,6 +46,7 @@ import algoanim.animalscript.AnimalScript;
 import algoanim.animalscript.AnimalStringMatrixGenerator;
 import algoanim.counter.model.TwoValueCounter;
 import algoanim.counter.view.TwoValueView;
+import animal.variables.VariableRoles;
 
 //%Die Gewichte der Kanten representieren die Prozesszeit von ausgehenden Knoten.
 //%Achte deshalb darauf, dass alle Ausgehendne Kanten von einem Knoten die gleiche Gewichtung hat.
@@ -67,11 +69,31 @@ public class Netzplan implements Generator {
     String qg02 = "secondDirectionQuestions";
     String qg03 = "criticalPathQuestion";
     String qg04 = "delayQuestion";
+    
+    private String MOST_RECENT_HOLDER = animal.variables.Variable.getRoleString(VariableRoles.MOST_RECENT_HOLDER);
+    private String FIXED_VALUE = animal.variables.Variable.getRoleString(VariableRoles.FIXED_VALUE);
+    private String STEPPER = animal.variables.Variable.getRoleString(VariableRoles.STEPPER);
+    private String TEMPORARY = animal.variables.Variable.getRoleString(VariableRoles.TEMPORARY);
+    private String MOST_WANTED_HOLDER = animal.variables.Variable.getRoleString(VariableRoles.MOST_WANTED_HOLDER);
+    private String WALKER = animal.variables.Variable.getRoleString(VariableRoles.WALKER);
+    
+    private Variables vars;
+    
+    String nodePreName = "process";
+	String ptPreName = "processTime";
+	String estPreName = "earliestStartTime";
+	String eetPreName = "earliestEndTime";
+	String lstPreName = "latestStartTime";
+	String letPreName = "latestEndTime";
+	String currentNodeName = "currentNode";
+	String currentPredecessorName = "currentPredecessor";
+	String currentSuccessorName = "currentSuccessor";
 
     public void init(){
         lang = new AnimalScript("Netzplantechnik", "Jan Ulrich Schmitt & Dennis Juckwer", 800, 600);        
         lang.setStepMode(true);
         lang.setInteractionType(Language.INTERACTION_TYPE_AVINTERACTION);
+        vars = lang.newVariables();
     }
 
     public String generate(AnimationPropertiesContainer props,Hashtable<String, Object> primitives) {
@@ -92,6 +114,8 @@ public class Netzplan implements Generator {
         n.setAllEdgeBaseColor(edgeColor);
         n.setAllEdgeHightlightColor(edgeHighlightColor);
         src1.highlight(0);
+        
+        setUpVars(n);
         
         // Zähler Anfang
         AnimalStringMatrixGenerator matrixGenerator = new AnimalStringMatrixGenerator((AnimalScript) lang);
@@ -123,12 +147,15 @@ public class Netzplan implements Generator {
         }
         src1.unhighlight(0);
         List<Integer> nodesToProcess = n.getEndNodes();
+        vars.declare("string", currentNodeName, "",STEPPER);
         for(Integer currentNode: nodesToProcess){
         	/////////////src1.unhighlight(0);
         	src1.highlight(1);
         	this.calculateFirstDirection(currentNode);
         	
         }
+        
+        vars.discard(currentNodeName);
         
         
         
@@ -144,10 +171,12 @@ public class Netzplan implements Generator {
         lang.nextStep("Beginn der Vorwärtsrechnung");
         
         src2.unhighlight(2);
+        vars.declare("string", currentNodeName, "",STEPPER);
         for(Integer currentNode: nodesToProcess){
         	src2.highlight(3);
         	this.calculateSecondDirection(currentNode);
         }
+        vars.discard(currentNodeName);
              
         
         this.startCriticalPathQuestion(n);
@@ -170,10 +199,26 @@ public class Netzplan implements Generator {
         return lang.toString();
     }
     
-    
+    private void setUpVars(NetzplanGraph npg)
+    {
+    	
+    	for(int nodeId: npg.getAllNodes())
+    	{
+    		vars.declare("int" , ptPreName+npg.getName(nodeId),String.valueOf(npg.getProcessTime(nodeId)), FIXED_VALUE);
+    		vars.declare("int" , estPreName+npg.getName(nodeId),"", MOST_RECENT_HOLDER);
+    		vars.declare("int" , eetPreName+npg.getName(nodeId),"", MOST_RECENT_HOLDER);
+    		vars.declare("int" , lstPreName+npg.getName(nodeId),String.valueOf(Integer.MAX_VALUE), MOST_RECENT_HOLDER);
+    		vars.declare("int" , letPreName+npg.getName(nodeId),String.valueOf(Integer.MAX_VALUE), MOST_RECENT_HOLDER);
+    	}
+    	
+    	
+    	
+    }
 
 	private void calculateFirstDirection(Integer node){
 
+		vars.set(currentNodeName, n.getName(node));
+		
     	src1.highlight(5);
     	n.highlightNode(node);
     	lang.nextStep("Aufruf Rückwärtsrechnung Knoten " + graph.getNodeLabel(node));
@@ -187,12 +232,14 @@ public class Netzplan implements Generator {
     		src1.unhighlight(6);
     		src1.highlight(7);
 			n.setEarliestStartTime(node, 0);
+			vars.set(estPreName+n.getName(node), "0");
 			smat.put(0, 0, "-1", null, null);
 			lang.nextStep();
 			src1.unhighlight(7);
 			src1.unhighlight(6);
 			src1.highlight(8);
     		n.setEarliestEndTime(node, n.getProcessTime(node));
+    		vars.set(eetPreName+n.getName(node), String.valueOf(n.getProcessTime(node)));
     		smat.put(0, 0, "-1", null, null);
     		smat.getElement(0, 0);
     		lang.nextStep();
@@ -243,6 +290,7 @@ public class Netzplan implements Generator {
         			src1.highlight(14);
         			lang.nextStep();
         			n.setEarliestStartTime(node, n.getEarliestEndTime(currentPredecessor));
+        			vars.set(estPreName+n.getName(node), String.valueOf(n.getEarliestEndTime(currentPredecessor)));
         			smat.getElement(0, 0);
         			smat.put(0, 0, "-1", null, null);
         			src1.highlight(15);
@@ -251,6 +299,7 @@ public class Netzplan implements Generator {
         			src1.unhighlight(15);
         			src1.highlight(16);
         			n.setEarliestEndTime(node, n.getEarliestStartTime(node) + n.getProcessTime(node));
+        			vars.set(eetPreName+n.getName(node), String.valueOf(n.getEarliestStartTime(node) + n.getProcessTime(node)));
         			smat.getElement(0, 0);
         			smat.put(0, 0, "-1", null, null);
         			lang.nextStep();
@@ -267,6 +316,7 @@ public class Netzplan implements Generator {
     }
 	
 	private void calculateSecondDirection(Integer node) {
+		vars.set(currentNodeName, n.getName(node));
     	src2.highlight(5);
     	n.highlightNode(node);
     	lang.nextStep("Aufruf Vorwärtsrechnung Knoten " + graph.getNodeLabel(node));
@@ -280,6 +330,7 @@ public class Netzplan implements Generator {
     		src2.unhighlight(6);
     		src2.highlight(7);
     		n.setLatestStartTime(node, n.getEarliestStartTime(node));
+    		vars.set(lstPreName+n.getName(node), String.valueOf(n.getEarliestStartTime(node)));
     		smat.put(0, 0, "-1", null, null);
     		smat.getElement(0, 0);
     		lang.nextStep();
@@ -287,6 +338,7 @@ public class Netzplan implements Generator {
 			src2.unhighlight(6);
 			src2.highlight(8);
     		n.setLatestEndTime(node, n.getEarliestEndTime(node));
+    		vars.set(letPreName+n.getName(node), String.valueOf(n.getEarliestEndTime(node)));
     		lang.nextStep();
     		src2.unhighlight(8);
     	}else{
@@ -330,6 +382,7 @@ public class Netzplan implements Generator {
         			src2.highlight(14);
         			lang.nextStep();
         			n.setLatestStartTime(node, n.getLatestStartTime(currentSuccessor)- n.getProcessTime(node));
+        			vars.set(lstPreName+n.getName(node), String.valueOf(n.getLatestStartTime(currentSuccessor)- n.getProcessTime(node)));
         			smat.put(0, 0, "-1", null, null);
         			smat.getElement(0, 0);
         			src2.highlight(15);
@@ -338,6 +391,7 @@ public class Netzplan implements Generator {
           			src2.unhighlight(15);
         			src2.highlight(16);
         			n.setLatestEndTime(node, n.getLatestStartTime(node)+ n.getProcessTime(node));
+        			vars.set(letPreName+n.getName(node), String.valueOf(n.getLatestStartTime(node)+ n.getProcessTime(node)));
         			smat.put(0, 0, "-1", null, null);
         			smat.getElement(0, 0);
         			lang.nextStep();
