@@ -373,25 +373,31 @@ public class Netzplan implements Generator {
 	
 	private boolean getCriticalPath(Integer actualNode, List<Integer> criticalNodes)
 	{
-		LinkedList<Integer> currentSuccessors = new LinkedList<Integer>();
-		currentSuccessors.addAll(n.getSuccessors(actualNode));
-		boolean isCriticalStep = false;
 		
-		for(Integer actualSuccessor: currentSuccessors){
-			if(n.getEarliestStartTime(actualNode) == n.getLatestStartTime(actualNode) && (n.isEndNode(actualSuccessor)||drawCriticalPath(actualSuccessor) )){
-				criticalNodes.add(actualSuccessor);
-				isCriticalStep = true;
-			}
-			
-		}
-		
-		if(isCriticalStep)
+		if(n.isEndNode(actualNode))
 		{
-			criticalNodes.add(actualNode);
+			if(!criticalNodes.contains(actualNode))
+				criticalNodes.add(actualNode);
+			return true;
 		}
-				
 		
-		return isCriticalStep;
+		if(n.getEarliestStartTime(actualNode) == n.getLatestStartTime(actualNode))
+		{
+			
+			for(Integer successor: n.getSuccessors(actualNode))
+			{
+				if(getCriticalPath(successor, critcalPathNodes))
+				{
+					if(!criticalNodes.contains(actualNode))
+					{
+						criticalNodes.add(actualNode);
+					}
+					return true;
+				}				
+			}
+		}
+		
+		return false;
 	}
 	
 	
