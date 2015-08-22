@@ -60,6 +60,8 @@ public class Netzplan implements Generator {
     StringMatrix smat;
     LinkedList<Integer> critcalPathNodes;
     
+    Random rg = new Random();
+    
     
     String qg01 = "firstDirectionQuestions";
     String qg02 = "secondDirectionQuestions";
@@ -146,14 +148,13 @@ public class Netzplan implements Generator {
         	src2.highlight(3);
         	this.calculateSecondDirection(currentNode);
         }
-        
-        
-        
+             
         
         this.startCriticalPathQuestion(n);
-       
-          
+           
         lang.nextStep();
+        this.startDelayQuestion(n);
+        
         src2.hide();
         SourceCode criticalPathText = setCriticicalPathInformation();
         for(Integer currentNode : n.getStartNodes()){
@@ -163,12 +164,7 @@ public class Netzplan implements Generator {
         criticalPathText.hide();
         n.hideGraph();
         SourceCode endInformation = this.showEndText(counter);
-        
-        
-        startDelayQuestion(n);
-
-        
-        
+                
         lang.finalizeGeneration();
 
         return lang.toString();
@@ -567,9 +563,7 @@ public class Netzplan implements Generator {
 	{
 		int node;
 		int delay;
-		
-		Random rg = new Random();
-		
+			
 		List<Integer> nodes = npg.getAllNodes();
 		
 		if(nodes.size() == 0)
@@ -593,11 +587,15 @@ public class Netzplan implements Generator {
 			node = nodes.get(rg.nextInt(nodes.size()));
 		}
 		
-		delay = npg.getLatestStartTime(node)- npg.getLatestStartTime(node);
+		delay = npg.getLatestStartTime(node)- npg.getEarliestStartTime(node);
 		
-		int maxDelay = delay+4;
+		int delta = 3;
+		int maxDelay = delay+delta+1;
 		int minDelay = 1;
 		
+		if(delay > delta)
+			minDelay = delay - delta;
+	
 		delay = rg.nextInt(maxDelay-minDelay)+minDelay;
 		
 		
@@ -632,17 +630,19 @@ public class Netzplan implements Generator {
 		{
 			return 0;
 		}
-		int successorDelay = 0;
-		for(int successor : npg.getSuccessors(node))
-		{
-			int tmp = getDelay(npg, successor, currentDelay);
-			if(tmp > successorDelay)
-			{
-				successorDelay = tmp;
-			}
-		}
 		
-		return successorDelay;
+		return currentDelay;
+//		int successorDelay = 0;
+//		for(int successor : npg.getSuccessors(node))
+//		{
+//			int tmp = getDelay(npg, successor, currentDelay);
+//			if(tmp > successorDelay)
+//			{
+//				successorDelay = tmp;
+//			}
+//		}
+//		
+//		return successorDelay;
 			
 	}
 	
