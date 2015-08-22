@@ -769,7 +769,6 @@ public class NetzplanGraph {
 		
 		Coordinates result[] = {pointA, pointB};
 		
-		System.out.println("LineCoordiate creation:\npointA: "+ pointA.getX()+" ; " +pointA.getY() +"\n"+pointB.getX() +" ; "+ pointB.getY());
 		return result;
 	}
 	
@@ -782,15 +781,6 @@ public class NetzplanGraph {
 		float lmaxX = maxX-centerX;
 		float lmaxY = maxY-centerY;
 		
-		System.out.println("dirX: "+dirX);
-		System.out.println("dirY: "+dirY);
-		System.out.println("CenterX: "+centerX);
-		System.out.println("CenterY: "+centerY);
-		System.out.println("lminX: "+lminX);
-		System.out.println("lminY: "+lminY);
-		System.out.println("lmaxX: "+lmaxX);
-		System.out.println("lmaxY: "+lmaxY);
-		
 		float nearestX = 0;
 		float nearestY = 0;
 		if(dirX < 0)
@@ -802,9 +792,6 @@ public class NetzplanGraph {
 			nearestY = lminY;
 		else
 			nearestY = lmaxY;
-		
-		System.out.println("nearesX: "+ nearestX);
-		System.out.println("nearesY: "+ nearestY);
 		
 		float x;
 		float y;

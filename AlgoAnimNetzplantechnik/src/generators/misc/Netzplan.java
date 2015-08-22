@@ -46,6 +46,10 @@ import algoanim.animalscript.AnimalStringMatrixGenerator;
 import algoanim.counter.model.TwoValueCounter;
 import algoanim.counter.view.TwoValueView;
 
+//%Die Gewichte der Kanten representieren die Prozesszeit von ausgehenden Knoten.
+//%Achte deshalb darauf, dass alle Ausgehendne Kanten von einem Knoten die gleiche Gewichtung hat.
+//%Um die Prozesszeit von den Endkoten festzulegen wird weiterer Dummy-Knoten benötigt.
+//%Dieser Knoten wird im Graphen nicht angezeigt und nicht beachtet.
 public class Netzplan implements Generator {
     private Language lang;
     private Graph graph;
@@ -370,6 +374,7 @@ public class Netzplan implements Generator {
 		LinkedList<Integer> currentSuccessors = new LinkedList<Integer>();
 		currentSuccessors.addAll(n.getSuccessors(actualNode));
 		boolean isCriticalStep = false;
+		
 		for(Integer actualSuccessor: currentSuccessors){
 			if(n.getEarliestStartTime(actualNode) == n.getLatestStartTime(actualNode) && (n.isEndNode(actualSuccessor)||drawCriticalPath(actualSuccessor) )){
 				criticalNodes.add(actualSuccessor);
@@ -632,6 +637,47 @@ public class Netzplan implements Generator {
 		return successorDelay;
 			
 	}
+	
+	private int calculateEST(NetzplanGraph npg, int nodeId)
+	{
+		if(npg.isStartNode(nodeId))
+		{
+			return 0;
+		}
+		int est = 0;
+		for(int predecessor: npg.getPredecessors(nodeId))
+		{
+			int tmp = calculateEST(npg, predecessor)+ npg.getProcessTime(predecessor);		
+			if(tmp > est)
+				est = tmp;
+		}
+		
+		return est;
+	}
+	
+	
+	private int calculateLST(NetzplanGraph npg, int nodeId)
+	{
+		
+		if(npg.isEndNode(nodeId))
+		{
+			return npg.getEarliestStartTime(nodeId);
+		}
+		
+		int lst = Integer.MAX_VALUE;
+		for(int successor: npg.getSuccessors(nodeId))
+		{
+			int tmp = calculateLST(npg, successor)-npg.getProcessTime(nodeId);
+			
+			if(tmp < lst)
+			{
+				lst = tmp;
+			}
+		}
+		
+		return lst;
+	}
+	
     
     private void setupQuestions()
     {
