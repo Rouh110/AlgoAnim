@@ -104,6 +104,12 @@ public class PageRank implements Generator {
     private String numberOfPredecessorName = "numberOfPredecessor";
     private String numberOfNodesName = "numberOfNodes";
     
+    private String MOST_RECENT_HOLDER = animal.variables.Variable.getRoleString(VariableRoles.MOST_RECENT_HOLDER);
+    private String FIXED_VALUE = animal.variables.Variable.getRoleString(VariableRoles.FIXED_VALUE);
+    private String STEPPER = animal.variables.Variable.getRoleString(VariableRoles.STEPPER);
+    private String TEMPORARY = animal.variables.Variable.getRoleString(VariableRoles.TEMPORARY);
+    private String MOST_WANTED_HOLDER = animal.variables.Variable.getRoleString(VariableRoles.MOST_WANTED_HOLDER);
+    
     private Variables vars;
     
     public PageRank(){
@@ -222,7 +228,8 @@ public class PageRank implements Generator {
         int nodeToQuestion = rg.nextInt(adjacencymatrix.length-1);
         nodeToQuestion++;
         
-        vars.declare("double", currentIterationChangeName,String.valueOf(difference),"most recent holder");
+        
+        vars.declare("double", currentIterationChangeName,String.valueOf(difference),MOST_RECENT_HOLDER);
         
 		while(difference > breakValue){ // Counter fuer Iterationen
 			formulaV.setText("Manhattan-Distanz zwischen letzter und vorletzter Iteration: " + new DecimalFormat("#.#####").format(difference) , null, null);
@@ -240,13 +247,13 @@ public class PageRank implements Generator {
 			formulaV.setText("", null, null);
 			
 			
-			vars.declare("string", currentNodeName,"","temporary");
+			vars.declare("string", currentNodeName,"",STEPPER);
 
 			for(int to = 0; to < adjacencymatrix.length; to++){
 				
 				
 				vars.set(currentNodeName, "Node"+g.getNodeLabel(to));
-				vars.declare("double", tempValueName+g.getNodeLabel(to), "0", "temporary");
+				vars.declare("double", tempValueName+g.getNodeLabel(to), "0", TEMPORARY);
 				
 				
 				if(nodeToQuestion == to)
@@ -276,7 +283,7 @@ public class PageRank implements Generator {
 				lang.nextStep();
 				src.unhighlight(4);
 				float[] predecValues = (float[]) results.get(results.size()-1);
-				vars.declare("string", currentPredecessorName,"", "walker");
+				vars.declare("string", currentPredecessorName,"", STEPPER);
 				for(int from = 0; from < adjacencymatrix.length; from++){
 					if(adjacencymatrix[from][to] == 1){
 						vars.set(currentPredecessorName, g.getNodeLabel(from));
@@ -308,7 +315,7 @@ public class PageRank implements Generator {
 				lang.nextStep();
 				src.unhighlight(6);
 	
-				vars.declare("String", currentDanglingNodeName, "", "walker");
+				vars.declare("String", currentDanglingNodeName, "", STEPPER);
 				for(Integer dangNode : p.getAllDanglingNodeNrs())
 				{
 					vars.set(currentDanglingNodeName, g.getNodeLabel(dangNode));
@@ -420,13 +427,13 @@ public class PageRank implements Generator {
 		VariableTypes.FLOAT.toString();
 		VariableRoles.UNKNOWN.toString();
 		
-		vars.declare("int", numberOfNodesName, String.valueOf(g.getSize()),"fixed value");
-		vars.declare("double",dampingFactorName, "0","fixed value");
-		vars.declare("double",breakValueName, "0","fixed value");
+		vars.declare("int", numberOfNodesName, String.valueOf(g.getSize()),FIXED_VALUE);
+		vars.declare("double",dampingFactorName, "0",FIXED_VALUE);
+		vars.declare("double",breakValueName, "0",FIXED_VALUE);
 		
 		for(int i = 0; i < g.getSize(); i++)
 		{
-			vars.declare("double","Node"+g.getNodeLabel(i), "0","most recent holder" );
+			vars.declare("double","Node"+g.getNodeLabel(i), "0",MOST_RECENT_HOLDER );
 		}
 	}
     
@@ -671,8 +678,7 @@ public class PageRank implements Generator {
     
     private String float2String(float value)
     {
-    	String stringValue = new DecimalFormat("#.###").format(value);
-    	stringValue = stringValue.replaceAll("0", "O");
+    	String stringValue = String.valueOf(value);
     	return stringValue;
     }
 
