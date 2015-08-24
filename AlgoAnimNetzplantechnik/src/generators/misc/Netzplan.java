@@ -193,6 +193,7 @@ public class Netzplan implements Generator {
         criticalPathText.hide();
         n.hideGraph();
         SourceCode endInformation = this.showEndText(counter);
+        lang.nextStep("Schlussinformationen");
                 
         lang.finalizeGeneration();
 
@@ -600,11 +601,21 @@ public class Netzplan implements Generator {
     	endText.addCodeLine("Anzahl Schreibzugriffe: " + counter.getAssigments(), "Line3", 0, null);
     	endText.addCodeLine("Anzahl Lesezugriffe: " + counter.getAccess(), "Line4", 0, null);
     	String criticalPathString = "";
-    	for(Integer currentNode: critcalPathNodes){
-    		criticalPathString = criticalPathString + " " + n.getName(currentNode);
+    	for(int i = critcalPathNodes.size()-1; i >= 0; i--){
+    		criticalPathString = criticalPathString + " " + n.getName(critcalPathNodes.get(i));
     	}
-    	
     	endText.addCodeLine("Knoten auf kritischem Pfad: " + criticalPathString, "Line 5", 0, null);
+    	
+    	int maxtime = -1;
+    	for(int i = 0; i < n.getAllNodes().size(); i++){
+    		if(n.isEndNode(i)){
+    			if(n.getEarliestEndTime(i) > maxtime){
+    				maxtime = n.getEarliestEndTime(i);
+    			}
+    		}
+    	}
+    	endText.addCodeLine("Die minimale Projektdauer betägt: " + maxtime + " Zeiteinheiten", "Line6", 0, null);
+    	
 
     	return endText;
 	}
