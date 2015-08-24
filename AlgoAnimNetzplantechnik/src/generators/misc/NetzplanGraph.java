@@ -501,6 +501,19 @@ public class NetzplanGraph {
 		return false;
 	}
 	
+	public boolean hasNegativeProcessTime()
+	{
+		for(int nodeId: getAllNodes())
+		{
+			if(getProcessTime(nodeId) < 0)
+			{
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
 	public boolean hasLoops()
 	{
 		if(getStartNodes().isEmpty() || getEndNodes().isEmpty())

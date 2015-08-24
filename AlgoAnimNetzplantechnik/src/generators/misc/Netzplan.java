@@ -30,6 +30,7 @@ import java.util.Set;
 import algoanim.primitives.Graph;
 import algoanim.primitives.SourceCode;
 import algoanim.primitives.StringMatrix;
+import algoanim.primitives.Text;
 import algoanim.primitives.Variables;
 import algoanim.primitives.generators.Language;
 import algoanim.properties.AnimationPropertiesKeys;
@@ -48,10 +49,7 @@ import algoanim.counter.model.TwoValueCounter;
 import algoanim.counter.view.TwoValueView;
 import animal.variables.VariableRoles;
 
-//%Die Gewichte der Kanten representieren die Prozesszeit. Dabei gilt die Zeit für den Knoten wovon die Kante ausgeht.
-//%Achte deshalb darauf, dass alle ausgehende Kanten von einem Knoten die gleiche Gewichtung hat.
-//%Um die Prozesszeit von den Endkoten festzulegen wird ein weiterer Dummy-Knoten mit einer Kante vom Endknoten zum Dummy-Knoten benötigt.
-//%Der Dummy-Knoten wird im Graphen nicht angezeigt und vom Algorithmus nicht beachtet.
+
 public class Netzplan implements Generator {
     private Language lang;
     private Graph graph;
@@ -108,7 +106,7 @@ public class Netzplan implements Generator {
         setupQuestions();
         
         
-        setHeader(headerColor);
+        Text headerText = setHeader(headerColor);
         setInformationText();
         src1 = setSourceCodeForward();
         StringMatrix legend = setUpLegend(matrixProperties);
@@ -140,14 +138,32 @@ public class Netzplan implements Generator {
         TwoValueView view = lang.newCounterView(counter,   
         		new Coordinates(600, 490), cp, true, true);
         //Zähler Ende
+        if(n.hasLoops())
+        {
+        	headerText.hide();
+        	TextProperties warningProp = new TextProperties();
+        	warningProp.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF,Font.BOLD, 24));
+        	//warningProp.set(AnimationPropertiesKeys.COLOR_PROPERTY, headerColor);
+        	lang.newText(new Coordinates(20,30), "Der Algorithmus kann nicht ausgeführt werden, da der Graph Loops hat.", "loopwaring", null, warningProp);
+        	lang.finalizeGeneration();
+        	return lang.toString();
+        }
+        if(n.hasNegativeProcessTime())
+        {
+        	headerText.hide();
+        	TextProperties warningProp = new TextProperties();
+        	warningProp.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF,Font.BOLD, 24));
+        	//warningProp.set(AnimationPropertiesKeys.COLOR_PROPERTY, headerColor);
+        	lang.newText(new Coordinates(20,30), "Der Algorithmus kann nicht ausgeführt werden, da der Graph negative Prozesszeiten hat.", "loopwaring", null, warningProp);
+        	lang.finalizeGeneration();
+        	lang.finalizeGeneration();
+        	return lang.toString();
+        }
         
         lang.nextStep("Beginn der Rückwärtsrechnung");
        
-        if(n.hasLoops())
-        {
-        	//TODO: Message about invalid graph
-        	return lang.toString();
-        }
+        
+        
         src1.unhighlight(0);
         List<Integer> nodesToProcess = n.getEndNodes();
         vars.declare("string", currentNodeName, "",STEPPER);
@@ -507,11 +523,11 @@ public class Netzplan implements Generator {
 	
 	
 	
-    private void setHeader(Color headerColor){
+    private Text setHeader(Color headerColor){
     	TextProperties headerProps = new TextProperties();
     	headerProps.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF,Font.BOLD, 24));
     	headerProps.set(AnimationPropertiesKeys.COLOR_PROPERTY, headerColor);
-    	lang.newText(new Coordinates(20,30), "Die Netzplantechnik", "header", null, headerProps);
+    	return lang.newText(new Coordinates(20,30), "Die Netzplantechnik", "header", null, headerProps);
 
     	
     }
@@ -887,7 +903,15 @@ public class Netzplan implements Generator {
  +"Projektes auswirken."
  +"\n \n"
  +"Es ist zu beachten, dass die Beziehungen zwischen den Arbeitsvorgängen eindeutig zu definieren sind. "
- +"Zyklen sind daher nicht zulässig!";
+ +"Zyklen sind daher nicht zulässig!"
+ + "\n \n"
+ + "Beim manuellen setzen des Graphprimitves müssen folgende Dinge beachtet werden:\n"
+ + "Die Gewichte der Kanten repräsentieren die Prozesszeit des Knoten wovon die Kante ausgeht."
+ + "Achte deshalb darauf, dass alle ausgehende Kanten von einem Knoten die gleiche Gewichtung haben.\n"
+ + "Um die Prozesszeit von den Endkoten festzulegen, wird ein weiterer Dummy-Knoten mit einer Kante vom Endknoten zum Dummy-Knoten benötigt."
+ + "Der Dummy-Knoten wird im Graphen nicht angezeigt und vom Algorithmus nicht beachtet.\n"
+ + "Der Graph darf keine Loops und keine negativen Kanten haben.";
+       
     }
 
     public String getCodeExample(){
