@@ -48,10 +48,10 @@ import algoanim.counter.model.TwoValueCounter;
 import algoanim.counter.view.TwoValueView;
 import animal.variables.VariableRoles;
 
-//%Die Gewichte der Kanten representieren die Prozesszeit von ausgehenden Knoten.
-//%Achte deshalb darauf, dass alle Ausgehendne Kanten von einem Knoten die gleiche Gewichtung hat.
-//%Um die Prozesszeit von den Endkoten festzulegen wird weiterer Dummy-Knoten benötigt.
-//%Dieser Knoten wird im Graphen nicht angezeigt und nicht beachtet.
+//%Die Gewichte der Kanten representieren die Prozesszeit. Dabei gilt die Zeit für den Knoten wovon die Kante ausgeht.
+//%Achte deshalb darauf, dass alle ausgehende Kanten von einem Knoten die gleiche Gewichtung hat.
+//%Um die Prozesszeit von den Endkoten festzulegen wird ein weiterer Dummy-Knoten mit einer Kante vom Endknoten zum Dummy-Knoten benötigt.
+//%Der Dummy-Knoten wird im Graphen nicht angezeigt und vom Algorithmus nicht beachtet.
 public class Netzplan implements Generator {
     private Language lang;
     private Graph graph;
@@ -205,14 +205,12 @@ public class Netzplan implements Generator {
     	for(int nodeId: npg.getAllNodes())
     	{
     		vars.declare("int" , ptPreName+npg.getName(nodeId),String.valueOf(npg.getProcessTime(nodeId)), FIXED_VALUE);
-    		vars.declare("int" , estPreName+npg.getName(nodeId),"", MOST_RECENT_HOLDER);
-    		vars.declare("int" , eetPreName+npg.getName(nodeId),"", MOST_RECENT_HOLDER);
-    		vars.declare("int" , lstPreName+npg.getName(nodeId),String.valueOf(Integer.MAX_VALUE), MOST_RECENT_HOLDER);
-    		vars.declare("int" , letPreName+npg.getName(nodeId),String.valueOf(Integer.MAX_VALUE), MOST_RECENT_HOLDER);
+    		vars.declare("int" , estPreName+npg.getName(nodeId),"-1", MOST_RECENT_HOLDER);
+    		vars.declare("int" , eetPreName+npg.getName(nodeId),"-1", MOST_RECENT_HOLDER);
+    		vars.declare("int" , lstPreName+npg.getName(nodeId),String.valueOf(-1), MOST_RECENT_HOLDER);
+    		vars.declare("int" , letPreName+npg.getName(nodeId),String.valueOf(-1), MOST_RECENT_HOLDER);
     	}
-    	
-    	
-    	
+	
     }
 
 	private void calculateFirstDirection(Integer node){
@@ -276,6 +274,9 @@ public class Netzplan implements Generator {
     		for(Integer innerPredecessors: predecessors){
     			n.highlightEdge(innerPredecessors, node);
     		}
+    		
+    		startFirstDirectionQuestion(n, node);
+    		
     		lang.nextStep();
         	for(Integer currentPredecessor: predecessors){
         		for(Integer innerPredecessors: predecessors){
@@ -368,6 +369,9 @@ public class Netzplan implements Generator {
         		}
         	}
         	src2.highlight(13);
+        	
+        	startSecondDirectionQuestion(n, node);
+        	
         	for(Integer currentSuccessor: successors){
         		for(Integer innerSuccessors: successors){
         			n.unHighlightEdge(node, innerSuccessors);
@@ -669,6 +673,36 @@ public class Netzplan implements Generator {
 		
 		lang.addFIBQuestion(question);
 		
+	}
+	
+	int fdQuestionCounter = 0;
+	private void startFirstDirectionQuestion(NetzplanGraph npg, int nodeId)
+	{
+		fdQuestionCounter++;
+		int answer = calculateEST(npg, nodeId);
+		String nodeLabel = npg.getName(nodeId);
+		
+		FillInBlanksQuestionModel question = new FillInBlanksQuestionModel("First Direction Question "+fdQuestionCounter);
+		question.setGroupID(qg01);
+		question.setPrompt("Welchen Wert für die 'Früheste Start Zeit' wird Knoten " + nodeLabel+" am Ende des Algorithmus haben.");
+		question.addAnswer(String.valueOf(answer), 5, answer + " war richtig.");
+		
+		lang.addFIBQuestion(question);
+			}
+	
+	int sdQuestionCounter = 0;
+	private void startSecondDirectionQuestion(NetzplanGraph npg, int nodeId)
+	{
+		sdQuestionCounter++;
+		int answer = calculateLST(npg, nodeId);
+		String nodeLabel = npg.getName(nodeId);
+		
+		FillInBlanksQuestionModel question = new FillInBlanksQuestionModel("Second Direction Question "+sdQuestionCounter);
+		question.setGroupID(qg02);
+		question.setPrompt("Welchen Wert für die 'Späteste Start Zeit' wird Knoten " + nodeLabel+" am Ende des Algorithmus haben.");
+		question.addAnswer(String.valueOf(answer), 5, answer + " war richtig.");
+		
+		lang.addFIBQuestion(question);
 	}
 	
 	private int getDelay(NetzplanGraph npg, int node, int delay)
