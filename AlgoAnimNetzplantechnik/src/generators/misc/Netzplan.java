@@ -137,10 +137,8 @@ public class Netzplan implements Generator {
         CounterProperties cp = new CounterProperties();
         cp.set(AnimationPropertiesKeys.FILLED_PROPERTY, true);
         cp.set(AnimationPropertiesKeys.FILL_PROPERTY, Color.BLUE);
-        TwoValueView view = lang.newCounterView(counter,
-        		new Coordinates(700, 490), cp, true, true);
-        
-        
+        TwoValueView view = lang.newCounterView(counter,   
+        		new Coordinates(600, 490), cp, true, true);
         //Zähler Ende
         
         lang.nextStep("Beginn der Rückwärtsrechnung");
@@ -199,6 +197,7 @@ public class Netzplan implements Generator {
         n.hideGraph();
         legend.hide();
         SourceCode endInformation = this.showEndText(counter);
+        lang.nextStep("Schlussinformationen");
                 
         lang.finalizeGeneration();
 
@@ -241,7 +240,7 @@ public class Netzplan implements Generator {
         data[1][1] = "Späteste Startzeit";
         data[1][2] = "Späteste Endzeit";
         
-        Coordinates upperLeft = new Coordinates(700,390);
+        Coordinates upperLeft = new Coordinates(600,390);
         return lang.newStringMatrix(upperLeft, data, "legend", null,matProp);
     }
     
@@ -257,7 +256,8 @@ public class Netzplan implements Generator {
     	src1.unhighlight(5);
 		List<Integer> predecessors = n.getPredecessors(node);
 		if(n.isStartNode(node)){
-    		src1.highlight(6);
+    		smat.getElement(0, 0); // neu hinzugefuegt 2408
+			src1.highlight(6);
     		lang.nextStep();
     		src1.unhighlight(6);
     		src1.highlight(7);
@@ -272,12 +272,14 @@ public class Netzplan implements Generator {
     		vars.set(eetPreName+n.getName(node), String.valueOf(n.getProcessTime(node)));
     		smat.put(0, 0, "-1", null, null);
     		smat.getElement(0, 0);
+    		smat.getElement(0, 0); //neu hinzugefuegt 2408
     		lang.nextStep();
     		src1.unhighlight(8);
     		
 
     	}else{
     		src1.highlight(9);
+    		smat.getElement(0,0); // neu hinzugefuegt 2408
     		for(Integer currentPredcessor: predecessors){
     			n.highlightEdge(currentPredcessor, node);
     		}
@@ -293,6 +295,7 @@ public class Netzplan implements Generator {
         		}
         		src1.unhighlight(10);
     			if(n.hasValidEntry(currentPredecessor, NetzplanGraph.CellID.EarliestEndTime) == false){
+    	    		smat.getElement(0,0); // neu hinzugefuegt 2408
     				n.highlightEdge(currentPredecessor, node);
     				src1.highlight(11);
     				lang.nextStep();
@@ -318,7 +321,9 @@ public class Netzplan implements Generator {
         		if(n.hasValidEntry(node, NetzplanGraph.CellID.EarliestEndTime)==false ||n.getEarliestEndTime(currentPredecessor) > n.getEarliestStartTime(node)){
         			if(n.hasValidEntry(node, NetzplanGraph.CellID.EarliestEndTime)==true){
         				smat.getElement(0, 0);
+        	    		smat.getElement(0,0); // neu hinzugefuegt 2408
         			}
+            		smat.getElement(0,0); // neu hinzugefuegt 2408
         			n.highlightEdge(currentPredecessor, node);
         			src1.highlight(14);
         			lang.nextStep();
@@ -334,6 +339,7 @@ public class Netzplan implements Generator {
         			n.setEarliestEndTime(node, n.getEarliestStartTime(node) + n.getProcessTime(node));
         			vars.set(eetPreName+n.getName(node), String.valueOf(n.getEarliestStartTime(node) + n.getProcessTime(node)));
         			smat.getElement(0, 0);
+            		smat.getElement(0,0); // neu hinzugefuegt 2408
         			smat.put(0, 0, "-1", null, null);
         			lang.nextStep();
         			src1.unhighlight(16);
@@ -358,6 +364,7 @@ public class Netzplan implements Generator {
     	src2.unhighlight(5);
 		List<Integer> successors = n.getSuccessors(node);
     	if(n.isEndNode(node)){
+    		smat.getElement(0,0); // neu hinzugefuegt 2408
     		src2.highlight(6);
     		lang.nextStep();
     		src2.unhighlight(6);
@@ -372,11 +379,13 @@ public class Netzplan implements Generator {
 			src2.highlight(8);
     		n.setLatestEndTime(node, n.getEarliestEndTime(node));
     		vars.set(letPreName+n.getName(node), String.valueOf(n.getEarliestEndTime(node)));
+    		smat.getElement(0,0); // neu hinzugefuegt 2408
+    		smat.put(0, 0, "-1", null, null); // neu hinzugefuegt 2408
     		lang.nextStep();
     		src2.unhighlight(8);
     	}else{
     		src2.highlight(9);
-    		
+    		smat.getElement(0,0); // neu hinzugefuegt 2408
     		for(Integer currentSuccessor: successors){
     			n.highlightEdge(node, currentSuccessor);
     		}
@@ -391,7 +400,8 @@ public class Netzplan implements Generator {
         		}
          		src2.unhighlight(10);
         		if(n.hasValidEntry(currentSuccessor, NetzplanGraph.CellID.LatestEndTime) == false){
-    				n.highlightEdge(node, currentSuccessor);
+        			smat.getElement(0,0); // neu hinzugefuegt 2408
+        			n.highlightEdge(node, currentSuccessor);
     				src2.highlight(11);
     				lang.nextStep();
     				n.unHighlightEdge(node, currentSuccessor);
@@ -400,20 +410,27 @@ public class Netzplan implements Generator {
         			calculateSecondDirection(currentSuccessor);
         		}
         	}
-        	src2.highlight(13);
+
+        	src2.highlight(13); 
+        	lang.nextStep(); // neu hinzugefuegt 2408
+
+        	//src2.highlight(13);
         	
         	startSecondDirectionQuestion(n, node);
         	
+
         	for(Integer currentSuccessor: successors){
         		for(Integer innerSuccessors: successors){
         			n.unHighlightEdge(node, innerSuccessors);
         		}
-        		lang.nextStep();
+        		//lang.nextStep();
         		src2.unhighlight(13);
         		if(n.hasValidEntry(node, NetzplanGraph.CellID.LatestEndTime)==false || n.getLatestStartTime(currentSuccessor)< n.getLatestEndTime(node)){
         			if(n.hasValidEntry(node, NetzplanGraph.CellID.LatestEndTime)==true){
         				smat.getElement(0, 0);
+        				smat.getElement(0,0); // neu hinzugefuegt 2408
         			}
+        			smat.getElement(0, 0); // neu hinzugefuegt 2408
         			n.highlightEdge(node, currentSuccessor);
         			src2.highlight(14);
         			lang.nextStep();
@@ -421,6 +438,7 @@ public class Netzplan implements Generator {
         			vars.set(lstPreName+n.getName(node), String.valueOf(n.getLatestStartTime(currentSuccessor)- n.getProcessTime(node)));
         			smat.put(0, 0, "-1", null, null);
         			smat.getElement(0, 0);
+        			smat.getElement(0,0); // neu hinzugefuegt 2408
         			src2.highlight(15);
         			src2.unhighlight(14);
         			lang.nextStep();
@@ -430,6 +448,7 @@ public class Netzplan implements Generator {
         			vars.set(letPreName+n.getName(node), String.valueOf(n.getLatestStartTime(node)+ n.getProcessTime(node)));
         			smat.put(0, 0, "-1", null, null);
         			smat.getElement(0, 0);
+        			smat.getElement(0,0); // neu hinzugefuegt 2408
         			lang.nextStep();
         			src2.unhighlight(16);
         			n.unHighlightEdge(node, currentSuccessor);
@@ -525,10 +544,10 @@ public class Netzplan implements Generator {
         //sProb.set(AnimationPropertiesKeys.COLOR_PROPERTY, Color.BLUE);
         //sProb.set(AnimationPropertiesKeys.HIGHLIGHTCOLOR_PROPERTY, Color.RED);
         
-        SourceCode src = lang.newSourceCode(new Coordinates(700, 50), "SourceCode", null, sourceCodeStyle);
+        SourceCode src = lang.newSourceCode(new Coordinates(600, 50), "SourceCode", null, sourceCodeStyle);
         src.addCodeLine("01. For all nodes without outgoing edges do", "Code0", 0, null);
         src.addCodeLine("02.     calculateFirstDirection(node)", "Code1", 0, null);
-        src.addCodeLine("03. For all nodes withoud ingoing edges do", "Code2", 0, null);
+        src.addCodeLine("03. For all nodes without ingoing edges do", "Code2", 0, null);
         src.addCodeLine("04.     calculateSecendDirection(node)", "Code3", 0, null);
         src.addCodeLine("", "Code4", 0, null);
         src.addCodeLine("05. calculateFirstDirection(node)", "Code5", 0, null);
@@ -552,10 +571,10 @@ public class Netzplan implements Generator {
         //sProb.set(AnimationPropertiesKeys.COLOR_PROPERTY, Color.BLUE);
         //sProb.set(AnimationPropertiesKeys.HIGHLIGHTCOLOR_PROPERTY, Color.RED);
         
-        SourceCode src = lang.newSourceCode(new Coordinates(700, 50), "SourceCode", null, sourceCodeStyle);
+        SourceCode src = lang.newSourceCode(new Coordinates(600, 50), "SourceCode", null, sourceCodeStyle);
         src.addCodeLine("01. For all nodes without outgoing edges do", "Code0", 0, null);
         src.addCodeLine("02.     calculateFirstDirection(node)", "Code1", 0, null);
-        src.addCodeLine("03. For all nodes withoud ingoing edges do", "Code2", 0, null);
+        src.addCodeLine("03. For all nodes without ingoing edges do", "Code2", 0, null);
         src.addCodeLine("04.     calculateSecendDirection(node)", "Code3", 0, null);
         src.addCodeLine("", "Code4", 0, null);
         src.addCodeLine("05. calculateSecondDirection(node)", "Code4", 0, null);
@@ -612,11 +631,21 @@ public class Netzplan implements Generator {
     	endText.addCodeLine("Anzahl Schreibzugriffe: " + counter.getAssigments(), "Line3", 0, null);
     	endText.addCodeLine("Anzahl Lesezugriffe: " + counter.getAccess(), "Line4", 0, null);
     	String criticalPathString = "";
-    	for(Integer currentNode: critcalPathNodes){
-    		criticalPathString = criticalPathString + " " + n.getName(currentNode);
+    	for(int i = critcalPathNodes.size()-1; i >= 0; i--){
+    		criticalPathString = criticalPathString + " " + n.getName(critcalPathNodes.get(i));
     	}
-    	
     	endText.addCodeLine("Knoten auf kritischem Pfad: " + criticalPathString, "Line 5", 0, null);
+    	
+    	int maxtime = -1;
+    	for(int i = 0; i < n.getAllNodes().size(); i++){
+    		if(n.isEndNode(i)){
+    			if(n.getEarliestEndTime(i) > maxtime){
+    				maxtime = n.getEarliestEndTime(i);
+    			}
+    		}
+    	}
+    	endText.addCodeLine("Die minimale Projektdauer betägt: " + maxtime + " Zeiteinheiten", "Line6", 0, null);
+    	
 
     	return endText;
 	}
