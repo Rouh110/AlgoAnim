@@ -107,15 +107,18 @@ public class Netzplan implements Generator {
         
         setupQuestions();
         
+        
         setHeader(headerColor);
         setInformationText();
-        src1 = setSourceCodeForward();    
+        src1 = setSourceCodeForward();
+        StringMatrix legend = setUpLegend(matrixProperties);
         n = new NetzplanGraph((AnimalScript)lang, graph,matrixProperties);
         n.setAllEdgeBaseColor(edgeColor);
         n.setAllEdgeHightlightColor(edgeHighlightColor);
         src1.highlight(0);
         
         setUpVars(n);
+        
         
         // Zähler Anfang
         AnimalStringMatrixGenerator matrixGenerator = new AnimalStringMatrixGenerator((AnimalScript) lang);
@@ -136,6 +139,8 @@ public class Netzplan implements Generator {
         cp.set(AnimationPropertiesKeys.FILL_PROPERTY, Color.BLUE);
         TwoValueView view = lang.newCounterView(counter,
         		new Coordinates(700, 490), cp, true, true);
+        
+        
         //Zähler Ende
         
         lang.nextStep("Beginn der Rückwärtsrechnung");
@@ -192,6 +197,7 @@ public class Netzplan implements Generator {
         lang.nextStep("Darstellung kritischer Pfad");
         criticalPathText.hide();
         n.hideGraph();
+        legend.hide();
         SourceCode endInformation = this.showEndText(counter);
                 
         lang.finalizeGeneration();
@@ -213,6 +219,32 @@ public class Netzplan implements Generator {
 	
     }
 
+    private StringMatrix setUpLegend(MatrixProperties matProp)
+    {
+    	if(matProp == null)
+    		matProp = new MatrixProperties();
+		
+        matProp.set(AnimationPropertiesKeys.DEPTH_PROPERTY, 0);
+        
+        matProp.set(AnimationPropertiesKeys.GRID_STYLE_PROPERTY, "table");
+        //matProp.set(AnimationPropertiesKeys.FILLED_PROPERTY, true);
+        matProp.set(AnimationPropertiesKeys.CELL_HEIGHT_PROPERTY, 20);
+        matProp.set(AnimationPropertiesKeys.CELL_WIDTH_PROPERTY, 125);
+        //Font font = new Font();
+        //matProp.set(AnimationPropertiesKeys.FONT_PROPERTY, font);
+        String[][] data = new String[2][3];
+        
+        data[0][0] = "Name";
+        data[1][0] = "Prozesszeit";
+        data[0][1] = "Früheste Startzeit";
+        data[0][2] = "Früheste Endzeit";
+        data[1][1] = "Späteste Startzeit";
+        data[1][2] = "Späteste Endzeit";
+        
+        Coordinates upperLeft = new Coordinates(700,390);
+        return lang.newStringMatrix(upperLeft, data, "legend", null,matProp);
+    }
+    
 	private void calculateFirstDirection(Integer node){
 
 		vars.set(currentNodeName, n.getName(node));
@@ -688,7 +720,7 @@ public class Netzplan implements Generator {
 		question.addAnswer(String.valueOf(answer), 5, answer + " war richtig.");
 		
 		lang.addFIBQuestion(question);
-			}
+	}
 	
 	int sdQuestionCounter = 0;
 	private void startSecondDirectionQuestion(NetzplanGraph npg, int nodeId)
