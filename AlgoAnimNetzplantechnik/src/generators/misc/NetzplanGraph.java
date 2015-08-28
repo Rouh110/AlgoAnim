@@ -225,6 +225,7 @@ public class NetzplanGraph {
 		return endNodes;
 	}
 	
+	
 	public List<Integer> getStartNodes()
 	{
 		List<Integer> startNodes =  new LinkedList<Integer>();

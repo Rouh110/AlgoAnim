@@ -220,7 +220,8 @@ public class PageRank implements Generator {
         Text currentText = setCounter(700, 360, "Die PageRank-Werte von Iteration 1:");
         Text formulaV = setCounter(50, 400, "");
         Text formulaC = setCounter(50, 450, "");
-        
+        Text dnSelfReferenceText = setCounter(50, 500, "");
+        dnSelfReferenceText.hide();
         startDanglingNodeQuestion(p, g);
         lang.nextStep("Aufruf und Initialisierung");
         src.unhighlight(0);
@@ -320,6 +321,14 @@ public class PageRank implements Generator {
 				vars.declare("String", currentDanglingNodeName, "", STEPPER);
 				for(Integer dangNode : p.getAllDanglingNodeNrs())
 				{
+					if(dangNode == to)
+					{
+						dnSelfReferenceText.setText("Ein Dangling Node hat auch Einfluss auf sich selber!", null, null);
+						dnSelfReferenceText.show();
+					}else
+					{
+						dnSelfReferenceText.hide();
+					}
 					vars.set(currentDanglingNodeName, g.getNodeLabel(dangNode));
 					src.highlight(7);
 					smat.highlightElem(0, dangNode, null, null);
@@ -346,6 +355,7 @@ public class PageRank implements Generator {
 					p.hideEdge(dangNode, to);
 					smat.unhighlightElem(0, dangNode, null, null);
 				}
+				dnSelfReferenceText.hide();
 				vars.discard(currentDanglingNodeName);
 				
 				p.unhighlightNode(to);
