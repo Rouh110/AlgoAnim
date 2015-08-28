@@ -1,31 +1,36 @@
 package generators.graph;
 
-import generators.graphics.helpers.Coordinate;
-
 import java.awt.Color;
 import java.awt.Font;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
-import algoanim.animalscript.AnimalCircleGenerator;
 import algoanim.animalscript.AnimalScript;
 import algoanim.primitives.Circle;
 import algoanim.primitives.Graph;
-import algoanim.primitives.generators.GraphGenerator;
 import algoanim.primitives.generators.Language;
 import algoanim.properties.AnimationPropertiesKeys;
 import algoanim.properties.CircleProperties;
-import algoanim.properties.GraphProperties;
 import algoanim.properties.PolylineProperties;
 import algoanim.properties.TextProperties;
 import algoanim.util.Coordinates;
-import algoanim.util.DisplayOptions;
 import algoanim.util.MsTiming;
 import algoanim.util.Node;
 import algoanim.util.Timing;
 import algoanim.primitives.*;
 
+/**
+ * This a graph for animal script, that is optimized for the page rank algorithm.
+ * It converts a normal animal graph into a PageRankGraph.
+ * It has the following features:
+ * Setting the radius of individual nodes.
+ * Setting the base and highlight color of individual nodes and edges.
+ * Detection of dangling nodes and separate features for dangling nodes like adding dangling edges
+ * and separate funktions for dangling edges.
+ * Highlighting, unhighliting, show, hide of individual nodes and edges.
+ * @author Jan Ulrich Schmitt
+ *
+ */
 public class PageRankGraph{
 
 	private Graph graph;
@@ -58,47 +63,88 @@ public class PageRankGraph{
 		init();
 	}
 	
+	/**
+	 * 
+	 * @return the minimal x coordinate.
+	 */
 	public int getMinX()
 	{
 		return minX;
 	}
 	
+	/**
+	 * 
+	 * @return the maximal x coordinate.
+	 */
 	public int getMaxX()
 	{
 		return maxX;
 	}
 	
+	/**
+	 * 
+	 * @return the minimal y coordinate.
+	 */
 	public int getMinY()
 	{
 		return minY;
 	}
 	
+	/**
+	 * 
+	 * @return the maximal y coordinate.
+	 */
 	public int getMaxY()
 	{
 		return maxY;
 	}
 	
+	/**
+	 * 
+	 * @return the minimal radius of the nodes.
+	 */
 	public int getminRadius(){
 		return minRadius;
 	}
 	
+	/**
+	 * 
+	 * @return the maximal radius of the nodes.
+	 */
 	public int getmaxRadius(){
 		return maxRadius;
 	}
 	
+	/**
+	 * 
+	 * @return the total draw depth of the node circle.
+	 */
 	protected int getNodeDrawDepth()
 	{
 		return nodeDrawDepth+drawDeph;
 	}
+	
+	/**
+	 * 
+	 * @return the total draw depth of the node text.
+	 */
 	protected int getTextDrawDepth()
 	{
 		return textDrawDepth+drawDeph;
 	}
+	
+	/**
+	 * 
+	 * @return the total draw depth of the edges.
+	 */
 	protected int getEdgeDrawDepth()
 	{
 		return edgeDrawDepth+drawDeph;
 	}
 	
+	/**
+	 * Initializes the graph.
+	 */
 	private void init()
 	{
 		// setup nodes
@@ -162,6 +208,9 @@ public class PageRankGraph{
 		
 	}
 	
+	/**
+	 * sets the min max coordinate of the graph using the current position and maximal radius of the nodes.
+	 */
 	protected void setMinMaxCoordinates()
 	{
 		for(int i = 0; i < nodes.length; i++)
@@ -195,12 +244,22 @@ public class PageRankGraph{
 		return lang.newPolyline(lineNodes, "edge", null, pp);
 	}
 	
+	/**
+	 * Sets the label text of the the node.
+	 * @param nodeNr the node id of the node.
+	 * @param text the new text. The old one will be overridden.
+	 */
 	public void setNodeText(int nodeNr, String text){
 		PageRankNode prn = nodes[nodeNr];
 		prn.text.setText(text, null, null);
 		
 	}
 	
+	/**
+	 * Sets the color of the node text.
+	 * @param nodeNr the node id of the node.
+	 * @param textColor the new color for the text.
+	 */
 	public void setTextColor(int nodeNr, Color textColor)
 	{
 		if(textColor != null)
@@ -209,6 +268,10 @@ public class PageRankGraph{
 		}
 	}
 	
+	/**
+	 * Sets the text color for all nodes.
+	 * @param textColor the new text color.
+	 */
 	public void setAllTextColor(Color textColor)
 	{
 		for(int i = 0; i < nodes.length; i++)
@@ -216,6 +279,11 @@ public class PageRankGraph{
 			setTextColor(i, textColor);
 		}
 	}
+	
+	/**
+	 * Highlights the node with the given node number.
+	 * @param nodeNr the node id.
+	 */
 	public void highlightNode(int nodeNr)
 	{
 		PageRankNode prn = nodes[nodeNr];
@@ -234,6 +302,10 @@ public class PageRankGraph{
 		
 	}
 	
+	/**
+	 * Unhighlights the node with the given node number.
+	 * @param nodeNr the node id.
+	 */
 	public void unhighlightNode(int nodeNr)
 	{
 		PageRankNode prn = nodes[nodeNr];
@@ -251,7 +323,13 @@ public class PageRankGraph{
 	}
 	
 	
-	
+	/**
+	 * Highlights the edge.
+	 * @param from the node id of the node where the edge comes from.
+	 * @param to the node id of the node where the edge points to.
+	 * @param offset the offset when the highlight will start.
+	 * @param duration the duration of the change.
+	 */
 	public void highlightEdge(int from, int to, Timing offset, Timing duration)
 	{
 		PageRankEdge edge = edgeMatrix[from][to];
@@ -266,6 +344,13 @@ public class PageRankGraph{
 		}
 	}
 	
+	/**
+	 * Unhighlights the edge.
+	 * @param from the node id of the node where the edge comes from.
+	 * @param to the node id of the node where the edge points to.
+	 * @param offset the offset when the unhighlight will start.
+	 * @param duration the duration of the change.
+	 */
 	public void unhighlightEdge(int from, int to, Timing offset, Timing duration)
 	{
 		PageRankEdge edge = edgeMatrix[from][to];
@@ -280,6 +365,9 @@ public class PageRankGraph{
 		}
 	}
 	
+	/**
+	 * Hides the complete graph.
+	 */
 	public void hideGraph(){
 		
 		//hide nodes
@@ -302,6 +390,9 @@ public class PageRankGraph{
 		}
 	}
 	
+	/**
+	 * Shows all elements of the graph except dangling edges.
+	 */
 	public void showGraph()
 	{
 		//show nodes
@@ -316,7 +407,7 @@ public class PageRankGraph{
 		{
 			for(int to = 0; to < graph.getSize(); to++)
 			{
-				if(edgeMatrix[from][to] != null)
+				if(edgeMatrix[from][to] != null && !edgeMatrix[from][to].isDanglingEdge)
 				{
 					edgeMatrix[from][to].line.show();
 				}
@@ -325,6 +416,13 @@ public class PageRankGraph{
 				
 	}
 	
+	/**
+	 * Sets the base color of the given edge.
+	 * If the edge is not highlighted the changes will be seen immediately.
+	 * @param from the node id of the node where the edge comes from.
+	 * @param to the node id of the node where the edge points to.
+	 * @param newColor the new color of the edge.
+	 */
 	public void setEdgeBaseColor(int from, int to, Color newColor)
 	{
 		if(newColor == null)
@@ -344,12 +442,22 @@ public class PageRankGraph{
 		}
 	}
 	
+	/**
+	 * Sets the base color of all edges except for the dangling edges.
+	 * @param edgeBaseColor
+	 */
 	public void setAllEdgesBaseColor(Color edgeBaseColor)
 	{
 		setAllEdgesBaseColor(edgeBaseColor, false);
 			
 	}
 	
+	/**
+	 * Sets the base edge color for all edges. If setDanglingEdgesColor == false the color for
+	 * the dangling edges won't be effected.
+	 * @param edgeBaseColor the new base color of the edges.
+	 * @param setDanglingEdgesColor controls if the dangling nodes should be set too.
+	 */
 	public void setAllEdgesBaseColor(Color edgeBaseColor, boolean setDanglingEdgesColor)
 	{
 		for(int from = 0; from < nodes.length; from++)
@@ -366,6 +474,10 @@ public class PageRankGraph{
 			
 	}
 	
+	/**
+	 * Sets the base color for all dangling edges.
+	 * @param edgeBaseColor the new base color.
+	 */
 	public void setAllDangingEdgeBaseColor(Color edgeBaseColor)
 	{
 		PageRankEdge edge = null;
@@ -382,6 +494,13 @@ public class PageRankGraph{
 		}
 	}
 	
+	/**
+	 * Sets the highlight color for all the given edge.
+	 * If the edge is highlighted the change will be seen immediately.
+	 * @param from the node id of the node where the edge comes from.
+	 * @param to the node id of the node where the edge points to.
+	 * @param newColor the new color of the node.
+	 */
 	public void setEdgeHighlightColor(int from, int to, Color newColor )
 	{
 		if(newColor == null)
@@ -403,13 +522,22 @@ public class PageRankGraph{
 	}
 	
 	
-	
+	/**
+	 * Sets the highlight color for all edges except for dangling edges.
+	 * @param edgeHighlightColor the new highlight color
+	 */
 	public void setAllEdgesHighlightColor(Color edgeHighlightColor)
 	{
 		setAllEdgesHighlightColor(edgeHighlightColor, false);
 			
 	}
 	
+	/**
+	 * Sets the highlight color for all edges. If setDanglingEdgesHColor is false, 
+	 * the highlight color for dangling edges won't be effected.
+	 * @param edgeHighlightColor the new highlight color.
+	 * @param setDanglingEdgesHColor if the highlight color for dangling edges should be set too.
+	 */
 	public void setAllEdgesHighlightColor(Color edgeHighlightColor,boolean setDanglingEdgesHColor )
 	{
 		for(int from = 0; from < nodes.length; from++)
@@ -425,6 +553,10 @@ public class PageRankGraph{
 			
 	}
 	
+	/**
+	 * Set the highlight color for all dangling edges.
+	 * @param edgeHighlightColor
+	 */
 	public void setAllDanglingEdgesHighlightColor(Color edgeHighlightColor)
 	{
 		PageRankEdge edge = null;
@@ -442,6 +574,11 @@ public class PageRankGraph{
 
 	}
 	
+	/**
+	 * Shows the given edge.
+	 * @param from the node id of  the node where the edge comes from.
+	 * @param to the node id of the node where the edge points to.
+	 */
 	public void showEdge(int from, int to)
 	{
 		PageRankEdge edge = edgeMatrix[from][to];
@@ -453,6 +590,11 @@ public class PageRankGraph{
 		
 	}
 	
+	/**
+	 * Hides the given edge.
+	 * @param from the node id of  the node where the edge comes from.
+	 * @param to the node id of the node where the edge points to.
+	 */
 	public void hideEdge(int from, int to)
 	{
 		PageRankEdge edge = edgeMatrix[from][to];
@@ -463,6 +605,9 @@ public class PageRankGraph{
 		}
 	}
 	
+	/**
+	 * Shows all Dangling edges.
+	 */
 	public void showAllDanglingEdges()
 	{
 		PageRankEdge edge = null;
@@ -479,6 +624,9 @@ public class PageRankGraph{
 		}
 	}
 	
+	/**
+	 * Hides all dangling edges.
+	 */
 	public void hideAllDanglingEdges()
 	{
 		PageRankEdge edge = null;
@@ -495,6 +643,12 @@ public class PageRankGraph{
 		}
 	}
 	
+	/**
+	 * Sets the fill color of the given node.
+	 * If the node is not highlighted, the change will be shown immediately.
+	 * @param nodeNr the node id.
+	 * @param newColor the new base color for the node.
+	 */
 	public void setNodeFillColor(int nodeNr, Color newColor)
 	{
 		if(newColor == null)
@@ -511,7 +665,12 @@ public class PageRankGraph{
 		}
 	}
 	
-	
+	/**
+	 * Sets the highlight color for the given node.
+	 * If the node is highlighted, the change will be shown immediately.
+	 * @param nodeNr the node id.
+	 * @param newColor the new highlight color.
+	 */
 	public void setNodeHighlightColor(int nodeNr, Color newColor)
 	{
 		if(newColor == null)
@@ -528,6 +687,10 @@ public class PageRankGraph{
 		}
 	}
 	
+	/**
+	 * Sets the highlight color for all nodes.
+	 * @param highlightColor the new highlight color.
+	 */
 	public void setAllNodeHighlightColor(Color highlightColor)
 	{
 		for(int i = 0; i < nodes.length; i++)
@@ -536,6 +699,12 @@ public class PageRankGraph{
 		}
 	}
 	
+	/**
+	 * Sets the node size of the given node.
+	 * The size will be clipped to the minimal radius and maximal radius.
+	 * @param nodeNr the node id.
+	 * @param newRadius the new radius.
+	 */
 	public void setNodeSize(int nodeNr, int newRadius)
 	{
 		Timing duration = new MsTiming(500);
@@ -559,6 +728,11 @@ public class PageRankGraph{
 	
 	}
 	
+	/**
+	 * Checks weather the given node is a dangling node.
+	 * @param nodeNr the node id of  the node to check.
+	 * @return true if the node is a dangling node, false otherwise.
+	 */
 	public boolean isDanglingNode(int nodeNr)
 	{
 		for(int to = 0; to < nodes.length; ++to)
@@ -572,6 +746,10 @@ public class PageRankGraph{
 		return true;
 	}
 	
+	/**
+	 * Returns the ids of all dangling nodes.
+	 * @return a new list with the ids of all dangling nodes.
+	 */
 	public List<Integer> getAllDanglingNodeNrs()
 	{
 		LinkedList<Integer> list = new LinkedList<Integer>();
@@ -587,6 +765,11 @@ public class PageRankGraph{
 		return list;
 	}
 	
+	/**
+	 * Update the positions of all edges that comes from or points to the node.
+	 * @param nodeNr the node id.
+	 * @param duration the duration of the change.
+	 */
 	protected void updateEdgesForNode(int nodeNr, Timing duration)
 	{
 		for(int to = 0; to < graph.getSize(); to++)
@@ -604,6 +787,13 @@ public class PageRankGraph{
 		}
 	}
 	
+	/**
+	 * Updates the position for the given edge.
+	 * @param edge the edge to update.
+	 * @param from the node where the edge comes from.
+	 * @param to the node where the edge points to.
+	 * @param duration the duration of the change.
+	 */
 	protected void updateEdge(PageRankEdge edge, PageRankNode from, PageRankNode to, Timing duration)
 	{
 		Coordinates lineNodes[] = getEdgeCoordinates(from, to);
@@ -620,6 +810,11 @@ public class PageRankGraph{
 		edge.to = lineNodes[1];
 	}
 	
+	/**
+	 * @param from the node where the edge comes from.
+	 * @param to the node where the edge points to.
+	 * @return the coordinates of the edge.
+	 */
 	protected Coordinates[] getEdgeCoordinates(PageRankNode from, PageRankNode to)
 	{
 		Coordinates c1 = ((Coordinates)from.circle.getCenter());
@@ -647,6 +842,11 @@ public class PageRankGraph{
 		
 	}
 	
+	/**
+	 * Return a new default property for a circle representing the node.
+	 * @param node the node id.
+	 * @return a new circle property for the given node.
+	 */
 	protected CircleProperties getCircleProperties(PageRankNode node)
 	{
 		CircleProperties cp = new CircleProperties();
@@ -670,6 +870,10 @@ public class PageRankGraph{
 		return cp;
 	}
 	
+	/**
+	 * Creates a default text property for the node text.
+	 * @return a new text property.
+	 */
 	protected TextProperties getTextProperties()
 	{
 		TextProperties tp = new TextProperties();
@@ -678,6 +882,11 @@ public class PageRankGraph{
     	return tp;
 	}
 	
+	/**
+	 * Returns a new default PolylineProperties for the given edge.
+	 * @param edge
+	 * @return a new PolylineProperties that fits to the given edge.
+	 */
 	protected PolylineProperties getPolyLineProperties(PageRankEdge edge)
 	{
 		PolylineProperties pp = new PolylineProperties();
@@ -701,6 +910,11 @@ public class PageRankGraph{
 		return pp;
 	}
 	
+	/**
+	 * Represents a node in PageRankGraph.
+	 * @author Rouh
+	 *
+	 */
 	protected class PageRankNode
 	{
 		public Text text = null;
@@ -711,6 +925,11 @@ public class PageRankGraph{
 		public boolean isHighlighted = false;
 	}
 	
+	/**
+	 * Represents an edge in the PageRankGraph.
+	 * @author Rouh
+	 *
+	 */
 	protected class PageRankEdge
 	{
 		public Polyline line = null;
