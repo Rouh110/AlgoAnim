@@ -1,7 +1,10 @@
 package generators.graph;
 
+import generators.graphics.helpers.Coordinate;
+
 import java.awt.Color;
 import java.awt.Font;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -41,11 +44,17 @@ public class PageRankGraph{
 	int nodeDrawDepth = 2;
 	
 	
+	int minX = Integer.MAX_VALUE;
+	int minY = Integer.MAX_VALUE;
+	int maxX = Integer.MIN_VALUE;
+	int maxY = Integer.MIN_VALUE;
+	
 	public PageRankGraph(Graph graph, Language lang) {
 		this.graph = graph;
 		adjacencyMatrix = graph.getAdjacencyMatrix();
 		edgeMatrix = new PageRankEdge[adjacencyMatrix.length][adjacencyMatrix[0].length];
 		this.lang = lang;
+		
 		init();
 	}
 	
@@ -129,6 +138,34 @@ public class PageRankGraph{
 			}
 		}
 		
+		setMinMaxCoordinates();
+		
+	}
+	
+	protected void setMinMaxCoordinates()
+	{
+		for(int i = 0; i < nodes.length; i++)
+		{
+			Coordinates centerPosition =  (Coordinates)nodes[i].circle.getCenter();
+			
+			int tmpMinX = centerPosition.getX()-getmaxRadius();
+			int tmpMinY = centerPosition.getY()-getmaxRadius();
+			int tmpMaxX = centerPosition.getX()+getmaxRadius();
+			int tmpMaxY = centerPosition.getY()+getmaxRadius();
+			
+			if(tmpMinX < minX)
+				minX= tmpMinX;
+			
+			if(tmpMinY < minY)
+				minY = tmpMinY;
+			
+			if(tmpMaxX > maxX)
+				maxX = tmpMaxX;
+			
+			if(tmpMaxY > maxY)
+				maxY = tmpMaxY;
+			
+		}
 	}
 
 	protected Polyline createLine(Node lineNodes[])
@@ -491,7 +528,7 @@ public class PageRankGraph{
 		{
 			newRadius = maxRadius;
 		}
-		
+	
 		prn.circle.moveBy("translateRadius", newRadius-prn.radius, newRadius-prn.radius, null,duration);
 		prn.radius = newRadius;
 //		CircleProperties cp = getCircleProperties(prn);
