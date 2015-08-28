@@ -112,6 +112,8 @@ public class PageRank implements Generator {
     
     private Variables vars;
     
+    private int nqvId = 0;
+    
     public PageRank(){
 
     }
@@ -232,8 +234,8 @@ public class PageRank implements Generator {
         vars.declare("double", currentIterationChangeName,String.valueOf(difference),MOST_RECENT_HOLDER);
         
 		while(difference > breakValue){ // Counter fuer Iterationen
-			formulaV.setText("Manhattan-Distanz zwischen letzter und vorletzter Iteration: " + new DecimalFormat("#.#####").format(difference) , null, null);
-			formulaC.setText("", null, null);
+			formulaV.setText("Manhattan-Distanz zwischen letzter und vorletzter Iteration: " + new DecimalFormat("#.#####").format(difference)+".", null, null);
+			formulaC.setText(" Der Algorithmus stoppt, wenn die Distanz kleiner als "+ new DecimalFormat("#.#####").format(breakValue)+" wird.", null, null);
 			iterations += 1;
 			src.highlight(1);
 			int chapterIntCorrect = iterations - 1;
@@ -367,14 +369,17 @@ public class PageRank implements Generator {
 		}
         
 
-        currentText.hide();
-        actMat.hide();
-        src.hide();
-        formulaC.hide();
-        formulaV.hide();
+		formulaV.setText("Manhattan-Distanz zwischen letzter und vorletzter Iteration: " + new DecimalFormat("#.#####").format(difference)+".", null, null);
+		formulaC.setText("Der Algorithmus stoppt, wenn die Distanz kleiner als "+ new DecimalFormat("#.#####").format(breakValue)+" wird.", null, null);
+		src.highlight(1);
+		currentText.hide();
+        actMat.hide(); 
         SourceCode stopInformation = showStopInformation();
-		lang.nextStep();
+		lang.nextStep("Abbruch des Algorithmus");
         
+		src.hide();
+		formulaC.hide();
+        formulaV.hide();
 		stopInformation.hide();
 		SourceCode endText = showEndText(counter, smat);
         p.hideAllDanglingEdges();
@@ -449,7 +454,7 @@ public class PageRank implements Generator {
     	
     }
     
-    int nqvId = 0;
+    
     private void startNextValueQuestion(float nextValue,int node ,Graph g)
     {
     
@@ -922,7 +927,7 @@ public class PageRank implements Generator {
     	infoProps.set(AnimationPropertiesKeys.COLOR_PROPERTY, Color.RED);
     	SourceCode stopInformation = lang.newSourceCode(new Coordinates(700,400), "InfoText", null, infoProps);
     	stopInformation.addCodeLine("Der Algorithmus endet an dieser Stelle nach", "Line0", 0, null);
-    	stopInformation.addCodeLine(actualCount + " Iterationen, da er konvergiert!", "Line1", 0, null);
+    	stopInformation.addCodeLine(actualCount + " Iterationen, da die Manhattan-Distanz kleiner als der Abbruchwert ist!", "Line1", 0, null);
     	return stopInformation;
 	}
     

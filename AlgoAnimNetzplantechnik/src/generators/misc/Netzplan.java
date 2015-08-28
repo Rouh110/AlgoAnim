@@ -86,6 +86,9 @@ public class Netzplan implements Generator {
 	String currentNodeName = "currentNode";
 	String currentPredecessorName = "currentPredecessor";
 	String currentSuccessorName = "currentSuccessor";
+	
+	int fdQuestionCounter = 0;
+	int sdQuestionCounter = 0;
 
     public void init(){
         lang = new AnimalScript("Netzplantechnik", "Jan Ulrich Schmitt & Dennis Juckwer", 800, 600);        
@@ -764,7 +767,7 @@ public class Netzplan implements Generator {
 		
 	}
 	
-	int fdQuestionCounter = 0;
+	
 	private void startFirstDirectionQuestion(NetzplanGraph npg, int nodeId)
 	{
 		fdQuestionCounter++;
@@ -779,7 +782,7 @@ public class Netzplan implements Generator {
 		lang.addFIBQuestion(question);
 	}
 	
-	int sdQuestionCounter = 0;
+	
 	private void startSecondDirectionQuestion(NetzplanGraph npg, int nodeId)
 	{
 		sdQuestionCounter++;
