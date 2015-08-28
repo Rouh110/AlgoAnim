@@ -115,6 +115,8 @@ public class PageRank implements Generator {
     
     private Variables vars;
     
+    private int nqvId = 0;
+    
     public PageRank(){
 
     }
@@ -221,7 +223,8 @@ public class PageRank implements Generator {
         Text currentText = setCounter(700, 360, "Die PageRank-Werte von Iteration 1:");
         Text formulaV = setCounter(50, 400, "");
         Text formulaC = setCounter(50, 450, "");
-        
+        Text dnSelfReferenceText = setCounter(50, 500, "");
+        dnSelfReferenceText.hide();
         startDanglingNodeQuestion(p, g);
         lang.nextStep("Aufruf und Initialisierung");
         src.unhighlight(0);
@@ -235,8 +238,8 @@ public class PageRank implements Generator {
         vars.declare("double", currentIterationChangeName,String.valueOf(difference),MOST_RECENT_HOLDER);
         
 		while(difference > breakValue){ // Counter fuer Iterationen
-			formulaV.setText("Manhattan-Distanz zwischen letzter und vorletzter Iteration: " + new DecimalFormat("#.#####").format(difference) , null, null);
-			formulaC.setText("", null, null);
+			formulaV.setText("Manhattan-Distanz zwischen letzter und vorletzter Iteration: " + new DecimalFormat("#.#####").format(difference)+".", null, null);
+			formulaC.setText(" Der Algorithmus stoppt, wenn die Distanz kleiner als "+ new DecimalFormat("#.#####").format(breakValue)+" wird.", null, null);
 			iterations += 1;
 			src.highlight(1);
 			int chapterIntCorrect = iterations - 1;
@@ -321,6 +324,14 @@ public class PageRank implements Generator {
 				vars.declare("String", currentDanglingNodeName, "", STEPPER);
 				for(Integer dangNode : p.getAllDanglingNodeNrs())
 				{
+					if(dangNode == to)
+					{
+						dnSelfReferenceText.setText("Ein Dangling Node hat auch Einfluss auf sich selber!", null, null);
+						dnSelfReferenceText.show();
+					}else
+					{
+						dnSelfReferenceText.hide();
+					}
 					vars.set(currentDanglingNodeName, g.getNodeLabel(dangNode));
 					src.highlight(7);
 					smat.highlightElem(0, dangNode, null, null);
@@ -347,6 +358,7 @@ public class PageRank implements Generator {
 					p.hideEdge(dangNode, to);
 					smat.unhighlightElem(0, dangNode, null, null);
 				}
+				dnSelfReferenceText.hide();
 				vars.discard(currentDanglingNodeName);
 				
 				p.unhighlightNode(to);
@@ -370,14 +382,17 @@ public class PageRank implements Generator {
 		}
         
 
-        currentText.hide();
-        actMat.hide();
-        src.hide();
-        formulaC.hide();
-        formulaV.hide();
+		formulaV.setText("Manhattan-Distanz zwischen letzter und vorletzter Iteration: " + new DecimalFormat("#.#####").format(difference)+".", null, null);
+		formulaC.setText("Der Algorithmus stoppt, wenn die Distanz kleiner als "+ new DecimalFormat("#.#####").format(breakValue)+" wird.", null, null);
+		src.highlight(1);
+		currentText.hide();
+        actMat.hide(); 
         SourceCode stopInformation = showStopInformation();
-		lang.nextStep();
+		lang.nextStep("Abbruch des Algorithmus");
         
+		src.hide();
+		formulaC.hide();
+        formulaV.hide();
 		stopInformation.hide();
 		SourceCode endText = showEndText(counter, smat, currentResults);
         p.hideAllDanglingEdges();
@@ -452,7 +467,7 @@ public class PageRank implements Generator {
     	
     }
     
-    int nqvId = 0;
+    
     private void startNextValueQuestion(float nextValue,int node ,Graph g)
     {
     
@@ -519,7 +534,7 @@ public class PageRank implements Generator {
         		
         	}else
         	{
-        		question.addAnswer(float2String(questionValue),-5,"Falsch.");
+        		question.addAnswer(float2String(questionValue),-5,"Falsch. Die richtige Antwort wäre "+ float2String(roundedValue)+".");
         	}
         }
         
@@ -650,6 +665,19 @@ public class PageRank implements Generator {
     	question.setGroupID(qgName02);
     	
     	List<Integer> danglingNodes = prg.getAllDanglingNodeNrs();
+    	StringBuilder danglingNodeString = new StringBuilder();
+    	
+    	int counter = 0;
+    	for(int danglingNode : danglingNodes)
+    	{
+    		danglingNodeString.append(g.getNodeLabel(danglingNode));
+    		counter++;
+    		if(counter != danglingNodes.size())
+    		{
+    			danglingNodeString.append(", ");
+    		}
+    	}
+    		
     	
     	for(int nodeId = 0; nodeId < g.getSize(); nodeId++)
     	{
@@ -657,10 +685,10 @@ public class PageRank implements Generator {
     	
     		if(danglingNodes.contains(nodeId))
     		{
-    			question.addAnswer(nodeLabel, 5, "Knoten "+ nodeLabel+" ist ein dangling node.");
+    			question.addAnswer(nodeLabel, 5, "Knoten "+ nodeLabel+" ist ein dangling node.\n");
     		}else
     		{
-    			question.addAnswer(nodeLabel, -5, "Knoten "+ nodeLabel+" ist kein dangling node.");
+    			question.addAnswer(nodeLabel, -5, "Knoten "+ nodeLabel+" ist kein dangling node. Dangling nodes wären: "+danglingNodeString.toString()+".\n");
     		}
     	}
     	
@@ -669,7 +697,7 @@ public class PageRank implements Generator {
     		question.addAnswer("Keiner", 5, "Es gibt keine Dangling Nodes in diesem Graphen.");
     	}else
     	{
-    		question.addAnswer("Keiner",-5, "Es gibt Dangling Nodes in diesem Graphen.");
+    		question.addAnswer("Keiner",-5, "Es gibt Dangling Nodes in diesem Graphen. Dangling nodes wären: "+danglingNodeString.toString()+".\n");
     	}
     	
     	
@@ -950,7 +978,7 @@ public class PageRank implements Generator {
     	infoProps.set(AnimationPropertiesKeys.COLOR_PROPERTY, Color.RED);
     	SourceCode stopInformation = lang.newSourceCode(new Coordinates(700,400), "InfoText", null, infoProps);
     	stopInformation.addCodeLine("Der Algorithmus endet an dieser Stelle nach", "Line0", 0, null);
-    	stopInformation.addCodeLine(actualCount + " Iterationen, da er konvergiert!", "Line1", 0, null);
+    	stopInformation.addCodeLine(actualCount + " Iterationen, da die Manhattan-Distanz kleiner als der Abbruchwert ist!", "Line1", 0, null);
     	return stopInformation;
 	}
     
