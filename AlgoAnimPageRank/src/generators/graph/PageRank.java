@@ -17,6 +17,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -51,6 +52,7 @@ import algoanim.animalscript.AnimalStringMatrixGenerator;
 
 import algoanim.counter.model.TwoValueCounter;
 import algoanim.counter.view.TwoValueView;
+
 
 
 
@@ -103,6 +105,7 @@ public class PageRank implements Generator {
     private String tempValueName = "tempValue";
     private String numberOfPredecessorName = "numberOfPredecessor";
     private String numberOfNodesName = "numberOfNodes";
+    private float currentResults[];
     
     private String MOST_RECENT_HOLDER = animal.variables.Variable.getRoleString(VariableRoles.MOST_RECENT_HOLDER);
     private String FIXED_VALUE = animal.variables.Variable.getRoleString(VariableRoles.FIXED_VALUE);
@@ -240,7 +243,7 @@ public class PageRank implements Generator {
 			String outputChapter = chapterIntCorrect + ". Iteration";
 			lang.nextStep(outputChapter);
 			src.unhighlight(1);
-			float[] currentResults = new float[adjacencymatrix.length];
+			currentResults = new float[adjacencymatrix.length];
 			src.highlight(2);
 			lang.nextStep();
 			src.unhighlight(2);
@@ -376,7 +379,7 @@ public class PageRank implements Generator {
 		lang.nextStep();
         
 		stopInformation.hide();
-		SourceCode endText = showEndText(counter, smat);
+		SourceCode endText = showEndText(counter, smat, currentResults);
         p.hideAllDanglingEdges();
         p.hideGraph();
         view.hide();
@@ -885,7 +888,7 @@ public class PageRank implements Generator {
 		
 	}
     
-	private SourceCode showEndText(TwoValueCounter counter, StringMatrix smat) {
+	private SourceCode showEndText(TwoValueCounter counter, StringMatrix smat, float[] currentResults) {
     	int actualCount = iterations - 1;
 		SourceCodeProperties infoProps = new SourceCodeProperties();
     	infoProps.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF, Font.PLAIN, 14));
@@ -895,10 +898,48 @@ public class PageRank implements Generator {
     	endText.addCodeLine("Anzahl Iterationen: " + actualCount, "Line2", 0, null);
     	endText.addCodeLine("Anzahl Schreibzugriffe: " + counter.getAssigments(), "Line3", 0, null);
     	endText.addCodeLine("Anzahl Lesezugriffe: " + counter.getAccess(), "Line4", 0, null);
+    	int tempPosition = 0;
+    	
+    	ArrayList<Integer> maxposition = new ArrayList<Integer>();
+    	
+    	
+    	
     	
     	for(int i = 0; i < adjacencymatrix.length; i++){
-    		endText.addCodeLine("PR(" + g.getNodeLabel(i) + ") = " + smat.getElement(1, i), "Line" + (i + 3), 0, null);	
+   		double maxValue = (double)Integer.MIN_VALUE;
+    		for(int inneri = 0; inneri < adjacencymatrix.length; inneri++){
+    			System.out.println("Das Label " +  g.getNodeLabel(inneri));
+    			if(currentResults[inneri] >= maxValue && maxposition.contains(inneri)==false){
+      				maxValue = currentResults[inneri];
+    				tempPosition = inneri;
+    				
+    			}
+    		}
+    		maxposition.add(tempPosition);
+    		
+   	}
+    	
+    	for(int i =0; i < adjacencymatrix.length;i++){
+    		endText.addCodeLine("PR(" + g.getNodeLabel(maxposition.get(i)) + ") = " + smat.getElement(1, (Integer) maxposition.get(i)), "Line" + (i + 3), 0, null);	
     	}
+    	
+    	boolean helpbool = true;
+    	String bestNodes = "";
+    	int i = 0;
+    	
+    	
+    	while(helpbool ){
+    		bestNodes = bestNodes + g.getNodeLabel(maxposition.get(i)) + " ";
+    		if((i < maxposition.size() && maxposition.get(i)==maxposition.get(0)&& i !=0)||(i < maxposition.size() - 1 && (maxposition.get(i) == maxposition.get(i+1)))){
+    			helpbool = true;
+    		}else{
+    			helpbool = false;
+    		}
+    		i++;
+    	}
+    	endText.addCodeLine("", "Liney", 0, null);
+    	endText.addCodeLine("Der bzw. die Knoten mit dem höchsten PR: " + bestNodes, "Linex", 0, null);
+    	
     	return endText;
 	}
 	

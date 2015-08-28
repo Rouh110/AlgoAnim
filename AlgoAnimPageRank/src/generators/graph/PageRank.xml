@@ -134,7 +134,7 @@ edge D B weight 1
 		</Primitive>
 								<Primitive type="double">
 			<name>breakValue</name>
-			<value><double>0.01</double></value>
+			<value><double>0.05</double></value>
 		</Primitive>
 		
 	</Folder>
