@@ -677,6 +677,18 @@ public class Netzplan implements Generator {
 		 MultipleSelectionQuestionModel question = new MultipleSelectionQuestionModel("Kritischer Pfad");
 		 question.setPrompt("Welche Knoten gehören alles zu einem kritischen Pfad? (Es kann mehr als einen kritischen Pfad geben.)");
 	     question.setGroupID(qg03);
+	     
+	     StringBuilder criticalPathNodesString = new StringBuilder();
+	     
+	     for(int i = 0; i<critcalPathNodes.size(); i++)
+	     {
+	    	 criticalPathNodesString.append(npg.getName(critcalPathNodes.get(i)));
+	    	 
+	    	 if(i < (critcalPathNodes.size()-1))
+	    	 {
+	    		 criticalPathNodesString.append(", ");
+	    	 }
+	     }
 	       
 	        
 	     for(Integer currentNode : npg.getAllNodes())
@@ -686,7 +698,7 @@ public class Netzplan implements Generator {
 	      		question.addAnswer(npg.getName(currentNode), 5,npg.getName(currentNode) + " gehört zu einem kritischen Pfad.\n");
 	        	}else
 	        	{
-	        		question.addAnswer(npg.getName(currentNode), -5,npg.getName(currentNode) + " gehört nicht zu einem kritischen Pfad.\n");
+	        		question.addAnswer(npg.getName(currentNode), -5,npg.getName(currentNode) + " gehört nicht zu einem kritischen Pfad. Richtige Antworten wären: " +criticalPathNodesString.toString()+ ".\n");
 	        	}
 	        	
 	     }
@@ -747,7 +759,7 @@ public class Netzplan implements Generator {
 		question.setGroupID(qg04);
 		
 		question.addAnswer(""+answer, 5, answer+" war richtig.");
-		
+
 		lang.addFIBQuestion(question);
 		
 	}

@@ -516,7 +516,7 @@ public class PageRank implements Generator {
         		
         	}else
         	{
-        		question.addAnswer(float2String(questionValue),-5,"Falsch.");
+        		question.addAnswer(float2String(questionValue),-5,"Falsch. Die richtige Antwort wäre "+ float2String(roundedValue)+".");
         	}
         }
         
@@ -647,6 +647,19 @@ public class PageRank implements Generator {
     	question.setGroupID(qgName02);
     	
     	List<Integer> danglingNodes = prg.getAllDanglingNodeNrs();
+    	StringBuilder danglingNodeString = new StringBuilder();
+    	
+    	int counter = 0;
+    	for(int danglingNode : danglingNodes)
+    	{
+    		danglingNodeString.append(g.getNodeLabel(danglingNode));
+    		counter++;
+    		if(counter != danglingNodes.size())
+    		{
+    			danglingNodeString.append(", ");
+    		}
+    	}
+    		
     	
     	for(int nodeId = 0; nodeId < g.getSize(); nodeId++)
     	{
@@ -654,10 +667,10 @@ public class PageRank implements Generator {
     	
     		if(danglingNodes.contains(nodeId))
     		{
-    			question.addAnswer(nodeLabel, 5, "Knoten "+ nodeLabel+" ist ein dangling node.");
+    			question.addAnswer(nodeLabel, 5, "Knoten "+ nodeLabel+" ist ein dangling node.\n");
     		}else
     		{
-    			question.addAnswer(nodeLabel, -5, "Knoten "+ nodeLabel+" ist kein dangling node.");
+    			question.addAnswer(nodeLabel, -5, "Knoten "+ nodeLabel+" ist kein dangling node. Dangling nodes wären: "+danglingNodeString.toString()+".\n");
     		}
     	}
     	
@@ -666,7 +679,7 @@ public class PageRank implements Generator {
     		question.addAnswer("Keiner", 5, "Es gibt keine Dangling Nodes in diesem Graphen.");
     	}else
     	{
-    		question.addAnswer("Keiner",-5, "Es gibt Dangling Nodes in diesem Graphen.");
+    		question.addAnswer("Keiner",-5, "Es gibt Dangling Nodes in diesem Graphen. Dangling nodes wären: "+danglingNodeString.toString()+".\n");
     	}
     	
     	
