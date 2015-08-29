@@ -7,25 +7,17 @@ package generators.misc;
 
 import generators.framework.Generator;
 import generators.framework.GeneratorType;
-import interactionsupport.models.AnswerModel;
 import interactionsupport.models.FillInBlanksQuestionModel;
-import interactionsupport.models.MultipleChoiceQuestionModel;
 import interactionsupport.models.MultipleSelectionQuestionModel;
 import interactionsupport.models.QuestionGroupModel;
-import interactionsupport.models.TrueFalseQuestionModel;
-import interactionsupport.views.MultipleSelectionQuestionView;
-import interactionsupport.views.QuestionView;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.util.ArrayList;
-import java.util.Currency;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Random;
-import java.util.Set;
 
 import algoanim.primitives.Graph;
 import algoanim.primitives.SourceCode;
@@ -101,6 +93,7 @@ public class Netzplan implements Generator {
 
     public String generate(AnimationPropertiesContainer props,Hashtable<String, Object> primitives) {
 
+    	// set up generation
         graph = (Graph)primitives.get("graph");
         sourceCodeStyle = (SourceCodeProperties) props.getPropertiesByName("SourcecodeStyle");
         Color edgeColor = (Color)primitives.get("EdgeColor");
@@ -110,14 +103,16 @@ public class Netzplan implements Generator {
         
         setupQuestions();
         
-        
+        // set and shows the beginning page with description
         Text headerText = setHeader(headerColor);
         setInformationText(new Offset(0,20,headerText,"SW"));
         
+        // set up the netzplan graph
         n = new NetzplanGraph((AnimalScript)lang, graph,matrixProperties);
         n.setAllEdgeBaseColor(edgeColor);
         n.setAllEdgeHightlightColor(edgeHighlightColor);
         
+        // setup the algorithm informations (source code, counter etc..)
         Node sourceCodePosition =  new Coordinates(n.getMaxX()+80,((Coordinates)headerText.getUpperLeft()).getY()+20);
         src1 = setSourceCodeForward(sourceCodePosition); 
         src1.highlight(0);
@@ -146,10 +141,9 @@ public class Netzplan implements Generator {
         TwoValueView view = lang.newCounterView(counter,  
         		new Offset(0,40,legend,"SW"), cp, true, true);
 
-       
-        
-        
         //Zähler Ende
+        
+        // error handling
         if(n.hasLoops())
         {
         	headerText.hide();
@@ -159,6 +153,7 @@ public class Netzplan implements Generator {
         	lang.finalizeGeneration();
         	return lang.toString();
         }
+        
         if(n.hasNegativeProcessTime())
         {
         	headerText.hide();
@@ -173,7 +168,8 @@ public class Netzplan implements Generator {
         lang.nextStep("Beginn der Rückwärtsrechnung");
        
         
-        
+        // starts the algorithm for the first direction. 
+        // It calculates the earliest start timer and the earliest end time
         src1.unhighlight(0);
         List<Integer> nodesToProcess = n.getEndNodes();
         vars.declare("string", currentNodeName, "",STEPPER);
@@ -186,18 +182,19 @@ public class Netzplan implements Generator {
         vars.discard(currentNodeName);
         
         
-        
+        // show info text for the change to the second direction
         nodesToProcess = n.getStartNodes();
         src1.hide();
         SourceCode algorithmChange = setChangeAlgorithmInformation(src1.getUpperLeft());
         lang.nextStep("Wechsel Rückwärts- zu Vorwärtsrechnung");
         
-        
+        // change the source code for the algorithm
         algorithmChange.hide();
         src2 = this.setSourceCodeBackward(sourceCodePosition);
         src2.highlight(2);
         lang.nextStep("Beginn der Vorwärtsrechnung");
         
+        // start the second algorithm, It calculates the latest start and end time.
         src2.unhighlight(2);
         vars.declare("string", currentNodeName, "",STEPPER);
         for(Integer currentNode: nodesToProcess){
@@ -206,7 +203,7 @@ public class Netzplan implements Generator {
         }
         vars.discard(currentNodeName);
              
-        
+        // calculate and show critical path
         this.startCriticalPathQuestion(n);
            
         lang.nextStep();
@@ -218,6 +215,8 @@ public class Netzplan implements Generator {
         	this.drawCriticalPath(currentNode);
         }
         lang.nextStep("Darstellung kritischer Pfad");
+        
+        // last page information
         criticalPathText.hide();
         n.hideGraph();
         legend.hide();
@@ -265,6 +264,12 @@ public class Netzplan implements Generator {
         return lang.newStringMatrix(position, data, "legend", null,matProp);
     }
     
+    /**
+     * The first part of the algorithm. It calculates the earliest end time and the earliest start time.
+     * The algorithm is recursive.
+     * Call this with each end node to calculate it for the whole graph.
+     * @param node the node to calculate the earliest start time for.
+     */
 	private void calculateFirstDirection(Integer node){
 
 		vars.set(currentNodeName, n.getName(node));
@@ -276,6 +281,8 @@ public class Netzplan implements Generator {
     	src1.unhighlight(1);
     	src1.unhighlight(5);
 		List<Integer> predecessors = n.getPredecessors(node);
+		
+		// if the node is a start node than the earliest start time is 0 and the earliest end time is 0+processTime
 		if(n.isStartNode(node)){
     		smat.getElement(0, 0); // neu hinzugefuegt 2408
 			src1.highlight(6);
@@ -299,6 +306,11 @@ public class Netzplan implements Generator {
     		
 
     	}else{
+    		
+    		// if the node is not a start node than the earliest start time is 
+    		// max(for all predeccesors : predecessor.earliestEndTime)
+    		// and the earliest end time is earliestStartTime + processTime.
+    		
     		src1.highlight(9);
     		smat.getElement(0,0); // neu hinzugefuegt 2408
     		for(Integer currentPredcessor: predecessors){
@@ -310,11 +322,14 @@ public class Netzplan implements Generator {
     		src1.unhighlight(9);
     		src1.highlight(10);
     		lang.nextStep();
+    		
+    		// calculates the earliest start time and end time of the predecessors if necessary.
     		for(Integer currentPredecessor: predecessors){
         		for(Integer innerPredecessors: predecessors){
         			n.unHighlightEdge(innerPredecessors, node);
         		}
         		src1.unhighlight(10);
+        		// if the current entry for earliestEndTime of the predecessor is invalid (not set) call calculateFirstDirection with the predecessor.
     			if(n.hasValidEntry(currentPredecessor, NetzplanGraph.CellID.EarliestEndTime) == false){
     	    		smat.getElement(0,0); // neu hinzugefuegt 2408
     				n.highlightEdge(currentPredecessor, node);
@@ -334,6 +349,8 @@ public class Netzplan implements Generator {
     		startFirstDirectionQuestion(n, node);
     		
     		lang.nextStep();
+    		
+    		//calculate and sets the maximal earliest start time end earliest end time for the given node.
         	for(Integer currentPredecessor: predecessors){
         		for(Integer innerPredecessors: predecessors){
         			n.unHighlightEdge(innerPredecessors, node);
@@ -369,12 +386,15 @@ public class Netzplan implements Generator {
         	}
     		
     	}
-		n.unhighlightNode(node);
-    	
-
-    	
+		n.unhighlightNode(node);	
     }
 	
+	/**
+	 * The second algorithm. It calculates the latest start and end time.
+	 * The algorithm is recursive.
+	 * Start at each start node to calculate the values for the hole graph.
+	 * @param node the node to calculate the values for.
+	 */
 	private void calculateSecondDirection(Integer node) {
 		vars.set(currentNodeName, n.getName(node));
     	src2.highlight(5);
@@ -384,6 +404,10 @@ public class Netzplan implements Generator {
     	src2.unhighlight(3);
     	src2.unhighlight(5);
 		List<Integer> successors = n.getSuccessors(node);
+		
+		
+		// if the node is an end node the latest start time is the earliest start time and
+		// the latest end time is the earliest end time.
     	if(n.isEndNode(node)){
     		smat.getElement(0,0); // neu hinzugefuegt 2408
     		src2.highlight(6);
@@ -405,6 +429,11 @@ public class Netzplan implements Generator {
     		lang.nextStep();
     		src2.unhighlight(8);
     	}else{
+    		
+    		// if the node is not an end node than the latest start time is
+    		// min(for each successor: successor.latestStartTime-node.processTime)
+    		// latest end time = node.latestStartTime+processTime
+    		
     		src2.highlight(9);
     		smat.getElement(0,0); // neu hinzugefuegt 2408
     		for(Integer currentSuccessor: successors){
@@ -415,6 +444,8 @@ public class Netzplan implements Generator {
     		src2.unhighlight(9);
     		src2.highlight(10);
     		lang.nextStep();
+    		
+    		// calculates the latest end and latest start time for each successor if necessary
         	for(Integer currentSuccessor: successors){
          		for(Integer innerSuccessors: successors){
         			n.unHighlightEdge(node, innerSuccessors);
@@ -440,6 +471,7 @@ public class Netzplan implements Generator {
         	startSecondDirectionQuestion(n, node);
         	
 
+        	//calculates and sets the minimal latest end and start time for the given node
         	for(Integer currentSuccessor: successors){
         		for(Integer innerSuccessors: successors){
         			n.unHighlightEdge(node, innerSuccessors);
@@ -479,7 +511,11 @@ public class Netzplan implements Generator {
     		
 	}
 	
-	
+	/**
+	 * Recursive function to show the critical path beginning at the given node.
+	 * @param actualNode the node to draw the critical path for.
+	 * @return true if the current node is a nod on a critical path, false otherwise.
+	 */
 	private boolean drawCriticalPath(Integer actualNode){
 		LinkedList<Integer> currentSuccessors = new LinkedList<Integer>();
 		currentSuccessors.addAll(n.getSuccessors(actualNode));
@@ -496,6 +532,13 @@ public class Netzplan implements Generator {
 		return isCriticalStep;
 	}
 	
+	/**
+	 * Puts all nodes that are on a critical path into the given list.
+	 * Each node will be there only ones.
+	 * @param actualNode
+	 * @param criticalNodes
+	 * @return true if the actualNode is on a critical path.
+	 */
 	private boolean getCriticalPath(Integer actualNode, List<Integer> criticalNodes)
 	{
 		
@@ -805,6 +848,13 @@ public class Netzplan implements Generator {
 			
 	}
 	
+	/**
+	 * Calculates the earliest start time for the the given node.
+	 * It doesn't change any value.
+	 * @param npg the graph of the node.
+	 * @param nodeId the node to calculate the est for.
+	 * @return the earliest start time.
+	 */
 	private int calculateEST(NetzplanGraph npg, int nodeId)
 	{
 		if(npg.isStartNode(nodeId))
@@ -822,7 +872,14 @@ public class Netzplan implements Generator {
 		return est;
 	}
 	
-	
+	/**
+	 * Calculates the latest start time for the given node.
+	 * This doesn't change any value.
+	 * The earliest start time and end time must be valid for the whole graph.
+	 * @param npg the graph with the node.
+	 * @param nodeId the node to calculate the latest start time for.
+	 * @return the latest start time.
+	 */
 	private int calculateLST(NetzplanGraph npg, int nodeId)
 	{
 		
