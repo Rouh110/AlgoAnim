@@ -48,6 +48,12 @@ public class NetzplanGraph {
 	
 	MatrixProperties defaultMatrixProperties = null;
 	
+	private int minX = Integer.MAX_VALUE;
+	private int minY = Integer.MAX_VALUE;
+	private int maxX = Integer.MIN_VALUE;
+	private int maxY = Integer.MIN_VALUE;
+	
+	
 	public NetzplanGraph(AnimalScript lang, Graph graph)
 	{
 		this(lang, graph, null);
@@ -58,6 +64,26 @@ public class NetzplanGraph {
 		this.defaultMatrixProperties = defaultMatrixProperties;
 		this.lang = lang;
 		init(graph);
+	}
+	
+	public int getMinX()
+	{
+		return minX;
+	}
+	
+	public int getMinY()
+	{
+		return minY;
+	}
+	
+	public int getMaxX()
+	{
+		return maxX;
+	}
+	
+	public int getMaxY()
+	{
+		return maxY;
 	}
 	
 	public void setProcessTime(int id, int time)
@@ -753,6 +779,38 @@ public class NetzplanGraph {
 			
 			
 		}
+		
+		// calculates and set the min max Coordinate
+		calculateMinMaxCoordinates();
+	}
+	
+	
+	private void calculateMinMaxCoordinates()
+	{
+		
+		int height = getValueTableHeight();
+		int width = getValueTableWidth();
+		for(NetzplanNode node :  nodes.values())
+		{
+			Coordinates upperLefPosition =  (Coordinates)node.values.getUpperLeft();
+			int tmpMinX = upperLefPosition.getX();
+			int tmpMinY = upperLefPosition.getY();
+			int tmpMaxX = upperLefPosition.getX()+width;
+			int tmpMaxY = upperLefPosition.getY()+height;
+			
+			if(tmpMinX < minX)
+				minX= tmpMinX;
+			
+			if(tmpMinY < minY)
+				minY = tmpMinY;
+			
+			if(tmpMaxX > maxX)
+				maxX = tmpMaxX;
+			
+			if(tmpMaxY > maxY)
+				maxY = tmpMaxY;
+		}
+		
 	}
 	
 	private Coordinates[] createEdgeCoordinates(NetzplanNode from, NetzplanNode to)
@@ -761,12 +819,12 @@ public class NetzplanGraph {
 		int additionalWidth = 8;
 		int additionalHeight = 8;
 		Coordinates fromUpperLeft = (Coordinates)from.values.getUpperLeft();
-		Coordinates fromDownRight = new Coordinates(fromUpperLeft.getX()+(from.values.getNrCols()*(cellWidth+additionalWidth)),
-				fromUpperLeft.getY()+(from.values.getNrRows()*(cellHeight+additionalHeight)));
+		Coordinates fromDownRight = new Coordinates(fromUpperLeft.getX()+getValueTableWidth(),
+				fromUpperLeft.getY()+getValueTableHeight());
 		
 		Coordinates toUpperLeft = (Coordinates)to.values.getUpperLeft();
-		Coordinates toDownRight = new Coordinates(toUpperLeft.getX()+(to.values.getNrCols()*(cellWidth+additionalWidth)),
-				toUpperLeft.getY()+(to.values.getNrRows()*(cellHeight+additionalHeight)));
+		Coordinates toDownRight = new Coordinates(toUpperLeft.getX()+getValueTableWidth(),
+				toUpperLeft.getY()+getValueTableHeight());
 		
 		float fromCenterX = (float)(fromUpperLeft.getX()+fromDownRight.getX())/2f;
 		float fromCenterY = (float)(fromUpperLeft.getY()+fromDownRight.getY())/2f;
@@ -784,6 +842,24 @@ public class NetzplanGraph {
 		Coordinates result[] = {pointA, pointB};
 		
 		return result;
+	}
+	
+	private int getValueTableWidth()
+	{
+		int additionalWidth = 8;
+		int colloums = 3;
+		
+		return colloums * (cellWidth+additionalWidth);
+		
+	}
+	
+	private int getValueTableHeight()
+	{
+		int additionalHeight = 8;
+		int rows = 2;
+		
+		return rows*(cellHeight+additionalHeight);
+		
 	}
 	
 	private Coordinates createLineCoordinate(float minX, float minY, float maxX, float maxY, float dirX, float dirY)

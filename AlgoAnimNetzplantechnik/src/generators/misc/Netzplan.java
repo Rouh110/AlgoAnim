@@ -39,6 +39,8 @@ import algoanim.properties.MatrixProperties;
 import algoanim.properties.SourceCodeProperties;
 import algoanim.properties.TextProperties;
 import algoanim.util.Coordinates;
+import algoanim.util.Node;
+import algoanim.util.Offset;
 
 import java.util.Hashtable;
 
@@ -110,14 +112,17 @@ public class Netzplan implements Generator {
         
         
         Text headerText = setHeader(headerColor);
-        setInformationText();
-        src1 = setSourceCodeForward();
-        StringMatrix legend = setUpLegend(matrixProperties);
+        setInformationText(new Offset(0,20,headerText,"SW"));
+        
         n = new NetzplanGraph((AnimalScript)lang, graph,matrixProperties);
         n.setAllEdgeBaseColor(edgeColor);
         n.setAllEdgeHightlightColor(edgeHighlightColor);
-        src1.highlight(0);
         
+        Node sourceCodePosition =  new Coordinates(n.getMaxX()+80,((Coordinates)headerText.getUpperLeft()).getY()+20);
+        src1 = setSourceCodeForward(sourceCodePosition); 
+        src1.highlight(0);
+        StringMatrix legend = setUpLegend(new Offset(0,40,src1,"SW"),matrixProperties);
+       
         setUpVars(n);
         
         
@@ -138,8 +143,12 @@ public class Netzplan implements Generator {
         CounterProperties cp = new CounterProperties();
         cp.set(AnimationPropertiesKeys.FILLED_PROPERTY, true);
         cp.set(AnimationPropertiesKeys.FILL_PROPERTY, Color.BLUE);
-        TwoValueView view = lang.newCounterView(counter,   
-        		new Coordinates(600, 490), cp, true, true);
+        TwoValueView view = lang.newCounterView(counter,  
+        		new Offset(0,40,legend,"SW"), cp, true, true);
+        		//new Coordinates(600, 490), cp, true, true);
+       
+        
+        
         //Zähler Ende
         if(n.hasLoops())
         {
@@ -183,12 +192,12 @@ public class Netzplan implements Generator {
         
         nodesToProcess = n.getStartNodes();
         src1.hide();
-        SourceCode algorithmChange = setChangeAlgorithmInformation();
+        SourceCode algorithmChange = setChangeAlgorithmInformation(src1.getUpperLeft());
         lang.nextStep("Wechsel Rückwärts- zu Vorwärtsrechnung");
         
         
         algorithmChange.hide();
-        src2 = this.setSourceCodeBackward();
+        src2 = this.setSourceCodeBackward(sourceCodePosition);
         src2.highlight(2);
         lang.nextStep("Beginn der Vorwärtsrechnung");
         
@@ -207,7 +216,7 @@ public class Netzplan implements Generator {
         this.startDelayQuestion(n);
         
         src2.hide();
-        SourceCode criticalPathText = setCriticicalPathInformation();
+        SourceCode criticalPathText = setCriticicalPathInformation(sourceCodePosition);
         for(Integer currentNode : n.getStartNodes()){
         	this.drawCriticalPath(currentNode);
         }
@@ -215,7 +224,7 @@ public class Netzplan implements Generator {
         criticalPathText.hide();
         n.hideGraph();
         legend.hide();
-        SourceCode endInformation = this.showEndText(counter);
+        SourceCode endInformation = this.showEndText(new Offset(0,40,headerText, "SW"),counter);
         lang.nextStep("Schlussinformationen");
                 
         lang.finalizeGeneration();
@@ -237,7 +246,7 @@ public class Netzplan implements Generator {
 	
     }
 
-    private StringMatrix setUpLegend(MatrixProperties matProp)
+    private StringMatrix setUpLegend(Node position, MatrixProperties matProp)
     {
     	if(matProp == null)
     		matProp = new MatrixProperties();
@@ -259,8 +268,8 @@ public class Netzplan implements Generator {
         data[1][1] = "Späteste Startzeit";
         data[1][2] = "Späteste Endzeit";
         
-        Coordinates upperLeft = new Coordinates(600,390);
-        return lang.newStringMatrix(upperLeft, data, "legend", null,matProp);
+        //Coordinates upperLeft = new Coordinates(600,390);
+        return lang.newStringMatrix(position, data, "legend", null,matProp);
     }
     
 	private void calculateFirstDirection(Integer node){
@@ -535,10 +544,11 @@ public class Netzplan implements Generator {
     	
     }
 	
-	private void setInformationText(){
+	private void setInformationText(Node textPosition){
     	SourceCodeProperties infoProps = new SourceCodeProperties();
     	infoProps.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF, Font.BOLD, 20));
-    	SourceCode infoText = lang.newSourceCode(new Coordinates(20,60), "InfoText", null, infoProps);
+    	SourceCode infoText = lang.newSourceCode(textPosition, "InfoText", null, infoProps);
+    	//SourceCode infoText = lang.newSourceCode(new Coordinates(20,60), "InfoText", null, infoProps);
     	
     	infoText.addCodeLine("Bei der Netzplantechnik handelt es sich um eine Methode, welche im Rahmen der Terminplanung bzw. des", "Line0", 0, null);
     	infoText.addCodeLine("Projektmanagements zum Einsatz kommt. Das Ziel besteht darin die Mindestdauer eines Projektes auf Basis", "Line1", 0, null);
@@ -557,13 +567,15 @@ public class Netzplan implements Generator {
     	infoText.hide();
     }
 	
-    private SourceCode setSourceCodeForward(){
+	
+    private SourceCode setSourceCodeForward(Node codePosition){
     	//SourceCodeProperties sProb = new  SourceCodeProperties();
         //sProb.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF, Font.PLAIN, 12));
         //sProb.set(AnimationPropertiesKeys.COLOR_PROPERTY, Color.BLUE);
         //sProb.set(AnimationPropertiesKeys.HIGHLIGHTCOLOR_PROPERTY, Color.RED);
         
-        SourceCode src = lang.newSourceCode(new Coordinates(600, 50), "SourceCode", null, sourceCodeStyle);
+        //SourceCode src = lang.newSourceCode(new Coordinates(600, 50), "SourceCode", null, sourceCodeStyle);
+        SourceCode src = lang.newSourceCode(codePosition, "SourceCode", null, sourceCodeStyle);
         src.addCodeLine("01. For all nodes without outgoing edges do", "Code0", 0, null);
         src.addCodeLine("02.     calculateFirstDirection(node)", "Code1", 0, null);
         src.addCodeLine("03. For all nodes without ingoing edges do", "Code2", 0, null);
@@ -584,13 +596,14 @@ public class Netzplan implements Generator {
         return src;
     }
     
-    private SourceCode setSourceCodeBackward(){
+    private SourceCode setSourceCodeBackward(Node position){
     	//SourceCodeProperties sProb = new  SourceCodeProperties();
         //sProb.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF, Font.PLAIN, 12));
         //sProb.set(AnimationPropertiesKeys.COLOR_PROPERTY, Color.BLUE);
         //sProb.set(AnimationPropertiesKeys.HIGHLIGHTCOLOR_PROPERTY, Color.RED);
         
-        SourceCode src = lang.newSourceCode(new Coordinates(600, 50), "SourceCode", null, sourceCodeStyle);
+        //SourceCode src = lang.newSourceCode(new Coordinates(600, 50), "SourceCode", null, sourceCodeStyle);
+        SourceCode src = lang.newSourceCode(position, "SourceCode", null, sourceCodeStyle);
         src.addCodeLine("01. For all nodes without outgoing edges do", "Code0", 0, null);
         src.addCodeLine("02.     calculateFirstDirection(node)", "Code1", 0, null);
         src.addCodeLine("03. For all nodes without ingoing edges do", "Code2", 0, null);
@@ -611,12 +624,13 @@ public class Netzplan implements Generator {
         return src;
     }
     
-    private SourceCode setChangeAlgorithmInformation(){
+    private SourceCode setChangeAlgorithmInformation(Node position){
     	SourceCodeProperties sProb = new  SourceCodeProperties();
         sProb.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font (Font.SANS_SERIF,Font.BOLD, 16));
         sProb.set(AnimationPropertiesKeys.COLOR_PROPERTY, Color.RED);
         //sProb.set(AnimationPropertiesKeys.HIGHLIGHTCOLOR_PROPERTY, Color.RED);
-    	SourceCode infoText = lang.newSourceCode(new Coordinates(700,50), "InfoText", null, sProb);
+    	//SourceCode infoText = lang.newSourceCode(new Coordinates(700,50), "InfoText", null, sProb);
+    	SourceCode infoText = lang.newSourceCode(position, "InfoText", null, sProb);
         infoText.addCodeLine("Achtung es beginnt nun der Zweite Teil", "line1", 0, null);
         infoText.addCodeLine("des Verfahrens! Der Algorithmus fährt mit", "line2", 0, null);
         infoText.addCodeLine("der Vorwärtsrechnung fort!", "line3", 0, null);
@@ -624,13 +638,14 @@ public class Netzplan implements Generator {
     
     }
     
-    private SourceCode setCriticicalPathInformation(){
+    private SourceCode setCriticicalPathInformation(Node position){
     	
     	SourceCodeProperties sProb = new  SourceCodeProperties();
         sProb.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font (Font.SANS_SERIF,Font.BOLD, 16));
         sProb.set(AnimationPropertiesKeys.COLOR_PROPERTY, Color.BLUE);
         //sProb.set(AnimationPropertiesKeys.HIGHLIGHTCOLOR_PROPERTY, Color.RED);
-        SourceCode infoText = lang.newSourceCode(new Coordinates(700,50), "InfoText", null, sProb);
+        //SourceCode infoText = lang.newSourceCode(new Coordinates(700,50), "InfoText", null, sProb);
+        SourceCode infoText = lang.newSourceCode(position, "InfoText", null, sProb);
         infoText.addCodeLine("Der kritische Pfad wird nun durch die", "line1", 0, null);
         infoText.addCodeLine("hervorgehobenen Kanten repräsentiert", "line2", 0, null);
         infoText.addCodeLine("auf ihm befinden sich alle Vorgänge,.", "line3", 0, null);
@@ -640,11 +655,12 @@ public class Netzplan implements Generator {
     
     }
     
-	private SourceCode showEndText(TwoValueCounter counter) {
+	private SourceCode showEndText(Node position, TwoValueCounter counter) {
     	//int actualCount = iterations - 1;
 		SourceCodeProperties infoProps = new SourceCodeProperties();
     	infoProps.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF, Font.PLAIN, 14));
-    	SourceCode endText = lang.newSourceCode(new Coordinates(20,100), "InfoText", null, infoProps);
+    	//SourceCode endText = lang.newSourceCode(new Coordinates(20,100), "InfoText", null, infoProps);
+    	SourceCode endText = lang.newSourceCode(position, "InfoText", null, infoProps);
     	endText.addCodeLine("Informationen zu dem zuvor angzeigten Ablauf des Algorithmus:", "Line0", 0, null);
     	endText.addCodeLine("", "Line1", 0, null);
     	endText.addCodeLine("Anzahl Schreibzugriffe: " + counter.getAssigments(), "Line3", 0, null);
