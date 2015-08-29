@@ -217,7 +217,9 @@ public class PageRank implements Generator {
         cp.set(AnimationPropertiesKeys.FILLED_PROPERTY, true);
         cp.set(AnimationPropertiesKeys.FILL_PROPERTY, Color.BLUE);
         TwoValueView view = lang.newCounterView(counter,
-        		new Coordinates(700, 490), cp, true, true);
+       		new Coordinates(700, 490), cp, true, true);
+
+
 
         Text lastText = setCounter(700, 210, "Die PageRank-Werte nach der Initialisierung:");
         Text currentText = setCounter(700, 360, "Die PageRank-Werte von Iteration 1:");
@@ -948,7 +950,7 @@ public class PageRank implements Generator {
    	}
     	
     	for(int i =0; i < adjacencymatrix.length;i++){
-    		endText.addCodeLine("PR(" + g.getNodeLabel(maxposition.get(i)) + ") = " + smat.getElement(1, (Integer) maxposition.get(i)), "Line" + (i + 3), 0, null);	
+    		endText.addCodeLine((i+1) + ". PR(" + g.getNodeLabel(maxposition.get(i)) + ") = " + smat.getElement(1, (Integer) maxposition.get(i)), "Line" + (i + 3), 0, null);	
     	}
     	
     	boolean helpbool = true;
@@ -966,7 +968,10 @@ public class PageRank implements Generator {
     		i++;
     	}
     	endText.addCodeLine("", "Liney", 0, null);
-    	endText.addCodeLine("Der bzw. die Knoten mit dem höchsten PR: " + bestNodes, "Linex", 0, null);
+    	endText.addCodeLine("Der bzw. die Knoten mit dem höchsten PageRank: " + bestNodes, "Linex", 0, null);
+    	endText.addCodeLine("", "Line14", 0, null);
+    	endText.addCodeLine("Knoten mit dem höchsten PageRank haben die höchste Wahrscheinlichkeit von einem Surfer", "Line15", 0, null);
+    	endText.addCodeLine("im Netz besucht zu werden und würden bei einer Suchmaschine an oberster Stelle erscheinen.", "Line16", 0, null);
     	
     	return endText;
 	}
