@@ -25,6 +25,7 @@ import java.util.Random;
 
 import algoanim.primitives.Circle;
 import algoanim.primitives.Graph;
+import algoanim.primitives.Primitive;
 import algoanim.primitives.SourceCode;
 import algoanim.primitives.StringMatrix;
 import algoanim.primitives.Text;
@@ -52,6 +53,7 @@ import algoanim.animalscript.AnimalStringMatrixGenerator;
 
 import algoanim.counter.model.TwoValueCounter;
 import algoanim.counter.view.TwoValueView;
+
 
 
 
@@ -103,7 +105,6 @@ public class PageRank implements Generator {
     private String currentPredecessorName = "currentPredecessor";
     private String currentDanglingNodeName = "currentDanglingNode";
     private String tempValueName = "tempValue";
-    private String numberOfPredecessorName = "numberOfPredecessor";
     private String numberOfNodesName = "numberOfNodes";
     private float currentResults[];
     
@@ -111,7 +112,7 @@ public class PageRank implements Generator {
     private String FIXED_VALUE = animal.variables.Variable.getRoleString(VariableRoles.FIXED_VALUE);
     private String STEPPER = animal.variables.Variable.getRoleString(VariableRoles.STEPPER);
     private String TEMPORARY = animal.variables.Variable.getRoleString(VariableRoles.TEMPORARY);
-    private String MOST_WANTED_HOLDER = animal.variables.Variable.getRoleString(VariableRoles.MOST_WANTED_HOLDER);
+
     
     private Variables vars;
     
@@ -129,6 +130,8 @@ public class PageRank implements Generator {
         
     }
     
+    
+    // Adjazenmatrix +  Anzahl ausgehender Kanten von Knoten setzen
     private void initalValues(int [][] adjacencymatrix){
     	    	
         results = new ArrayList<float[]>();
@@ -151,14 +154,6 @@ public class PageRank implements Generator {
     	}
     }
     
-    private boolean isDanglingNode(int i){
-    	if(numberOfOutgoingEdges[i] == 0){
-    		return true;
-    	}
-    	else{
-    		return false;
-    	}
-    }
 
     public String generate(AnimationPropertiesContainer props,Hashtable<String, Object> primitives) {
 
@@ -177,18 +172,18 @@ public class PageRank implements Generator {
         
         
         setupQuestions();
-            
-    	setHeader();
-    	SourceCode informationText = setInformationText();
+        //Überschrift einfügen    
+    	Text headertext = setHeader();
+    	//Infotext zu Beginn einfügen
+    	SourceCode informationText = setInformationText(headertext, 0, 50);
     	lang.nextStep("Einleitung");
     	informationText.hide();
     	
-    	
+    	// Test auf unzulässigen Wert des Dämpfungsfaktors und ggf. auf default-Wert setzen
     	if(dampingFactor > 1.0f){
     		dampingFactor = 0.85f;
-    		showWarningMessageForDamp();
+    		showWarningMessageForDamp(headertext, 0, 100);
     	}
-    	int [] temparray = {0, 1, 2};
     	
     	g = (Graph)primitives.get("graph");
     	setupVars(g);
@@ -199,6 +194,7 @@ public class PageRank implements Generator {
     	
 
     	initalValues(g.getAdjacencyMatrix());
+    	//PageRankGraph (eigene Visualiserung) wird erzeugt
     	p = setupGraph(nodehighlightcolor, color_of_edges,color_of_nodetext);
     	
     
@@ -208,25 +204,30 @@ public class PageRank implements Generator {
     	}
     	
     	p.setAllDangingEdgeBaseColor(color_of_dangling_nodes);
-        SourceCode src = setSourceCode(sourceCode);
-        StringMatrix smat = setupMatrix(700,250, initValue);
-        StringMatrix actMat = setupMatrix(700, 400, 0.0f);
+        SourceCode src = setSourceCode(sourceCode, p.getMaxX(), ((Coordinates)headertext.getUpperLeft()).getY());
+
+        
+
+
+        // Matritzen und zugehörige Texte zur Darstellung von Zwischenschritten werden erzeugt
+        Text lastText = setCounter(src, 0 , 20, "Die PageRank-Werte nach der Initialisierung:");
+        StringMatrix smat = setupMatrix(lastText, 0,20, initValue);
+        Text currentText = setCounter(smat, 0, 20,  "Die PageRank-Werte von Iteration 1:");
+        StringMatrix actMat = setupMatrix(currentText, 0, 20, 0.0f);
         
         TwoValueCounter counter = lang.newCounter(smat);
         CounterProperties cp = new CounterProperties();
         cp.set(AnimationPropertiesKeys.FILLED_PROPERTY, true);
         cp.set(AnimationPropertiesKeys.FILL_PROPERTY, Color.BLUE);
         TwoValueView view = lang.newCounterView(counter,
-       		new Coordinates(700, 490), cp, true, true);
+       		new Offset(0, 20, actMat, "SW"), cp, true, true);
 
-
-
-        Text lastText = setCounter(700, 210, "Die PageRank-Werte nach der Initialisierung:");
-        Text currentText = setCounter(700, 360, "Die PageRank-Werte von Iteration 1:");
-        Text formulaV = setCounter(50, 400, "");
-        Text formulaC = setCounter(50, 450, "");
-        Text dnSelfReferenceText = setCounter(50, 500, "");
+        // Text zur Darstellung von Formeln wird erzeugt
+        Text formulaV = setCounter(50, p.getMaxY() + 5, "");
+        Text formulaC = setCounter(formulaV, 0, 20, "");
+        Text dnSelfReferenceText = setCounter(formulaC, 0, 20, "");
         dnSelfReferenceText.hide();
+        
         startDanglingNodeQuestion(p, g);
         lang.nextStep("Aufruf und Initialisierung");
         src.unhighlight(0);
@@ -241,7 +242,7 @@ public class PageRank implements Generator {
         
 		while(difference > breakValue){ // Counter fuer Iterationen
 			formulaV.setText("Manhattan-Distanz zwischen letzter und vorletzter Iteration: " + new DecimalFormat("#.#####").format(difference)+".", null, null);
-			formulaC.setText(" Der Algorithmus stoppt, wenn die Distanz kleiner als "+ new DecimalFormat("#.#####").format(breakValue)+" wird.", null, null);
+			formulaC.setText("Der Algorithmus stoppt, wenn die Distanz kleiner als "+ new DecimalFormat("#.#####").format(breakValue)+" wird.", null, null);
 			iterations += 1;
 			src.highlight(1);
 			int chapterIntCorrect = iterations - 1;
@@ -257,6 +258,7 @@ public class PageRank implements Generator {
 			
 			vars.declare("string", currentNodeName,"",STEPPER);
 
+			// for all nodes in G do:
 			for(int to = 0; to < adjacencymatrix.length; to++){
 				
 				
@@ -271,7 +273,7 @@ public class PageRank implements Generator {
 					nodeToQuestion = rg.nextInt(adjacencymatrix.length);
 				}
 				
-				
+				//PageRank of actual node n <- (1-d)/|G| 
 				String fV = "PR(" + g.getNodeLabel(to) +") = (1-d)/|G| "; 
 				formulaV.setText(fV, null, null);
 				currentResults[to] = (float) ((1.0f - dampingFactor) / adjacencymatrix.length);
@@ -292,8 +294,10 @@ public class PageRank implements Generator {
 				src.unhighlight(4);
 				float[] predecValues = (float[]) results.get(results.size()-1);
 				vars.declare("string", currentPredecessorName,"", STEPPER);
+				// for each predecessor p of actual node n do
 				for(int from = 0; from < adjacencymatrix.length; from++){
 					if(adjacencymatrix[from][to] == 1){
+						// PR of n <- PR of n ü d * ((PR of p in the last step/ outgoing edges from p))
 						vars.set(currentPredecessorName, g.getNodeLabel(from));
 						fV = "PR(" + g.getNodeLabel(to) + ") = PR(" +  g.getNodeLabel(to) + ") + d * PR(" + g.getNodeLabel(from) + ")/"  + "outgoing edges from " + g.getNodeLabel(from) + " ";
 						smat.getElement(0, 0); //// Hilfsabfrage fuer Counter
@@ -305,9 +309,7 @@ public class PageRank implements Generator {
 						formulaC.setText(fC, null, null);
 						src.highlight(5);
 						p.highlightEdge(from, to, null, null);
-						
 						p.setNodeSize(to, this.calcNodeSize(currentResults[to], p.getmaxRadius(), p.getminRadius(), g));
-						float [] lastValues = (float []) results.get(iterations - 2);
 						smat.highlightElem(1, from, null, null);
 						actMat.put(1, to, new DecimalFormat("#.#####").format(currentResults[to]), null, null);
 						lang.nextStep();
@@ -324,6 +326,7 @@ public class PageRank implements Generator {
 				src.unhighlight(6);
 	
 				vars.declare("String", currentDanglingNodeName, "", STEPPER);
+				// for each dangling node dn do:
 				for(Integer dangNode : p.getAllDanglingNodeNrs())
 				{
 					if(dangNode == to)
@@ -334,6 +337,7 @@ public class PageRank implements Generator {
 					{
 						dnSelfReferenceText.hide();
 					}
+					// PR of n <- Pr  of n + d * (1/|G|)
 					vars.set(currentDanglingNodeName, g.getNodeLabel(dangNode));
 					src.highlight(7);
 					smat.highlightElem(0, dangNode, null, null);
@@ -367,6 +371,7 @@ public class PageRank implements Generator {
 				actMat.unhighlightCell(0, to, null, null);
 			}
 			
+			//Update der Werte in den Infomatritzen
 			for(int i = 0; i< adjacencymatrix.length; i++){
 				smat.put(1, i, new DecimalFormat("#.#####").format(currentResults[i]), null, null);
 				actMat.put(1,i,"0.0",null,null);
@@ -389,19 +394,20 @@ public class PageRank implements Generator {
 		src.highlight(1);
 		currentText.hide();
         actMat.hide(); 
-        SourceCode stopInformation = showStopInformation();
+        SourceCode stopInformation = showStopInformation(smat, 0, 50);
 		lang.nextStep("Abbruch des Algorithmus");
         
 		src.hide();
 		formulaC.hide();
         formulaV.hide();
 		stopInformation.hide();
-		SourceCode endText = showEndText(counter, smat, currentResults);
+		SourceCode endText = showEndText(counter, smat, currentResults, headertext, 0, 50);
         p.hideAllDanglingEdges();
         p.hideGraph();
         view.hide();
         smat.hide();
         lastText.hide();
+        
         lang.nextStep("Fazit");
         
 		lang.finalizeGeneration();
@@ -435,7 +441,7 @@ public class PageRank implements Generator {
 
 
 
-
+// Berechnung der Größe eines Knotens in Abhängigkeit von seinem PageRank
 	private int calcNodeSize(float prValue, int max, int min, Graph g){
     	float minPRValue = (float)(1.0f - dampingFactor)/(float)(g.getAdjacencyMatrix().length);
     	float newSize = ((prValue-(float)minPRValue)/(float)(1.0f - minPRValue)) * ((float)(max - min)) + (float)min;
@@ -481,8 +487,7 @@ public class PageRank implements Generator {
     	
     	MultipleChoiceQuestionModel question = new MultipleChoiceQuestionModel("Nächter Wert " +nqvId);
     	question.setPrompt("Welchen Wert hat Knoten "+ g.getNodeLabel(node) + " am Ende der kompletten Iteration? (gerundet auf die dritte Nachkommastelle)");
-    	
-        String valueString = String.valueOf(roundedValue);
+
         
         LinkedList<Float> values = new LinkedList<Float>();
         values.add(roundedValue);
@@ -543,120 +548,7 @@ public class PageRank implements Generator {
         question.setGroupID(qgName01);
         
         lang.addMCQuestion(question);
-        
-    	
-    	//FillInBlanksQuestionModel m1 = new FillInBlanksQuestionModel("Nächter Wert " +nqvId);
-    	
-    	
-//        m1.setPrompt("Gebe den nächsten Wert für " + g.getNodeLabel(node) + " an. (gerundet auf die dritte Nachkommastelle)");
-//        
-//        String valueString = String.valueOf(roundedValue);
-        
-        
-        
-//        String[] splittedValue = valueString.split(".");
-//        splittedValue = new String[2];
-//        
-//        splittedValue[0] = "0";
-//        splittedValue[1] = "004";
-//        
-//        if(splittedValue == null)
-//        {
-//        	splittedValue = valueString.split(",");
-//        }
-//        
-//        String beforePoint = splittedValue[0];
-//        String afterPoint = "";
-//        
-//        if(splittedValue.length == 2)
-//        {
-//        	afterPoint = splittedValue[1];
-//        }
-//        
-//        
-//        for(int i = 1;  i < beforePoint.length(); i++)
-//        {
-//        	if(beforePoint.substring(i, i+1).equals("0"))
-//        	{
-//        		beforePoint = beforePoint.substring(i+1, beforePoint.length());
-//        	}else
-//        	{
-//        		break;
-//        	}
-//        }
-//        
-//        for(int i = afterPoint.length(); i > 0; i++)
-//        {
-//        	if(afterPoint.substring(i-1, i).equals("0"))
-//        	{
-//        		afterPoint = afterPoint.substring(0, i-1);
-//        	}else
-//        	{
-//        		break;
-//        	}
-//        }
-//        
-//        
-//        
-//        if(afterPoint.length() != 0)
-//        {
-//        	m1.addAnswer("0",beforePoint +String.valueOf('.')+afterPoint,5,"Richtig!");
-//            m1.addAnswer("1",beforePoint + ","+afterPoint,5,"Richtig!");
-//        }else
-//        {
-//        	m1.addAnswer("3",beforePoint,5,"Richtig!");
-//        }
-//        
-//        boolean editAnswer = false;
-//        
-//        for(int i = 0; i < 3; i++)
-//        {
-//        	if(afterPoint.length() < i)
-//        	{
-//        		afterPoint = afterPoint+"0";
-//        		editAnswer = true;
-//        	}
-//        }
-//        
-//        if(editAnswer)
-//        {
-//        	m1.addAnswer("4",beforePoint + String.valueOf('.')+afterPoint,5,"Richtig!");
-//            m1.addAnswer("5",beforePoint + ","+afterPoint,5,"Richtig!");
-//        }
-//        
-//        m1.addAnswer("6", "0,0101", 5, "jooooo");
-//        m1.setGroupID(qgName01);
-//        
-//        
-//        System.out.println("Starting next question. nextValue: "+ nextValue);
-//        for(AnswerModel a : m1.getAnswers())
-//        {
-//        	System.out.println(a.getText());
-//        }
-//        
-//        System.out.println("Trim Values:");
-//        System.out.println("0,0101".trim());
-//        System.out.println("0.0101".trim());
-//        for(AnswerModel a : m1.getAnswers())
-//        {
-//        	System.out.println(a.getText().trim());
-//        }
-//        
-//        System.out.println("Trim Values end");
-//        
-//        System.out.println("answerIDs:");
-//        
-//        for(AnswerModel a : m1.getAnswers())
-//        {
-//        	System.out.println(m1.getAnswerID(a.getText().trim()));
-//        }
-//        
-//        System.out.println(m1.getAnswerID("0,004".trim()));
-//        System.out.println("answerIDs end");
-//        
-//        lang.addFIBQuestion(m1);
-        
-    
+         
     }
     
     
@@ -773,6 +665,7 @@ public class PageRank implements Generator {
     
     /////////////////////////////////////Helper Functions///////////////////////////////
    
+    // Farbe eines Knoten in Abhängigkeit vom PageRank berechnen
     private Color colorLin(Color startColor, Color endColor, float percent)
     {
     	int[] color1 = new int[3];
@@ -806,17 +699,19 @@ public class PageRank implements Generator {
     }
     
     
-    private void setHeader(){
+    // Methode zur Erstellung der Überschrift
+    private Text setHeader(){
     	TextProperties headerProps = new TextProperties();
     	headerProps.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF,Font.BOLD, 24));
     	headerProps.set(AnimationPropertiesKeys.COLOR_PROPERTY, color_of_headertext);
-    	lang.newText(new Coordinates(20,30), "Der PageRank-Algorithmus", "header", null, headerProps);
+    	return lang.newText(new Coordinates(20,30), "Der PageRank-Algorithmus", "header", null, headerProps);
     }
     
-    private SourceCode setInformationText(){
+    //Infotext zu Beginn
+    private SourceCode setInformationText(Primitive currentPrimitive, int deltax, int deltay){
     	SourceCodeProperties infoProps = new SourceCodeProperties();
     	infoProps.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF, Font.BOLD, 20));
-    	SourceCode infoText = lang.newSourceCode(new Coordinates(20,100), "InfoText", null, infoProps);
+    	SourceCode infoText = lang.newSourceCode(new Offset(deltax, deltay, currentPrimitive, "SW"), "InfoText", null, infoProps);
     	infoText.addCodeLine("Der PageRank-Algorithmus ist ein Algorithmus zur Bewertung von Knoten in einem Netzwerk.", "Line0", 0, null);
     	infoText.addCodeLine("Larry Page und Sergei Brin entwickelten ihn an der Stanford University zur Bewertung von", "Line1", 0, null);
     	infoText.addCodeLine("Webseiten im Rahmen ihrer mittlerweile weltweit bekannnten Suchmaschine Google. Das Bewertungsprinzip", "Line2", 0, null);
@@ -835,6 +730,14 @@ public class PageRank implements Generator {
     	return infoText;
     }
     
+    private Text setCounter(Primitive currentPrimitive, int deltax, int deltay, String Text){
+
+    	TextProperties counterProps = new TextProperties();
+    	counterProps.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF, Font.PLAIN, 16));
+    	return lang.newText(new Offset(deltax, deltay, currentPrimitive, "SW"), Text, "Counter", null, counterProps);
+    	
+    }
+    
     private Text setCounter(int x, int y, String Text){
 
     	TextProperties counterProps = new TextProperties();
@@ -843,9 +746,11 @@ public class PageRank implements Generator {
     	
     }
     
-    private SourceCode setSourceCode(SourceCodeProperties sProb){
+    
+    // Erstellung des Sourcecodes
+    private SourceCode setSourceCode(SourceCodeProperties sProb, int x, int y){
         
-        SourceCode src = lang.newSourceCode(new Coordinates(700, 50), "SourceCode", null, sProb);
+        SourceCode src = lang.newSourceCode(new Coordinates(x + 70 , y + 20), "SourceCode", null, sProb);
         src.addCodeLine("1. PageRank (Graph G, dampingfactor d)", "Code0", 0, null);
         src.addCodeLine("2. while PageRankValues change signifficantly", "Code1", 0, null);
         src.addCodeLine("3.     for all nodes in G do", "Code2", 0, null);
@@ -858,6 +763,7 @@ public class PageRank implements Generator {
         return src;
     }
     
+    // Erzeugung des Graphen in unserer Datenstruktur
     private PageRankGraph setupGraph(Color nodehighlightcolor,Color color_of_edges,Color color_of_nodetext){
     	GraphProperties gProps = new GraphProperties("graphprop");
         gProps.set(AnimationPropertiesKeys.FILL_PROPERTY, Color.WHITE);
@@ -874,7 +780,7 @@ public class PageRank implements Generator {
         return  p;
     }
     
-    private StringMatrix setupMatrix(int x, int y, float initValue){
+    private StringMatrix setupMatrix(Primitive currentPrimitive,int deltax, int deltay, float initValue){
     	
     	AnimalStringMatrixGenerator matrixGenerator = new AnimalStringMatrixGenerator(
 				(AnimalScript) lang);
@@ -891,12 +797,13 @@ public class PageRank implements Generator {
         matProp.set(AnimationPropertiesKeys.CELL_HEIGHT_PROPERTY, 30);
         matProp.set(AnimationPropertiesKeys.CELL_WIDTH_PROPERTY, 80);
         StringMatrix smat = new StringMatrix(matrixGenerator,
-				new Coordinates(x, y), strValues, "Matrix", null,
+				new Offset(deltax, deltay, currentPrimitive, "SW"), strValues, "Matrix", null,
 				matProp);
 
     	return smat;
     }
     
+    // Unterschied zwischen zwei Iterationen (breakValue)
     private float getDifference(float[] lastValues, float[] actualValues){
     	float difference = 0.0f;
     	for(int i = 0; i < lastValues.length; i++){
@@ -905,11 +812,12 @@ public class PageRank implements Generator {
     	return difference;
     }
     
-    private void showWarningMessageForDamp() {
+    //Fehlermeldung bei unzulässigen Dämpfungsfaktor
+    private void showWarningMessageForDamp(Primitive currentPrimitive, int deltax, int deltay) {
     	SourceCodeProperties infoProps = new SourceCodeProperties();
     	infoProps.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF, Font.BOLD, 14));
     	infoProps.set(AnimationPropertiesKeys.COLOR_PROPERTY, Color.RED);
-    	SourceCode warningMessage = lang.newSourceCode(new Coordinates(20,100), "InfoText", null, infoProps);
+    	SourceCode warningMessage = lang.newSourceCode(new Offset(deltax, deltay, currentPrimitive, "SW"), "InfoText", null, infoProps);
     	warningMessage.addCodeLine("Der von Ihnen eingegebene Wert des Dämpfungsfaktors liegt nicht", "Line0", 0, null);
     	warningMessage.addCodeLine("zwischen 0 und 1! Er wurde daher auf den üblichen Wert von 0.85" , "Line1", 0, null);
     	warningMessage.addCodeLine("gesetzt!", "Line3", 0, null);
@@ -918,11 +826,12 @@ public class PageRank implements Generator {
 		
 	}
     
-	private SourceCode showEndText(TwoValueCounter counter, StringMatrix smat, float[] currentResults) {
+	// Informationen zu Ende (Anzahl Zugriffe etc..)
+    private SourceCode showEndText(TwoValueCounter counter, StringMatrix smat, float[] currentResults, Primitive currentPrimitive, int deltax, int deltay) {
     	int actualCount = iterations - 1;
 		SourceCodeProperties infoProps = new SourceCodeProperties();
     	infoProps.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF, Font.PLAIN, 14));
-    	SourceCode endText = lang.newSourceCode(new Coordinates(20,100), "InfoText", null, infoProps);
+    	SourceCode endText = lang.newSourceCode(new Offset(deltax, deltay, currentPrimitive, "SW"), "InfoText", null, infoProps);
     	endText.addCodeLine("Informationen zu dem zuvor angzeigten Ablauf des Algorithmus:", "Line0", 0, null);
     	endText.addCodeLine("", "Line1", 0, null);
     	endText.addCodeLine("Anzahl Iterationen: " + actualCount, "Line2", 0, null);
@@ -938,7 +847,6 @@ public class PageRank implements Generator {
     	for(int i = 0; i < adjacencymatrix.length; i++){
    		double maxValue = (double)Integer.MIN_VALUE;
     		for(int inneri = 0; inneri < adjacencymatrix.length; inneri++){
-    			System.out.println("Das Label " +  g.getNodeLabel(inneri));
     			if(currentResults[inneri] >= maxValue && maxposition.contains(inneri)==false){
       				maxValue = currentResults[inneri];
     				tempPosition = inneri;
@@ -976,12 +884,13 @@ public class PageRank implements Generator {
     	return endText;
 	}
 	
-	private SourceCode showStopInformation(){
+	// Info im Falle von Konvergenz des Algorithmus
+    private SourceCode showStopInformation(Primitive currentPrimitive, int deltax, int deltay){
     	int actualCount = iterations - 1;
 		SourceCodeProperties infoProps = new SourceCodeProperties();
     	infoProps.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF, Font.BOLD, 14));
     	infoProps.set(AnimationPropertiesKeys.COLOR_PROPERTY, Color.RED);
-    	SourceCode stopInformation = lang.newSourceCode(new Coordinates(700,400), "InfoText", null, infoProps);
+    	SourceCode stopInformation = lang.newSourceCode(new Offset(deltax, deltay, currentPrimitive, "SW"), "InfoText", null, infoProps);
     	stopInformation.addCodeLine("Der Algorithmus endet an dieser Stelle nach", "Line0", 0, null);
     	stopInformation.addCodeLine(actualCount + " Iterationen, da die Manhattan-Distanz kleiner als der Abbruchwert ist!", "Line1", 0, null);
     	return stopInformation;
