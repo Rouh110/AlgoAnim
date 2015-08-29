@@ -105,7 +105,6 @@ public class PageRank implements Generator {
     private String currentPredecessorName = "currentPredecessor";
     private String currentDanglingNodeName = "currentDanglingNode";
     private String tempValueName = "tempValue";
-    private String numberOfPredecessorName = "numberOfPredecessor";
     private String numberOfNodesName = "numberOfNodes";
     private float currentResults[];
     
@@ -113,7 +112,7 @@ public class PageRank implements Generator {
     private String FIXED_VALUE = animal.variables.Variable.getRoleString(VariableRoles.FIXED_VALUE);
     private String STEPPER = animal.variables.Variable.getRoleString(VariableRoles.STEPPER);
     private String TEMPORARY = animal.variables.Variable.getRoleString(VariableRoles.TEMPORARY);
-    private String MOST_WANTED_HOLDER = animal.variables.Variable.getRoleString(VariableRoles.MOST_WANTED_HOLDER);
+
     
     private Variables vars;
     
@@ -131,6 +130,8 @@ public class PageRank implements Generator {
         
     }
     
+    
+    // Adjazenmatrix +  Anzahl ausgehender Kanten von Knoten setzen
     private void initalValues(int [][] adjacencymatrix){
     	    	
         results = new ArrayList<float[]>();
@@ -153,14 +154,6 @@ public class PageRank implements Generator {
     	}
     }
     
-    private boolean isDanglingNode(int i){
-    	if(numberOfOutgoingEdges[i] == 0){
-    		return true;
-    	}
-    	else{
-    		return false;
-    	}
-    }
 
     public String generate(AnimationPropertiesContainer props,Hashtable<String, Object> primitives) {
 
@@ -191,7 +184,6 @@ public class PageRank implements Generator {
     		dampingFactor = 0.85f;
     		showWarningMessageForDamp(headertext, 0, 100);
     	}
-    	int [] temparray = {0, 1, 2};
     	
     	g = (Graph)primitives.get("graph");
     	setupVars(g);
@@ -318,7 +310,6 @@ public class PageRank implements Generator {
 						src.highlight(5);
 						p.highlightEdge(from, to, null, null);
 						p.setNodeSize(to, this.calcNodeSize(currentResults[to], p.getmaxRadius(), p.getminRadius(), g));
-						float [] lastValues = (float []) results.get(iterations - 2);
 						smat.highlightElem(1, from, null, null);
 						actMat.put(1, to, new DecimalFormat("#.#####").format(currentResults[to]), null, null);
 						lang.nextStep();
@@ -416,6 +407,7 @@ public class PageRank implements Generator {
         view.hide();
         smat.hide();
         lastText.hide();
+        
         lang.nextStep("Fazit");
         
 		lang.finalizeGeneration();
@@ -495,8 +487,7 @@ public class PageRank implements Generator {
     	
     	MultipleChoiceQuestionModel question = new MultipleChoiceQuestionModel("Nächter Wert " +nqvId);
     	question.setPrompt("Welchen Wert hat Knoten "+ g.getNodeLabel(node) + " am Ende der kompletten Iteration? (gerundet auf die dritte Nachkommastelle)");
-    	
-        String valueString = String.valueOf(roundedValue);
+
         
         LinkedList<Float> values = new LinkedList<Float>();
         values.add(roundedValue);
