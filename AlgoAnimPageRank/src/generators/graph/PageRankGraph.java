@@ -26,7 +26,7 @@ import algoanim.primitives.*;
  * Setting the radius of individual nodes.
  * Setting the base and highlight color of individual nodes and edges.
  * Detection of dangling nodes and separate features for dangling nodes like adding dangling edges
- * and separate funktions for dangling edges.
+ * and separate functions for dangling edges.
  * Highlighting, unhighliting, show, hide of individual nodes and edges.
  * @author Jan Ulrich Schmitt
  *
