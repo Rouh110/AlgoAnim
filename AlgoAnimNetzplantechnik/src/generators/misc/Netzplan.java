@@ -145,7 +145,7 @@ public class Netzplan implements Generator {
         cp.set(AnimationPropertiesKeys.FILL_PROPERTY, Color.BLUE);
         TwoValueView view = lang.newCounterView(counter,  
         		new Offset(0,40,legend,"SW"), cp, true, true);
-        		//new Coordinates(600, 490), cp, true, true);
+
        
         
         
@@ -155,7 +155,6 @@ public class Netzplan implements Generator {
         	headerText.hide();
         	TextProperties warningProp = new TextProperties();
         	warningProp.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF,Font.BOLD, 24));
-        	//warningProp.set(AnimationPropertiesKeys.COLOR_PROPERTY, headerColor);
         	lang.newText(new Coordinates(20,30), "Der Algorithmus kann nicht ausgeführt werden, da der Graph Loops hat.", "loopwaring", null, warningProp);
         	lang.finalizeGeneration();
         	return lang.toString();
@@ -165,7 +164,6 @@ public class Netzplan implements Generator {
         	headerText.hide();
         	TextProperties warningProp = new TextProperties();
         	warningProp.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF,Font.BOLD, 24));
-        	//warningProp.set(AnimationPropertiesKeys.COLOR_PROPERTY, headerColor);
         	lang.newText(new Coordinates(20,30), "Der Algorithmus kann nicht ausgeführt werden, da der Graph negative Prozesszeiten hat.", "loopwaring", null, warningProp);
         	lang.finalizeGeneration();
         	lang.finalizeGeneration();
@@ -180,7 +178,6 @@ public class Netzplan implements Generator {
         List<Integer> nodesToProcess = n.getEndNodes();
         vars.declare("string", currentNodeName, "",STEPPER);
         for(Integer currentNode: nodesToProcess){
-        	/////////////src1.unhighlight(0);
         	src1.highlight(1);
         	this.calculateFirstDirection(currentNode);
         	
@@ -254,11 +251,8 @@ public class Netzplan implements Generator {
         matProp.set(AnimationPropertiesKeys.DEPTH_PROPERTY, 0);
         
         matProp.set(AnimationPropertiesKeys.GRID_STYLE_PROPERTY, "table");
-        //matProp.set(AnimationPropertiesKeys.FILLED_PROPERTY, true);
         matProp.set(AnimationPropertiesKeys.CELL_HEIGHT_PROPERTY, 20);
         matProp.set(AnimationPropertiesKeys.CELL_WIDTH_PROPERTY, 125);
-        //Font font = new Font();
-        //matProp.set(AnimationPropertiesKeys.FONT_PROPERTY, font);
         String[][] data = new String[2][3];
         
         data[0][0] = "Name";
@@ -268,7 +262,6 @@ public class Netzplan implements Generator {
         data[1][1] = "Späteste Startzeit";
         data[1][2] = "Späteste Endzeit";
         
-        //Coordinates upperLeft = new Coordinates(600,390);
         return lang.newStringMatrix(position, data, "legend", null,matProp);
     }
     
@@ -402,7 +395,7 @@ public class Netzplan implements Generator {
     		smat.put(0, 0, "-1", null, null);
     		smat.getElement(0, 0);
     		lang.nextStep();
-    		src2.unhighlight(7); //////////////////
+    		src2.unhighlight(7); 
 			src2.unhighlight(6);
 			src2.highlight(8);
     		n.setLatestEndTime(node, n.getEarliestEndTime(node));
@@ -451,7 +444,6 @@ public class Netzplan implements Generator {
         		for(Integer innerSuccessors: successors){
         			n.unHighlightEdge(node, innerSuccessors);
         		}
-        		//lang.nextStep();
         		src2.unhighlight(13);
         		if(n.hasValidEntry(node, NetzplanGraph.CellID.LatestEndTime)==false || n.getLatestStartTime(currentSuccessor)< n.getLatestEndTime(node)){
         			if(n.hasValidEntry(node, NetzplanGraph.CellID.LatestEndTime)==true){
@@ -548,7 +540,6 @@ public class Netzplan implements Generator {
     	SourceCodeProperties infoProps = new SourceCodeProperties();
     	infoProps.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF, Font.BOLD, 20));
     	SourceCode infoText = lang.newSourceCode(textPosition, "InfoText", null, infoProps);
-    	//SourceCode infoText = lang.newSourceCode(new Coordinates(20,60), "InfoText", null, infoProps);
     	
     	infoText.addCodeLine("Bei der Netzplantechnik handelt es sich um eine Methode, welche im Rahmen der Terminplanung bzw. des", "Line0", 0, null);
     	infoText.addCodeLine("Projektmanagements zum Einsatz kommt. Das Ziel besteht darin die Mindestdauer eines Projektes auf Basis", "Line1", 0, null);
@@ -569,12 +560,6 @@ public class Netzplan implements Generator {
 	
 	
     private SourceCode setSourceCodeForward(Node codePosition){
-    	//SourceCodeProperties sProb = new  SourceCodeProperties();
-        //sProb.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF, Font.PLAIN, 12));
-        //sProb.set(AnimationPropertiesKeys.COLOR_PROPERTY, Color.BLUE);
-        //sProb.set(AnimationPropertiesKeys.HIGHLIGHTCOLOR_PROPERTY, Color.RED);
-        
-        //SourceCode src = lang.newSourceCode(new Coordinates(600, 50), "SourceCode", null, sourceCodeStyle);
         SourceCode src = lang.newSourceCode(codePosition, "SourceCode", null, sourceCodeStyle);
         src.addCodeLine("01. For all nodes without outgoing edges do", "Code0", 0, null);
         src.addCodeLine("02.     calculateFirstDirection(node)", "Code1", 0, null);
@@ -597,12 +582,6 @@ public class Netzplan implements Generator {
     }
     
     private SourceCode setSourceCodeBackward(Node position){
-    	//SourceCodeProperties sProb = new  SourceCodeProperties();
-        //sProb.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF, Font.PLAIN, 12));
-        //sProb.set(AnimationPropertiesKeys.COLOR_PROPERTY, Color.BLUE);
-        //sProb.set(AnimationPropertiesKeys.HIGHLIGHTCOLOR_PROPERTY, Color.RED);
-        
-        //SourceCode src = lang.newSourceCode(new Coordinates(600, 50), "SourceCode", null, sourceCodeStyle);
         SourceCode src = lang.newSourceCode(position, "SourceCode", null, sourceCodeStyle);
         src.addCodeLine("01. For all nodes without outgoing edges do", "Code0", 0, null);
         src.addCodeLine("02.     calculateFirstDirection(node)", "Code1", 0, null);
@@ -628,8 +607,6 @@ public class Netzplan implements Generator {
     	SourceCodeProperties sProb = new  SourceCodeProperties();
         sProb.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font (Font.SANS_SERIF,Font.BOLD, 16));
         sProb.set(AnimationPropertiesKeys.COLOR_PROPERTY, Color.RED);
-        //sProb.set(AnimationPropertiesKeys.HIGHLIGHTCOLOR_PROPERTY, Color.RED);
-    	//SourceCode infoText = lang.newSourceCode(new Coordinates(700,50), "InfoText", null, sProb);
     	SourceCode infoText = lang.newSourceCode(position, "InfoText", null, sProb);
         infoText.addCodeLine("Achtung es beginnt nun der Zweite Teil", "line1", 0, null);
         infoText.addCodeLine("des Verfahrens! Der Algorithmus fährt mit", "line2", 0, null);
@@ -643,8 +620,6 @@ public class Netzplan implements Generator {
     	SourceCodeProperties sProb = new  SourceCodeProperties();
         sProb.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font (Font.SANS_SERIF,Font.BOLD, 16));
         sProb.set(AnimationPropertiesKeys.COLOR_PROPERTY, Color.BLUE);
-        //sProb.set(AnimationPropertiesKeys.HIGHLIGHTCOLOR_PROPERTY, Color.RED);
-        //SourceCode infoText = lang.newSourceCode(new Coordinates(700,50), "InfoText", null, sProb);
         SourceCode infoText = lang.newSourceCode(position, "InfoText", null, sProb);
         infoText.addCodeLine("Der kritische Pfad wird nun durch die", "line1", 0, null);
         infoText.addCodeLine("hervorgehobenen Kanten repräsentiert", "line2", 0, null);
@@ -659,7 +634,6 @@ public class Netzplan implements Generator {
     	//int actualCount = iterations - 1;
 		SourceCodeProperties infoProps = new SourceCodeProperties();
     	infoProps.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF, Font.PLAIN, 14));
-    	//SourceCode endText = lang.newSourceCode(new Coordinates(20,100), "InfoText", null, infoProps);
     	SourceCode endText = lang.newSourceCode(position, "InfoText", null, infoProps);
     	endText.addCodeLine("Informationen zu dem zuvor angzeigten Ablauf des Algorithmus:", "Line0", 0, null);
     	endText.addCodeLine("", "Line1", 0, null);
@@ -828,17 +802,6 @@ public class Netzplan implements Generator {
 		}
 		
 		return currentDelay;
-//		int successorDelay = 0;
-//		for(int successor : npg.getSuccessors(node))
-//		{
-//			int tmp = getDelay(npg, successor, currentDelay);
-//			if(tmp > successorDelay)
-//			{
-//				successorDelay = tmp;
-//			}
-//		}
-//		
-//		return successorDelay;
 			
 	}
 	
