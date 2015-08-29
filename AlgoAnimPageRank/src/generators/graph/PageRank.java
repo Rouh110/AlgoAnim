@@ -25,6 +25,7 @@ import java.util.Random;
 
 import algoanim.primitives.Circle;
 import algoanim.primitives.Graph;
+import algoanim.primitives.Primitive;
 import algoanim.primitives.SourceCode;
 import algoanim.primitives.StringMatrix;
 import algoanim.primitives.Text;
@@ -52,6 +53,7 @@ import algoanim.animalscript.AnimalStringMatrixGenerator;
 
 import algoanim.counter.model.TwoValueCounter;
 import algoanim.counter.view.TwoValueView;
+
 
 
 
@@ -178,15 +180,15 @@ public class PageRank implements Generator {
         
         setupQuestions();
             
-    	setHeader();
-    	SourceCode informationText = setInformationText();
+    	Text headertext = setHeader();
+    	SourceCode informationText = setInformationText(headertext, 0, 50);
     	lang.nextStep("Einleitung");
     	informationText.hide();
     	
     	
     	if(dampingFactor > 1.0f){
     		dampingFactor = 0.85f;
-    		showWarningMessageForDamp();
+    		showWarningMessageForDamp(headertext, 0, 100);
     	}
     	int [] temparray = {0, 1, 2};
     	
@@ -208,24 +210,30 @@ public class PageRank implements Generator {
     	}
     	
     	p.setAllDangingEdgeBaseColor(color_of_dangling_nodes);
-        SourceCode src = setSourceCode(sourceCode);
-        StringMatrix smat = setupMatrix(700,250, initValue);
-        StringMatrix actMat = setupMatrix(700, 400, 0.0f);
+        SourceCode src = setSourceCode(sourceCode, p.getMaxX(), ((Coordinates)headertext.getUpperLeft()).getY());
+
         
+
+
+
+        Text lastText = setCounter(src, 0 , 20, "Die PageRank-Werte nach der Initialisierung:");
+        StringMatrix smat = setupMatrix(lastText, 0,20, initValue);
+        
+
+        
+        Text currentText = setCounter(smat, 0, 20,  "Die PageRank-Werte von Iteration 1:");
+        StringMatrix actMat = setupMatrix(currentText, 0, 20, 0.0f);
         TwoValueCounter counter = lang.newCounter(smat);
         CounterProperties cp = new CounterProperties();
         cp.set(AnimationPropertiesKeys.FILLED_PROPERTY, true);
         cp.set(AnimationPropertiesKeys.FILL_PROPERTY, Color.BLUE);
         TwoValueView view = lang.newCounterView(counter,
-       		new Coordinates(700, 490), cp, true, true);
+       		new Offset(0, 20, actMat, "SW"), cp, true, true);
 
 
-
-        Text lastText = setCounter(700, 210, "Die PageRank-Werte nach der Initialisierung:");
-        Text currentText = setCounter(700, 360, "Die PageRank-Werte von Iteration 1:");
-        Text formulaV = setCounter(50, 400, "");
-        Text formulaC = setCounter(50, 450, "");
-        Text dnSelfReferenceText = setCounter(50, 500, "");
+        Text formulaV = setCounter(50, p.getMaxY() + 5, "");
+        Text formulaC = setCounter(formulaV, 0, 20, "");
+        Text dnSelfReferenceText = setCounter(formulaC, 0, 20, "");
         dnSelfReferenceText.hide();
         startDanglingNodeQuestion(p, g);
         lang.nextStep("Aufruf und Initialisierung");
@@ -241,7 +249,7 @@ public class PageRank implements Generator {
         
 		while(difference > breakValue){ // Counter fuer Iterationen
 			formulaV.setText("Manhattan-Distanz zwischen letzter und vorletzter Iteration: " + new DecimalFormat("#.#####").format(difference)+".", null, null);
-			formulaC.setText(" Der Algorithmus stoppt, wenn die Distanz kleiner als "+ new DecimalFormat("#.#####").format(breakValue)+" wird.", null, null);
+			formulaC.setText("Der Algorithmus stoppt, wenn die Distanz kleiner als "+ new DecimalFormat("#.#####").format(breakValue)+" wird.", null, null);
 			iterations += 1;
 			src.highlight(1);
 			int chapterIntCorrect = iterations - 1;
@@ -389,14 +397,14 @@ public class PageRank implements Generator {
 		src.highlight(1);
 		currentText.hide();
         actMat.hide(); 
-        SourceCode stopInformation = showStopInformation();
+        SourceCode stopInformation = showStopInformation(smat, 0, 50);
 		lang.nextStep("Abbruch des Algorithmus");
         
 		src.hide();
 		formulaC.hide();
         formulaV.hide();
 		stopInformation.hide();
-		SourceCode endText = showEndText(counter, smat, currentResults);
+		SourceCode endText = showEndText(counter, smat, currentResults, headertext, 0, 50);
         p.hideAllDanglingEdges();
         p.hideGraph();
         view.hide();
@@ -806,17 +814,17 @@ public class PageRank implements Generator {
     }
     
     
-    private void setHeader(){
+    private Text setHeader(){
     	TextProperties headerProps = new TextProperties();
     	headerProps.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF,Font.BOLD, 24));
     	headerProps.set(AnimationPropertiesKeys.COLOR_PROPERTY, color_of_headertext);
-    	lang.newText(new Coordinates(20,30), "Der PageRank-Algorithmus", "header", null, headerProps);
+    	return lang.newText(new Coordinates(20,30), "Der PageRank-Algorithmus", "header", null, headerProps);
     }
     
-    private SourceCode setInformationText(){
+    private SourceCode setInformationText(Primitive currentPrimitive, int deltax, int deltay){
     	SourceCodeProperties infoProps = new SourceCodeProperties();
     	infoProps.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF, Font.BOLD, 20));
-    	SourceCode infoText = lang.newSourceCode(new Coordinates(20,100), "InfoText", null, infoProps);
+    	SourceCode infoText = lang.newSourceCode(new Offset(deltax, deltay, currentPrimitive, "SW"), "InfoText", null, infoProps);
     	infoText.addCodeLine("Der PageRank-Algorithmus ist ein Algorithmus zur Bewertung von Knoten in einem Netzwerk.", "Line0", 0, null);
     	infoText.addCodeLine("Larry Page und Sergei Brin entwickelten ihn an der Stanford University zur Bewertung von", "Line1", 0, null);
     	infoText.addCodeLine("Webseiten im Rahmen ihrer mittlerweile weltweit bekannnten Suchmaschine Google. Das Bewertungsprinzip", "Line2", 0, null);
@@ -835,17 +843,29 @@ public class PageRank implements Generator {
     	return infoText;
     }
     
+    //private Text setCounter(int x, int y, String Text){
+    private Text setCounter(Primitive currentPrimitive, int deltax, int deltay, String Text){
+
+    	TextProperties counterProps = new TextProperties();
+    	counterProps.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF, Font.PLAIN, 16));
+    	return lang.newText(new Offset(deltax, deltay, currentPrimitive, "SW"), Text, "Counter", null, counterProps);
+    	
+    }
+    
     private Text setCounter(int x, int y, String Text){
 
     	TextProperties counterProps = new TextProperties();
     	counterProps.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF, Font.PLAIN, 16));
     	return lang.newText(new Coordinates(x, y), Text, "Counter", null, counterProps);
+    	//return lang.newText(new Offset(0, 10, currentPrimitive, "SE"), Text, "Counter", null, counterProps);
     	
     }
     
-    private SourceCode setSourceCode(SourceCodeProperties sProb){
+    
+    
+    private SourceCode setSourceCode(SourceCodeProperties sProb, int x, int y){
         
-        SourceCode src = lang.newSourceCode(new Coordinates(700, 50), "SourceCode", null, sProb);
+        SourceCode src = lang.newSourceCode(new Coordinates(x + 70 , y + 20), "SourceCode", null, sProb);
         src.addCodeLine("1. PageRank (Graph G, dampingfactor d)", "Code0", 0, null);
         src.addCodeLine("2. while PageRankValues change signifficantly", "Code1", 0, null);
         src.addCodeLine("3.     for all nodes in G do", "Code2", 0, null);
@@ -874,7 +894,7 @@ public class PageRank implements Generator {
         return  p;
     }
     
-    private StringMatrix setupMatrix(int x, int y, float initValue){
+    private StringMatrix setupMatrix(Primitive currentPrimitive,int deltax, int deltay, float initValue){
     	
     	AnimalStringMatrixGenerator matrixGenerator = new AnimalStringMatrixGenerator(
 				(AnimalScript) lang);
@@ -891,7 +911,7 @@ public class PageRank implements Generator {
         matProp.set(AnimationPropertiesKeys.CELL_HEIGHT_PROPERTY, 30);
         matProp.set(AnimationPropertiesKeys.CELL_WIDTH_PROPERTY, 80);
         StringMatrix smat = new StringMatrix(matrixGenerator,
-				new Coordinates(x, y), strValues, "Matrix", null,
+				new Offset(deltax, deltay, currentPrimitive, "SW"), strValues, "Matrix", null,
 				matProp);
 
     	return smat;
@@ -905,11 +925,11 @@ public class PageRank implements Generator {
     	return difference;
     }
     
-    private void showWarningMessageForDamp() {
+    private void showWarningMessageForDamp(Primitive currentPrimitive, int deltax, int deltay) {
     	SourceCodeProperties infoProps = new SourceCodeProperties();
     	infoProps.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF, Font.BOLD, 14));
     	infoProps.set(AnimationPropertiesKeys.COLOR_PROPERTY, Color.RED);
-    	SourceCode warningMessage = lang.newSourceCode(new Coordinates(20,100), "InfoText", null, infoProps);
+    	SourceCode warningMessage = lang.newSourceCode(new Offset(deltax, deltay, currentPrimitive, "SW"), "InfoText", null, infoProps);
     	warningMessage.addCodeLine("Der von Ihnen eingegebene Wert des Dämpfungsfaktors liegt nicht", "Line0", 0, null);
     	warningMessage.addCodeLine("zwischen 0 und 1! Er wurde daher auf den üblichen Wert von 0.85" , "Line1", 0, null);
     	warningMessage.addCodeLine("gesetzt!", "Line3", 0, null);
@@ -918,11 +938,11 @@ public class PageRank implements Generator {
 		
 	}
     
-	private SourceCode showEndText(TwoValueCounter counter, StringMatrix smat, float[] currentResults) {
+	private SourceCode showEndText(TwoValueCounter counter, StringMatrix smat, float[] currentResults, Primitive currentPrimitive, int deltax, int deltay) {
     	int actualCount = iterations - 1;
 		SourceCodeProperties infoProps = new SourceCodeProperties();
     	infoProps.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF, Font.PLAIN, 14));
-    	SourceCode endText = lang.newSourceCode(new Coordinates(20,100), "InfoText", null, infoProps);
+    	SourceCode endText = lang.newSourceCode(new Offset(deltax, deltay, currentPrimitive, "SW"), "InfoText", null, infoProps);
     	endText.addCodeLine("Informationen zu dem zuvor angzeigten Ablauf des Algorithmus:", "Line0", 0, null);
     	endText.addCodeLine("", "Line1", 0, null);
     	endText.addCodeLine("Anzahl Iterationen: " + actualCount, "Line2", 0, null);
@@ -976,12 +996,12 @@ public class PageRank implements Generator {
     	return endText;
 	}
 	
-	private SourceCode showStopInformation(){
+	private SourceCode showStopInformation(Primitive currentPrimitive, int deltax, int deltay){
     	int actualCount = iterations - 1;
 		SourceCodeProperties infoProps = new SourceCodeProperties();
     	infoProps.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF, Font.BOLD, 14));
     	infoProps.set(AnimationPropertiesKeys.COLOR_PROPERTY, Color.RED);
-    	SourceCode stopInformation = lang.newSourceCode(new Coordinates(700,400), "InfoText", null, infoProps);
+    	SourceCode stopInformation = lang.newSourceCode(new Offset(deltax, deltay, currentPrimitive, "SW"), "InfoText", null, infoProps);
     	stopInformation.addCodeLine("Der Algorithmus endet an dieser Stelle nach", "Line0", 0, null);
     	stopInformation.addCodeLine(actualCount + " Iterationen, da die Manhattan-Distanz kleiner als der Abbruchwert ist!", "Line1", 0, null);
     	return stopInformation;
