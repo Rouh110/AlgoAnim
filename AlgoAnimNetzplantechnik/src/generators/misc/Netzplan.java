@@ -660,7 +660,7 @@ public class Netzplan implements Generator {
     	SourceCode infoText = lang.newSourceCode(position, "InfoText", null, sProb);
     	infoText.addCodeLine("Achtung es beginnt nun der zweite Teil des Verfahrens!", "line1", 0, null);
         infoText.addCodeLine("Der Algorithmus berechnet dabei die späteste Startzeit", "line2", 0, null);
-        infoText.addCodeLine("und die späteste Endzeit der einzelenen Knoten", "line3", 0, null);
+        infoText.addCodeLine("und die späteste Endzeit der einzelnen Knoten", "line3", 0, null);
         return infoText;
     
     }
@@ -672,7 +672,7 @@ public class Netzplan implements Generator {
     	SourceCode infoText = lang.newSourceCode(position, "InfoText", null, sProb);
     	infoText.addCodeLine("Es beginnt nun der erste Teil des Verfahrens!", "line1", 0, null);
         infoText.addCodeLine("Der Algorithmus berechnet dabei die früheste Startzeit", "line2", 0, null);
-        infoText.addCodeLine("und die früheste Endzeit der einzelenen Knoten.", "line3", 0, null);
+        infoText.addCodeLine("und die früheste Endzeit der einzelnen Knoten.", "line3", 0, null);
         return infoText;
     
     }
@@ -685,7 +685,7 @@ public class Netzplan implements Generator {
         SourceCode infoText = lang.newSourceCode(position, "InfoText", null, sProb);
         infoText.addCodeLine("Der kritische Pfad wird nun durch die", "line1", 0, null);
         infoText.addCodeLine("hervorgehobenen Kanten repräsentiert", "line2", 0, null);
-        infoText.addCodeLine("auf ihm befinden sich alle Vorgänge,.", "line3", 0, null);
+        infoText.addCodeLine("auf ihm befinden sich alle Vorgänge,", "line3", 0, null);
         infoText.addCodeLine("deren Verzögerung eine Verzögerung des", "line4", 0, null);
         infoText.addCodeLine("gesamten Vorhabens verursacht!", "line5", 0, null);
         return infoText;
@@ -969,16 +969,16 @@ public class Netzplan implements Generator {
  +"einzelnen Vorgänge werden dabei in Form eines gerichteten Graphen dargestellt. \n"
  +"Neben der minimalen Gesamtdauer, welche das zu untersuchende Projekt im Idealfall benötigt, werden "
  +"zudem für jeden Arbeitsvorgang sogenannte Pufferzeiten ermittelt. Diese geben an in welchem Ausmaß "
- +"Verzögerungen eines Arbeitsvorganges möglicht sind, ohne dass sie sich negativ auf die Gesamtdauer des "
+ +"Verzögerungen eines Arbeitsvorganges möglich sind, ohne dass sie sich negativ auf die Gesamtdauer des "
  +"Projektes auswirken."
  +"\n \n"
  +"Es ist zu beachten, dass die Beziehungen zwischen den Arbeitsvorgängen eindeutig zu definieren sind. "
  +"Zyklen sind daher nicht zulässig!"
  + "\n \n"
  + "Beim manuellen setzen des Graphprimitves müssen folgende Dinge beachtet werden:\n"
- + "Die Gewichte der Kanten repräsentieren die Prozesszeit des Knoten wovon die Kante ausgeht."
- + "Achte deshalb darauf, dass alle ausgehende Kanten von einem Knoten die gleiche Gewichtung haben.\n"
- + "Um die Prozesszeit von den Endkoten festzulegen, wird ein weiterer Dummy-Knoten mit einer Kante vom Endknoten zum Dummy-Knoten benötigt."
+ + "Die Gewichte der Kanten repräsentieren die Prozesszeit des Knotens von dem die Kante ausgeht. "
+ + "Achte deshalb darauf, dass alle ausgehende Kanten von einem Knoten die gleiche Gewichtung haben. \n"
+ + "Um die Prozesszeit von den Endkoten festzulegen, wird ein weiterer Dummy-Knoten mit einer Kante vom Endknoten zum Dummy-Knoten benötigt. "
  + "Der Dummy-Knoten wird im Graphen nicht angezeigt und vom Algorithmus nicht beachtet.\n"
  + "Der Graph darf keine Loops und keine negativen Kanten haben.";
        
