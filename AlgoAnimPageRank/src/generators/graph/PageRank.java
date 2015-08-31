@@ -278,7 +278,7 @@ public class PageRank implements Generator {
 					nodeToQuestion = rg.nextInt(adjacencymatrix.length);
 				}
 				
-				//PageRank of actual node n <- (1-d)/|G| 
+				//PageRank of current node n <- (1-d)/|G| 
 				String fV = "PR(" + g.getNodeLabel(to) +") = (1-d)/|G| "; 
 				formulaV.setText(fV, null, null);
 				currentResults[to] = (float) ((1.0f - dampingFactor) / adjacencymatrix.length);
@@ -299,7 +299,7 @@ public class PageRank implements Generator {
 				src.unhighlight(4);
 				float[] predecValues = (float[]) results.get(results.size()-1);
 				vars.declare("string", currentPredecessorName,"", STEPPER);
-				// for each predecessor p of actual node n do
+				// for each predecessor p of current node n do
 				for(int from = 0; from < adjacencymatrix.length; from++){
 					if(adjacencymatrix[from][to] == 1){
 						// PR of n <- PR of n ü d * ((PR of p in the last step/ outgoing edges from p))
@@ -645,8 +645,8 @@ public class PageRank implements Generator {
         return "PageRank (Graph G, dampingfactor d) \n"
       + "    while PageRankValues change signifficantly \n"
       + "            for all nodes in G do \n"
-      + "                    PageRank of actual node n - (1-d)/|G| \n"
-      + "            for each predecessor p of actual node n do \n"
+      + "                    PageRank of current node n - (1-d)/|G| \n"
+      + "            for each predecessor p of current node n do \n"
       + "                    PR of n - PR of n + d*((PR of p in the last step)/outgoing edges from p) \n"
       + "            for each dangling node dn do// dangling nodes are nodes with no successors \n"
       + "                    PR of n - PR of n + d * (1/|G|)";
@@ -759,8 +759,8 @@ public class PageRank implements Generator {
         src.addCodeLine("1. PageRank (Graph G, dampingfactor d)", "Code0", 0, null);
         src.addCodeLine("2. while PageRankValues change signifficantly", "Code1", 0, null);
         src.addCodeLine("3.     for all nodes in G do", "Code2", 0, null);
-        src.addCodeLine("4.         PageRank of actual node n <- (1-d)/|G|", "Code3", 0, null);
-        src.addCodeLine("5.         for each predecessor p of actual node n do", "Code4", 0, null);
+        src.addCodeLine("4.         PageRank of current node n <- (1-d)/|G|", "Code3", 0, null);
+        src.addCodeLine("5.         for each predecessor p of current node n do", "Code4", 0, null);
         src.addCodeLine("6.             PR of n <- PR of n + d*((PR of p in the last step)/outgoing edges from p)", "Code5", 0, null);
         src.addCodeLine("7.         for each dangling node dn do", "Code6", 0, null);
         src.addCodeLine("8.             PR of n <- PR of n + d * (1/|G|)", "Code7", 0, null);
@@ -837,7 +837,7 @@ public class PageRank implements Generator {
 		SourceCodeProperties infoProps = new SourceCodeProperties();
     	infoProps.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font(Font.SANS_SERIF, Font.PLAIN, 14));
     	SourceCode endText = lang.newSourceCode(new Offset(deltax, deltay, currentPrimitive, "SW"), "InfoText", null, infoProps);
-    	endText.addCodeLine("Informationen zu dem zuvor angzeigten Ablauf des Algorithmus:", "Line0", 0, null);
+    	endText.addCodeLine("Informationen zu dem zuvor angezeigten Ablauf des Algorithmus:", "Line0", 0, null);
     	endText.addCodeLine("", "Line1", 0, null);
     	endText.addCodeLine("Anzahl Iterationen: " + actualCount, "Line2", 0, null);
     	endText.addCodeLine("Anzahl Schreibzugriffe: " + counter.getAssigments(), "Line3", 0, null);
