@@ -83,6 +83,8 @@ public class Netzplan implements Generator {
 	
 	int fdQuestionCounter = 0;
 	int sdQuestionCounter = 0;
+	
+	private boolean askQuestions = true;
 
     public void init(){
         lang = new AnimalScript("Netzplantechnik", "Jan Ulrich Schmitt & Dennis Juckwer", 800, 600);        
@@ -101,7 +103,7 @@ public class Netzplan implements Generator {
         Color headerColor = (Color)primitives.get("headerColor");
         MatrixProperties matrixProperties = (MatrixProperties) props.getPropertiesByName("NodeStyle");
         
-        setupQuestions();
+        setupQuestions(3);
         
         // set and shows the beginning page with description
         Text headerText = setHeader(headerColor);
@@ -723,12 +725,18 @@ public class Netzplan implements Generator {
     
 	private void startCriticalPathQuestion(NetzplanGraph npg)
 	{
+		
+		
+		
 		 critcalPathNodes = new LinkedList<Integer>(); // habe es zu gloabelen Vairable gemacht, um auf die Knoten im Pfad zuzuggreifen zu koennen
 	         
 	     for(Integer currentNode:npg.getStartNodes()){
 	      	this.getCriticalPath(currentNode,critcalPathNodes);
 	     }
-	        
+	      
+	     if(!askQuestions)
+				return;
+	     
 		 MultipleSelectionQuestionModel question = new MultipleSelectionQuestionModel("Kritischer Pfad");
 		 question.setPrompt("Welche Knoten gehören alles zu einem kritischen Pfad? (Es kann mehr als einen kritischen Pfad geben.)");
 	     question.setGroupID(qg03);
@@ -806,6 +814,10 @@ public class Netzplan implements Generator {
 	
 	private void startDelayQuestion(NetzplanGraph npg, int node, int delay)
 	{
+		
+		if(!askQuestions)
+			return;
+		
 		String nodeLabel =  npg.getName(node);
 		int answer = getDelay(npg, node, delay);
 		
@@ -822,6 +834,9 @@ public class Netzplan implements Generator {
 	
 	private void startFirstDirectionQuestion(NetzplanGraph npg, int nodeId)
 	{
+		if(!askQuestions)
+			return;
+		
 		fdQuestionCounter++;
 		int answer = calculateEST(npg, nodeId);
 		String nodeLabel = npg.getName(nodeId);
@@ -837,6 +852,9 @@ public class Netzplan implements Generator {
 	
 	private void startSecondDirectionQuestion(NetzplanGraph npg, int nodeId)
 	{
+		if(!askQuestions)
+			return;
+		
 		sdQuestionCounter++;
 		int answer = calculateLST(npg, nodeId);
 		String nodeLabel = npg.getName(nodeId);
@@ -922,25 +940,33 @@ public class Netzplan implements Generator {
 	}
 	
     
-    private void setupQuestions()
+    private void setupQuestions(int maxNumberOfRepeats)
     {
 
+    	int onlyOnceQuestions = 1;
+    	
+    	if(maxNumberOfRepeats <= 0)
+    	{
+    		maxNumberOfRepeats = 0;
+    		onlyOnceQuestions = 0;
+    		askQuestions = false;
+    	}else
+    	{
+    		askQuestions = true;
+    	}
+    	
     	QuestionGroupModel model;
       
-        model = new QuestionGroupModel(qg01, 1);
-        model.setNumberOfRepeats(2);
+        model = new QuestionGroupModel(qg01, maxNumberOfRepeats);
         lang.addQuestionGroup(model);
         
-        model = new QuestionGroupModel(qg02, 1);
-        model.setNumberOfRepeats(2);
+        model = new QuestionGroupModel(qg02, maxNumberOfRepeats);
         lang.addQuestionGroup(model);
         
-        model = new QuestionGroupModel(qg03, 1);
-        model.setNumberOfRepeats(1);
+        model = new QuestionGroupModel(qg03, onlyOnceQuestions);
         lang.addQuestionGroup(model);
         
-        model = new QuestionGroupModel(qg04, 1);
-        model.setNumberOfRepeats(1);
+        model = new QuestionGroupModel(qg04, onlyOnceQuestions);
         lang.addQuestionGroup(model);
         
         

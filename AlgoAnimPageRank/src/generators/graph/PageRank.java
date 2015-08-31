@@ -118,6 +118,8 @@ public class PageRank implements Generator {
     
     private int nqvId = 0;
     
+    private boolean askQuestions = true;
+    
     public PageRank(){
 
     }
@@ -171,7 +173,7 @@ public class PageRank implements Generator {
         
         
         
-        setupQuestions();
+        setupQuestions(0);
         //Überschrift einfügen    
     	Text headertext = setHeader();
     	//Infotext zu Beginn einfügen
@@ -210,8 +212,6 @@ public class PageRank implements Generator {
     		srcXPos = 600;
     	
         SourceCode src = setSourceCode(sourceCode, srcXPos, ((Coordinates)headertext.getUpperLeft()).getY());
-
-        
 
 
         // Matritzen und zugehörige Texte zur Darstellung von Zwischenschritten werden erzeugt
@@ -468,14 +468,30 @@ public class PageRank implements Generator {
 		}
 	}
     
-    private void setupQuestions()
+    private void setupQuestions(int maxNumberOfRepeats)
     {
+    	
+    	int onlyOnceQuestions = 1;
+    	
+    	if(maxNumberOfRepeats <= 0)
+    	{
+    		maxNumberOfRepeats = 0;
+    		onlyOnceQuestions = 0;
+    		askQuestions = false;
+    	}else
+    	{
+    		askQuestions = true;
+    	}
+    		
+    	
+    	
+    	
     	QuestionGroupModel questionGroup = new QuestionGroupModel(qgName01);
-    	questionGroup.setNumberOfRepeats(2);
+    	questionGroup.setNumberOfRepeats(maxNumberOfRepeats);
     	lang.addQuestionGroup(questionGroup);
     	
     	questionGroup = new QuestionGroupModel(qgName02);
-    	questionGroup.setNumberOfRepeats(1);
+    	questionGroup.setNumberOfRepeats(onlyOnceQuestions);
     	lang.addQuestionGroup(questionGroup);
     	
     }
@@ -483,6 +499,8 @@ public class PageRank implements Generator {
     
     private void startNextValueQuestion(float nextValue,int node ,Graph g)
     {
+    	if(!askQuestions)
+    		return;
     
     	Random randomGenerator = new Random();
     	nqvId ++;
@@ -559,6 +577,9 @@ public class PageRank implements Generator {
     
     private void startDanglingNodeQuestion(PageRankGraph prg, Graph g)
     {
+    	if(!askQuestions)
+    		return;
+    	
     	MultipleSelectionQuestionModel question = new MultipleSelectionQuestionModel("Dangling Nodes");
     	question.setPrompt("Welche Knoten sind Dangling Nodes?");
     	question.setGroupID(qgName02);
