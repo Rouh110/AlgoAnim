@@ -168,6 +168,7 @@ public class PageRank implements Generator {
         color_of_dangling_nodes = (Color)primitives.get("color_of_dangling_nodes");
         dampingFactor = (double)primitives.get("dampingFactor");
         breakValue = (double)primitives.get("breakValue");
+        int maxRepeatQuestions = (int)primitives.get("maxNumberOfCorrectAnsweredQuestions");
         
         
         

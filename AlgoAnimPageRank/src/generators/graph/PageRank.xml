@@ -136,6 +136,10 @@ edge D B weight 1
 			<name>breakValue</name>
 			<value><double>0.05</double></value>
 		</Primitive>
+		<Primitive type="int">
+			<name>maxNumberOfCorrectAnsweredQuestions</name>
+			<value><int>2</int></value>
+		</Primitive>
 		
 	</Folder>
 </PropertiesTreeModel>

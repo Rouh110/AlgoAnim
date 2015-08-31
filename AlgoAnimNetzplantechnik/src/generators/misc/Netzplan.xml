@@ -204,5 +204,9 @@ edge F G weight 1
 			<name>headerColor</name>
 			<value><Color>(0, 0, 255)</Color></value>
 		</Primitive>
+				<Primitive type="int">
+			<name>maxNumberOfCorrectAnsweredQuestions</name>
+			<value><int>2</int></value>
+		</Primitive>
 	</Folder>
 </PropertiesTreeModel>
