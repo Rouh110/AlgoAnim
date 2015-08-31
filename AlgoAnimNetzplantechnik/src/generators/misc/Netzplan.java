@@ -102,6 +102,7 @@ public class Netzplan implements Generator {
         Color edgeHighlightColor = (Color)primitives.get("EdgeHighlightColor");
         Color headerColor = (Color)primitives.get("headerColor");
         MatrixProperties matrixProperties = (MatrixProperties) props.getPropertiesByName("NodeStyle");
+        int maxRepeatQuestions = (int)primitives.get("maxNumberOfCorrectAnsweredQuestions");
         
         setupQuestions(3);
         
