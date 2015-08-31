@@ -104,7 +104,7 @@ public class Netzplan implements Generator {
         MatrixProperties matrixProperties = (MatrixProperties) props.getPropertiesByName("NodeStyle");
         int maxRepeatQuestions = (int)primitives.get("maxNumberOfCorrectAnsweredQuestions");
         
-        setupQuestions(3);
+        setupQuestions(maxRepeatQuestions);
         
         // set and shows the beginning page with description
         Text headerText = setHeader(headerColor);

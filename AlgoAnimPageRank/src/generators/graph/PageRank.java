@@ -171,10 +171,9 @@ public class PageRank implements Generator {
         dampingFactor = (double)primitives.get("dampingFactor");
         breakValue = (double)primitives.get("breakValue");
         int maxRepeatQuestions = (int)primitives.get("maxNumberOfCorrectAnsweredQuestions");
+         
         
-        
-        
-        setupQuestions(0);
+        setupQuestions(maxRepeatQuestions);
         //Überschrift einfügen    
     	Text headertext = setHeader();
     	//Infotext zu Beginn einfügen
