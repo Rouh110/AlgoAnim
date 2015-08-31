@@ -114,8 +114,12 @@ public class Netzplan implements Generator {
         
         // setup the algorithm informations (source code, counter etc..)
         Node sourceCodePosition =  new Coordinates(n.getMaxX()+80,((Coordinates)headerText.getUpperLeft()).getY()+20);
+        
+        SourceCode firstAlgoInfo = setStartFirstAlgorithmInformation(sourceCodePosition);        
+        
         src1 = setSourceCodeForward(sourceCodePosition); 
         src1.highlight(0);
+        src1.hide();
         StringMatrix legend = setUpLegend(new Offset(0,40,src1,"SW"),matrixProperties);
        
         setUpVars(n);
@@ -165,8 +169,11 @@ public class Netzplan implements Generator {
         	return lang.toString();
         }
         
-        lang.nextStep("Beginn der Rückwärtsrechnung");
+        lang.nextStep("Beginn der Vorwärtsrechnung");
        
+        firstAlgoInfo.hide(); 
+        src1.show();
+        lang.nextStep();
         
         // starts the algorithm for the first direction. 
         // It calculates the earliest start timer and the earliest end time
@@ -186,13 +193,13 @@ public class Netzplan implements Generator {
         nodesToProcess = n.getStartNodes();
         src1.hide();
         SourceCode algorithmChange = setChangeAlgorithmInformation(src1.getUpperLeft());
-        lang.nextStep("Wechsel Rückwärts- zu Vorwärtsrechnung");
+        lang.nextStep("Wechsel Rückwärts- zu Rückwärtsrechnung");
         
         // change the source code for the algorithm
         algorithmChange.hide();
         src2 = this.setSourceCodeBackward(sourceCodePosition);
         src2.highlight(2);
-        lang.nextStep("Beginn der Vorwärtsrechnung");
+        lang.nextStep("Beginn der Rückwärtsrechnung");
         
         // start the second algorithm, It calculates the latest start and end time.
         src2.unhighlight(2);
@@ -276,7 +283,7 @@ public class Netzplan implements Generator {
 		
     	src1.highlight(5);
     	n.highlightNode(node);
-    	lang.nextStep("Aufruf Rückwärtsrechnung Knoten " + graph.getNodeLabel(node));
+    	lang.nextStep("Aufruf Vorwärtsrechnung Knoten " + graph.getNodeLabel(node));
     	src1.unhighlight(12);
     	src1.unhighlight(1);
     	src1.unhighlight(5);
@@ -399,7 +406,7 @@ public class Netzplan implements Generator {
 		vars.set(currentNodeName, n.getName(node));
     	src2.highlight(5);
     	n.highlightNode(node);
-    	lang.nextStep("Aufruf Vorwärtsrechnung Knoten " + graph.getNodeLabel(node));
+    	lang.nextStep("Aufruf Rückwärtsrechnung Knoten " + graph.getNodeLabel(node));
     	src2.unhighlight(12);
     	src2.unhighlight(3);
     	src2.unhighlight(5);
@@ -593,7 +600,7 @@ public class Netzplan implements Generator {
     	infoText.addCodeLine("Verzögerungen eines Arbeitsvorganges möglich sind, ohne dass sie sich negativ auf die Gesamtdauer des", "Line6", 0, null);
     	infoText.addCodeLine("Projektes auszuwirken.", "Line7", 0, null);
     	infoText.addCodeLine("", "Line8", 0, null);
-    	infoText.addCodeLine("Es ist zu beachten, dass die Beziehungen zwischen den Arbeitsvorgaengen eindeutig zu definieren sind.", "Line9", 0, null);
+    	infoText.addCodeLine("Es ist zu beachten, dass die Beziehungen zwischen den Arbeitsvorgängen eindeutig zu definieren sind.", "Line9", 0, null);
     	infoText.addCodeLine("Zyklen sind daher nicht zulässig!", "Line10", 0, null);
 
 
@@ -651,9 +658,21 @@ public class Netzplan implements Generator {
         sProb.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font (Font.SANS_SERIF,Font.BOLD, 16));
         sProb.set(AnimationPropertiesKeys.COLOR_PROPERTY, Color.RED);
     	SourceCode infoText = lang.newSourceCode(position, "InfoText", null, sProb);
-        infoText.addCodeLine("Achtung es beginnt nun der Zweite Teil", "line1", 0, null);
-        infoText.addCodeLine("des Verfahrens! Der Algorithmus fährt mit", "line2", 0, null);
-        infoText.addCodeLine("der Vorwärtsrechnung fort!", "line3", 0, null);
+    	infoText.addCodeLine("Achtung es beginnt nun der zweite Teil des Verfahrens!", "line1", 0, null);
+        infoText.addCodeLine("Der Algorithmus berechnet dabei die späteste Startzeit", "line2", 0, null);
+        infoText.addCodeLine("und die späteste Endzeit der einzelenen Knoten", "line3", 0, null);
+        return infoText;
+    
+    }
+    
+    private SourceCode setStartFirstAlgorithmInformation(Node position){
+    	SourceCodeProperties sProb = new  SourceCodeProperties();
+        sProb.set(AnimationPropertiesKeys.FONT_PROPERTY, new Font (Font.SANS_SERIF,Font.BOLD, 16));
+        sProb.set(AnimationPropertiesKeys.COLOR_PROPERTY, Color.RED);
+    	SourceCode infoText = lang.newSourceCode(position, "InfoText", null, sProb);
+    	infoText.addCodeLine("Es beginnt nun der erste Teil des Verfahrens!", "line1", 0, null);
+        infoText.addCodeLine("Der Algorithmus berechnet dabei die früheste Startzeit", "line2", 0, null);
+        infoText.addCodeLine("und die früheste Endzeit der einzelenen Knoten.", "line3", 0, null);
         return infoText;
     
     }

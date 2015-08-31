@@ -204,7 +204,12 @@ public class PageRank implements Generator {
     	}
     	
     	p.setAllDangingEdgeBaseColor(color_of_dangling_nodes);
-        SourceCode src = setSourceCode(sourceCode, p.getMaxX(), ((Coordinates)headertext.getUpperLeft()).getY());
+    	
+    	int srcXPos = p.getMaxX();
+    	if(srcXPos < 600)
+    		srcXPos = 600;
+    	
+        SourceCode src = setSourceCode(sourceCode, srcXPos, ((Coordinates)headertext.getUpperLeft()).getY());
 
         
 
